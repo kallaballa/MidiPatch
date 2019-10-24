@@ -44,15 +44,37 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 	}
 	else if (msgtype == 0xB0) {
 //		std::cout << "MIDI CC ON   C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
+		std::vector<string> commonParams;
+
+		//try to set a common parameter for all synths. NOTE: only works if all synthesizers have the same public parameters
 		if(current_program == 127 && !poly.getVoices().empty()) {
-			Synth s = poly.getVoices()[0].synth;
-			std::vector<string> publicParameters;
-			for (auto& cp : s.getParameters()) {
-				const string name = cp.getDisplayName();
-				if (!name.empty() && name.at(0) != '_') {
-					publicParameters.push_back(name);
+			Synth s;
+			std::vector<string> currentParams;
+			bool first = true;
+
+			//check if all parameters match between all synths
+			for (auto& pv : poly.getVoices()) {
+				currentParams.clear();
+				s = pv.synth;
+				for (auto& cp : s.getParameters()) {
+					const string name = cp.getDisplayName();
+					//Parameters with a name starting with '_' are private
+					if (!name.empty() && name.at(0) != '_') {
+						currentParams.push_back(name);
+					}
+				}
+				if(first) {
+					commonParams = currentParams;
+					first = false;
+				} else {
+					if(currentParams != commonParams) {
+						std::cerr << "Synth parameters differ, can't set parameters globally" << std::endl;
+						return;
+					}
 				}
 			}
+
+			std::vector<string> publicParameters = currentParams;
 
 			for (auto& pv : poly.getVoices()) {
 				s = pv.synth;
@@ -106,13 +128,12 @@ int main(int argc, const char * argv[]) {
 	Synth s[argc - 1];
 	size_t ccoffset = 52;
 
-	for (size_t i = 1; i < argc; ++i) {
+	for (size_t i = 2; i < argc; ++i) {
 		s[i - 1] = Synth();
 		state["synth"] = &s[i - 1];
 		state.dofile(argv[i]);
 		poly.addVoice(s[i - 1]);
 	}
-
 	synth.setOutputGen(poly);
 
 	// open rtaudio stream and rtmidi port
@@ -122,7 +143,7 @@ int main(int argc, const char * argv[]) {
 			cin.get();
 			exit(0);
 		}
-		midiIn->openPort(1);
+		midiIn->openPort(atoi(argv[1]));
 		midiIn->setCallback(&midiCallback);
 
 		dac.openStream(&rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL);

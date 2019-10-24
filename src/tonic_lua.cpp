@@ -182,6 +182,19 @@ void bindings(kaguya::State& state) {
 					(SquareWave& (SquareWave::*)(ControlGenerator))&SquareWave::freq)
 	));
 
+	state["TriangleWave"].setClass(make_generator(state,
+			kaguya::UserdataMetatable<TriangleWave, TemplatedGenerator<Tonic_::AngularWave_>>()
+			.setConstructors<TriangleWave()>()
+			.addOverloadedFunctions("freq",
+					(TriangleWave& (TriangleWave::*)(Generator))&TriangleWave::freq,
+					(TriangleWave& (TriangleWave::*)(float))&TriangleWave::freq,
+					(TriangleWave& (TriangleWave::*)(ControlGenerator))&TriangleWave::freq)
+			.addOverloadedFunctions("slope",
+					(TriangleWave& (TriangleWave::*)(Generator))&TriangleWave::slope,
+					(TriangleWave& (TriangleWave::*)(float))&TriangleWave::slope,
+					(TriangleWave& (TriangleWave::*)(ControlGenerator))&TriangleWave::slope)
+));
+
 	state["SquareWaveBL"].setClass(make_generator(state,
 			kaguya::UserdataMetatable<SquareWaveBL, TemplatedGenerator<Tonic_::RectWaveBL_>>()
 			.setConstructors<SquareWaveBL()>()
