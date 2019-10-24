@@ -20,6 +20,7 @@ static Synth synth;
 static PolySynth poly;
 
 uint8_t current_program = 127;
+size_t controlNumberOffset = 0;
 
 int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime,
 		RtAudioStreamStatus status, void *userData) {
@@ -107,11 +108,11 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 }
 
 int main(int argc, const char * argv[]) {
+	int midiIndex = atoi(argv[1]);
+	controlNumberOffset = atoi(argv[2]);
+
 	kaguya::State state;
 	bindings(state);
-
-//    state["synth"] = &synth;
-//    state.dofile("synth.lua");
 
 // Configure RtAudio
 	RtAudio dac;
@@ -125,14 +126,14 @@ int main(int argc, const char * argv[]) {
 
 	// You don't necessarily have to do this - it will default to 44100 if not set.
 	Tonic::setSampleRate(sampleRate);
-	Synth s[argc - 1];
+	Synth s[argc - 3];
 	size_t ccoffset = 52;
 
-	for (size_t i = 2; i < argc; ++i) {
-		s[i - 1] = Synth();
-		state["synth"] = &s[i - 1];
+	for (size_t i = 3; i < argc; ++i) {
+		s[i - 3] = Synth();
+		state["synth"] = &s[i - 3];
 		state.dofile(argv[i]);
-		poly.addVoice(s[i - 1]);
+		poly.addVoice(s[i - 3]);
 	}
 	synth.setOutputGen(poly);
 
@@ -143,7 +144,7 @@ int main(int argc, const char * argv[]) {
 			cin.get();
 			exit(0);
 		}
-		midiIn->openPort(atoi(argv[1]));
+		midiIn->openPort(midiIndex);
 		midiIn->setCallback(&midiCallback);
 
 		dac.openStream(&rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL);
