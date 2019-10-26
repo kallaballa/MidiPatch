@@ -112,6 +112,8 @@ int main(int argc, const char * argv[]) {
 	std::string appName = argv[0];
 	int midiIndex = 0;
 	int audioIndex = 0;
+  unsigned int sampleRate = 48000;
+  unsigned int bufferFrames = 512;
 	std::vector<string> patchFiles;
 
 	namespace po = boost::program_options;
@@ -120,6 +122,8 @@ int main(int argc, const char * argv[]) {
 			("help,h", "Print help messages")
 			("midi,m", po::value<int>(&midiIndex)->default_value(midiIndex), "The index of the midi input device to use.")
 			("audio,a", po::value<int>(&audioIndex)->default_value(audioIndex), "The index of the audio output device to use.")
+			("rate,r", po::value<unsigned int>(&sampleRate)->default_value(sampleRate), "The audio output sample rate")
+			("buffer,b", po::value<unsigned int>(&bufferFrames)->default_value(bufferFrames), "Number of frames per buffer")
 			("offset,o", po::value<size_t>(&controlNumberOffset)->default_value(controlNumberOffset), "The control number offset for parameter mapping");
 
 	po::options_description hidden("Hidden options");
@@ -158,8 +162,7 @@ int main(int argc, const char * argv[]) {
    RtAudio::StreamParameters rtParams;
    rtParams.deviceId = audioIndex;
    rtParams.nChannels = nChannels;
-   unsigned int sampleRate = 48000;
-   unsigned int bufferFrames = 512; // 512 sample frames
+ // 512 sample frames
 
 	RtMidiIn *midiIn = new RtMidiIn();
 
