@@ -4,10 +4,10 @@ ifdef JAVASCRIPT
 TARGET := farts.html
 endif
 
-SRCS  := farts.cpp tonic_lua0.cpp tonic_lua1.cpp tonic_lua2.cpp PolySynth.cpp
+SRCS  := farts.cpp tonic_lua0.cpp tonic_lua1.cpp tonic_lua2.cpp PolySynth.cpp ../third/RtMidi/RtMidi.cpp ../third/RtAudio/RtAudio.cpp
 CXXFLAGS += -I../third/kaguya/include -I../third/lua-5.3.5/src -I../third/Tonic/src -I../third/RtMidi -I../third/RtAudio
-LIBS += -ltonic -llua -ldl -ljack -lrtmidi -lrtaudio -lpulse-simple -lpulse -lasound -lboost_program_options
-LDFLAGS += -L../third/lua-5.3.5/src -L../third/Tonic/src -L../third/RtMidi -L../third/RtAudio
+LIBS += -ltonic -llua -ldl -lasound -lboost_program_options
+LDFLAGS += -L../third/lua-5.3.5/src -L../third/Tonic/src
 
 #precompiled headers
 HEADERS := tonic_lua.hpp 
