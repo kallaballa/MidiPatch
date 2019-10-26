@@ -157,7 +157,7 @@ int main(int argc, const char * argv[]) {
 // Configure RtAudio
 	RtAudio dac;
 	RtAudio::StreamParameters rtParams;
-	rtParams.deviceId = dac.getDefaultOutputDevice();
+	rtParams.deviceId = audioIndex;
 	rtParams.nChannels = nChannels;
 	unsigned int sampleRate = 44100;
 	unsigned int bufferFrames = 64; // 512 sample frames
@@ -182,7 +182,7 @@ int main(int argc, const char * argv[]) {
 			cin.get();
 			exit(0);
 		}
-		midiIn->openPort(0);
+		midiIn->openPort(midiIndex);
 		midiIn->setCallback(&midiCallback);
 
 		dac.openStream(&rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL);
