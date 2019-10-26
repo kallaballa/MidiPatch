@@ -4,7 +4,7 @@ ifdef JAVASCRIPT
 TARGET := farts.html
 endif
 
-SRCS  := farts.cpp tonic_lua.cpp PolySynth.cpp
+SRCS  := farts.cpp tonic_lua.cpp tonic_lua2.cpp PolySynth.cpp
 CXXFLAGS += -I../third/kaguya/include -I../third/lua-5.3.5/src -I../third/Tonic/src -I../third/RtMidi -I../third/RtAudio
 LIBS += -ltonic -llua -ldl -ljack -lrtmidi -lrtaudio -lpulse-simple -lpulse -lasound
 LDFLAGS += -L../third/lua-5.3.5/src -L../third/Tonic/src -L../third/RtMidi -L../third/RtAudio

@@ -113,7 +113,8 @@ int main(int argc, const char * argv[]) {
 	controlNumberOffset = atoi(argv[2]);
 
 	kaguya::State state;
-	bindings(state);
+	bindings1(state);
+	bindings2(state);
 
 // Configure RtAudio
 	RtAudio dac;
