@@ -154,13 +154,12 @@ int main(int argc, const char * argv[]) {
 	bindings1(state);
 	bindings2(state);
 
-// Configure RtAudio
-	RtAudio dac;
-	RtAudio::StreamParameters rtParams;
-	rtParams.deviceId = audioIndex;
-	rtParams.nChannels = nChannels;
-	unsigned int sampleRate = 44100;
-	unsigned int bufferFrames = 512; // 512 sample frames
+  RtAudio dac;
+   RtAudio::StreamParameters rtParams;
+   rtParams.deviceId = dac.getDefaultOutputDevice();
+   rtParams.nChannels = nChannels;
+   unsigned int sampleRate = 44100;
+   unsigned int bufferFrames = 512; // 512 sample frames
 
 	RtMidiIn *midiIn = new RtMidiIn();
 
@@ -185,8 +184,8 @@ int main(int argc, const char * argv[]) {
 		midiIn->openPort(midiIndex);
 		midiIn->setCallback(&midiCallback);
 
-		dac.openStream(&rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL);
-		dac.startStream();
+    dac.openStream( &rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL );
+    dac.startStream();
 
 		printf("\n\nPress Enter to stop\n\n");
 		cin.get();
