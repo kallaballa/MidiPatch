@@ -160,7 +160,7 @@ int main(int argc, const char * argv[]) {
 	rtParams.deviceId = audioIndex;
 	rtParams.nChannels = nChannels;
 	unsigned int sampleRate = 44100;
-	unsigned int bufferFrames = 64; // 512 sample frames
+	unsigned int bufferFrames = 512; // 512 sample frames
 
 	RtMidiIn *midiIn = new RtMidiIn();
 
