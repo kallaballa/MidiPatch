@@ -1,9 +1,7 @@
 #include "Tonic.h"
 #include "kaguya/kaguya.hpp"
-extern "C" {
-#include "lua.h"
-}
 #include <iostream>
+#include <boost/program_options.hpp>
 
 #include "RtAudio.h"
 #include "tonic_lua.hpp"
@@ -108,18 +106,58 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 
 }
 
+namespace po = boost::program_options;
+
 int main(int argc, const char * argv[]) {
-	int midiIndex = atoi(argv[1]);
-	controlNumberOffset = atoi(argv[2]);
+	std::string appName = argv[0];
+	int midiIndex = 0;
+	int audioIndex = 0;
+	std::vector<string> patchFiles;
+
+	namespace po = boost::program_options;
+	po::options_description desc("Options");
+	desc.add_options()
+			("help,h", "Print help messages")
+			("midi,m", po::value<int>(&midiIndex)->default_value(midiIndex), "The index of the midi input device to use.")
+			("audio,a", po::value<int>(&audioIndex)->default_value(audioIndex), "The index of the audio output device to use.")
+			("offset,o", po::value<size_t>(&controlNumberOffset)->default_value(controlNumberOffset), "The control number offset for parameter mapping");
+
+	po::options_description hidden("Hidden options");
+	hidden.add_options()("patch-files", po::value<vector<string>>(&patchFiles), "patch-files");
+
+	po::options_description cmdline_options;
+	cmdline_options.add(desc).add(hidden);
+
+	po::positional_options_description positionalOptions;
+	positionalOptions.add("patch-files", 32);
+
+	po::options_description visible;
+	visible.add(desc);
+	po::variables_map vm;
+
+	po::store(po::command_line_parser(argc, argv).options(cmdline_options).positional(positionalOptions).run(), vm); // throws on error
+
+	if (vm.count("help")) {
+		std::cerr << "Usage: farts [options] <patch file>..."
+				<< std::endl;
+		std::cerr << visible;
+		exit(1);
+	}
+
+	po::notify(vm); // throws on error, so do after help in case
+									// there are any problems
+
+
 
 	kaguya::State state;
+	bindings0(state);
 	bindings1(state);
 	bindings2(state);
 
 // Configure RtAudio
 	RtAudio dac;
 	RtAudio::StreamParameters rtParams;
-	rtParams.deviceId = dac.getDefaultOutputDevice();
+	rtParams.deviceId = audioIndex;
 	rtParams.nChannels = nChannels;
 	unsigned int sampleRate = 44100;
 	unsigned int bufferFrames = 64; // 512 sample frames
@@ -128,14 +166,12 @@ int main(int argc, const char * argv[]) {
 
 	// You don't necessarily have to do this - it will default to 44100 if not set.
 	Tonic::setSampleRate(sampleRate);
-	Synth s[argc - 3];
-	size_t ccoffset = 52;
+	std::vector<Synth> s(patchFiles.size());
 
-	for (size_t i = 3; i < argc; ++i) {
-		s[i - 3] = Synth();
-		state["synth"] = &s[i - 3];
-		state.dofile(argv[i]);
-		poly.addVoice(s[i - 3]);
+	for (size_t i = 0; i < argc; ++i) {
+		state["synth"] = &s[i];
+		state.dofile(patchFiles[i]);
+		poly.addVoice(s[i]);
 	}
 	synth.setOutputGen(poly);
 

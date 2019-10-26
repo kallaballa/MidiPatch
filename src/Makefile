@@ -6,7 +6,7 @@ endif
 
 SRCS  := farts.cpp tonic_lua0.cpp tonic_lua1.cpp tonic_lua2.cpp PolySynth.cpp
 CXXFLAGS += -I../third/kaguya/include -I../third/lua-5.3.5/src -I../third/Tonic/src -I../third/RtMidi -I../third/RtAudio
-LIBS += -ltonic -llua -ldl -ljack -lrtmidi -lrtaudio -lpulse-simple -lpulse -lasound
+LIBS += -ltonic -llua -ldl -ljack -lrtmidi -lrtaudio -lpulse-simple -lpulse -lasound -lboost_program_options
 LDFLAGS += -L../third/lua-5.3.5/src -L../third/Tonic/src -L../third/RtMidi -L../third/RtAudio
 
 #precompiled headers
