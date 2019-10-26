@@ -157,7 +157,7 @@ int main(int argc, const char * argv[]) {
 // Configure RtAudio
 	RtAudio dac;
 	RtAudio::StreamParameters rtParams;
-	rtParams.deviceId = audioIndex;
+	rtParams.deviceId = dac.getDefaultOutputDevice();
 	rtParams.nChannels = nChannels;
 	unsigned int sampleRate = 44100;
 	unsigned int bufferFrames = 64; // 512 sample frames
@@ -168,7 +168,7 @@ int main(int argc, const char * argv[]) {
 	Tonic::setSampleRate(sampleRate);
 	std::vector<Synth> s(patchFiles.size());
 
-	for (size_t i = 0; i < argc; ++i) {
+	for (size_t i = 0; i < patchFiles.size(); ++i) {
 		state["synth"] = &s[i];
 		state.dofile(patchFiles[i]);
 		poly.addVoice(s[i]);
@@ -178,11 +178,11 @@ int main(int argc, const char * argv[]) {
 	// open rtaudio stream and rtmidi port
 	try {
 		if (midiIn->getPortCount() == 0) {
-			std::cout << "No MIDI ports available!\n";
+			std::cerr << "No MIDI ports available!\n";
 			cin.get();
 			exit(0);
 		}
-		midiIn->openPort(midiIndex);
+		midiIn->openPort(0);
 		midiIn->setCallback(&midiCallback);
 
 		dac.openStream(&rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL);
