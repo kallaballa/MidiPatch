@@ -2,12 +2,19 @@ Farts is a scriptable modular synthesizer. The scripting is done in [lua](https:
 
 # Usage
 
-    src/farts [midi port index] [control number offset] [syntesizer patch]...
+    Usage: farts [options] <patch file>...
 
+    Options:
+      -h [ --help ]               Print help messages
+      -m [ --midi ] arg (=0)      The index of the midi input device to use.
+      -a [ --audio ] arg (=0)     The index of the audio output device to use.
+      -r [ --rate ] arg (=48000)  The audio output sample rate
+      -b [ --buffer ] arg (=512)  Number of frames per buffer
+      -o [ --offset ] arg (=0)    The control number offset for parameter mapping
 
 For example to create a midi synthesizer with 3 voices, connecting to the second midi port (port index starts at 0), which automatically maps patch parameters to control numbers, starting at the control number offset in ascending order:
 
-    src/farts 1 52 src/sin.lua src/sin.lua src/sin.lua src/sin.lua
+    src/farts -m1 -o 52 src/sin.lua src/sin.lua src/sin.lua src/sin.lua
 
 Note, that you can use a different patch per voice.
 
@@ -41,8 +48,7 @@ Dependencies:
 - libasound (ALSA)
 - libpulse (PulseAudio) 
 - libpulse-simple (Pulse-simple)
-- libreadline
-
+- libboost_program_options
 
 After you installed the dependencies all you have to do is type
 
