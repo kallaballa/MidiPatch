@@ -4,7 +4,7 @@ local noteVelocity = synth:addParameter("_polyVelocity", 0.0);
 local voiceNumber = synth:addParameter("_polyVoiceNumber", 0.0);
 
 local voiceFreq = ControlMidiToFreq():input(noteNum)
-local tone = ((SineWave():freq(voiceFreq) * 0.3) * TriangleWave():freq(voiceFreq)) * 2
+local tone = ((SineWave():freq(voiceFreq))
 local fv = FixedValue(0.02)
    local env = ADSR()
         :attack(synth:addParameter("attack",0.1))
@@ -14,4 +14,4 @@ local fv = FixedValue(0.02)
         :doesSustain(1)
         :trigger(gate);
 
-synth:setOutputGen((tone * env) * (fv + noteVelocity * 0.005));
+synth:setOutputGen((tone * env) * (fv + noteVelocity * 0.005) * 0.1);

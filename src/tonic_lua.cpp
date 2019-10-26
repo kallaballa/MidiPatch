@@ -41,6 +41,12 @@ void bindings(kaguya::State& state) {
 					));
 
 
+	state["ControlGenerator"].setClass(make_control_operators(
+			kaguya::UserdataMetatable<ControlGenerator>()
+			.setConstructors<ControlGenerator()>()
+			.addFunction("smoothed", &ControlGenerator::smoothed)
+			.addFunction("tick", &ControlGenerator::tick))
+		);
 
 	state["Adder"].setClass(make_generator(state,
 			kaguya::UserdataMetatable<Adder, TemplatedGenerator<Tonic_::Adder_>>()
@@ -247,12 +253,7 @@ void bindings(kaguya::State& state) {
 							(LPF24& (LPF24::*)(float))&LPF24::Q)
 						));
 
-	state["ControlGenerator"].setClass(make_control_operators(
-			kaguya::UserdataMetatable<ControlGenerator>()
-			.setConstructors<ControlGenerator()>()
-			.addFunction("smoothed", &ControlGenerator::smoothed)
-			.addFunction("tick", &ControlGenerator::tick))
-		);
+
 
 	state["ControlParameter"].setClass(make_control(state,
 			kaguya::UserdataMetatable<ControlParameter, TemplatedControlGenerator<Tonic_::ControlParameter_>>()
@@ -324,6 +325,7 @@ void bindings(kaguya::State& state) {
 				(ControlMidiToFreq (ControlMidiToFreq::*)(float))&ControlMidiToFreq::input,
 				(ControlMidiToFreq (ControlMidiToFreq::*)(ControlGenerator))&ControlMidiToFreq::input)));
 
+
 	state["ADSR"].setClass(make_generator(state,
 			kaguya::UserdataMetatable<ADSR, TemplatedGenerator<Tonic_::ADSR_>>()
 			.setConstructors<ADSR()>()
@@ -377,4 +379,21 @@ void bindings(kaguya::State& state) {
 					.addOverloadedFunctions("makeupGain",
 							(Compressor& (Compressor::*)(float))&Compressor::makeupGain,
 							(Compressor& (Compressor::*)(ControlGenerator))&Compressor::makeupGain)));
+
+	state["StereoDelay"].setClass(make_wet_dry(state,
+			kaguya::UserdataMetatable<StereoDelay,TemplatedWetDryEffect<StereoDelay,Tonic_::StereoDelay_>>()
+			.setConstructors<StereoDelay(float,float,float,float)>()
+			.addOverloadedFunctions("feedback",
+					(StereoDelay& (StereoDelay::*)(Generator))&StereoDelay::feedback,
+					(StereoDelay& (StereoDelay::*)(float))&StereoDelay::feedback,
+					(StereoDelay& (StereoDelay::*)(ControlGenerator))&StereoDelay::feedback)
+			.addOverloadedFunctions("delayTimeLeft",
+					(StereoDelay& (StereoDelay::*)(Generator))&StereoDelay::delayTimeLeft,
+					(StereoDelay& (StereoDelay::*)(float))&StereoDelay::delayTimeLeft,
+					(StereoDelay& (StereoDelay::*)(ControlGenerator))&StereoDelay::delayTimeLeft)
+			.addOverloadedFunctions("delayTimeRight",
+					(StereoDelay& (StereoDelay::*)(Generator))&StereoDelay::delayTimeRight,
+					(StereoDelay& (StereoDelay::*)(float))&StereoDelay::delayTimeRight,
+					(StereoDelay& (StereoDelay::*)(ControlGenerator))&StereoDelay::delayTimeRight)
+					));
 }

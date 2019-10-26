@@ -5,7 +5,7 @@ ifeq ($(UNAME_S), Darwin)
 endif
 
 CXX      := g++
-CXXFLAGS := -pthread -fno-strict-aliasing -std=c++0x -pedantic -Wall
+CXXFLAGS := -pthread -fno-strict-aliasing -std=c++11 -pedantic -Wall
 LDFLAGS  := -L/opt/local/lib
 LIBS     := -lpthread -lm 
 .PHONY: all release debian-release info debug clean debian-clean distclean asan
@@ -28,6 +28,9 @@ ifeq ($(MACHINE), i686)
   LIBDIR = lib
 endif
 
+ifdef SYSROOT
+CXXFLAGS += --sysroot=${SYSROOT}
+endif
 ifdef JAVASCRIPT
 CXX			 := em++
 CXXFLAGS += -I/usr/local/include
@@ -49,8 +52,6 @@ endif
 
 ifeq ($(UNAME_S), Darwin)
  LDFLAGS += -L/opt/X11/lib/
-else
- CXXFLAGS += -march=native
 endif
 
 all: release

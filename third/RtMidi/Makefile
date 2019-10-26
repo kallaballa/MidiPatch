@@ -17,9 +17,13 @@ GCH    := ${HEADERS:.hpp=.gch}
 OBJS    := ${SRCS:.cpp=.o} 
 DEPS    := ${SRCS:.cpp=.dep} 
 
-CXXFLAGS += -fpic -I../ -D__LINUX_ALSA__
+CXXFLAGS += -fpic -D__LINUX_ALSA__ -I/usr/include/
 LDFLAGS += -shared 
 .PHONY: all release debug clean distclean 
+
+ifdef SYSROOT
+CXXFLAGS += --sysroot=${SYSROOT}
+endif
 
 all: release
 release: ${TARGET}

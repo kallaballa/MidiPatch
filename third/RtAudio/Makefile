@@ -21,6 +21,10 @@ CXXFLAGS += -fpic -I../ -D__LINUX_PULSE__
 LDFLAGS += -shared 
 .PHONY: all release debug clean distclean 
 
+ifdef SYSROOT
+CXXFLAGS += --sysroot=${SYSROOT}
+endif
+
 all: release
 release: ${TARGET}
 debug: ${TARGET}

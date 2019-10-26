@@ -60,6 +60,31 @@ template<class Tclass, class Tclass_> kaguya::UserdataMetatable<Tclass,Templated
 	return make_control_operators(tbl);
 }
 
+template<class Tclass, class Tclass_> kaguya::UserdataMetatable<Tclass,TemplatedWetDryEffect<Tclass,Tclass_>> make_wet_dry(kaguya::State& state, kaguya::UserdataMetatable<Tclass,TemplatedWetDryEffect<Tclass, Tclass_>>& tbl) {
+	typedef TemplatedGenerator<Tclass_> TG_t;
+	state[string("TemplatedGenerator") + typeid(Tclass).name()].setClass(
+				kaguya::UserdataMetatable<TG_t,Generator>());
+
+	typedef TemplatedWetDryEffect<Tclass, Tclass_> TG1_t;
+	state[string("TemplatedWetDryEffect") + typeid(Tclass).name()].setClass(
+				kaguya::UserdataMetatable<TG1_t,TG_t>()
+				.addFunction("input", &Tclass::input)
+				.addOverloadedFunctions("bypass",
+						(Tclass& (Tclass::*)(float))&Tclass::bypass,
+						(Tclass& (Tclass::*)(ControlGenerator))&Tclass::bypass)
+				.addOverloadedFunctions("wetLevel",
+						(Tclass& (Tclass::*)(Generator))&Tclass::wetLevel,
+						(Tclass& (Tclass::*)(float))&Tclass::wetLevel,
+						(Tclass& (Tclass::*)(ControlGenerator))&Tclass::wetLevel)
+				.addOverloadedFunctions("dryLevel",
+						(Tclass& (Tclass::*)(Generator))&Tclass::dryLevel,
+						(Tclass& (Tclass::*)(float))&Tclass::dryLevel,
+						(Tclass& (Tclass::*)(ControlGenerator))&Tclass::dryLevel)
+	);
+
+	return make_generator_operators(tbl);
+}
+
 void bindings(kaguya::State& state);
 
 

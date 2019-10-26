@@ -4,6 +4,7 @@ extern "C" {
 #include "lua.h"
 }
 #include <iostream>
+
 #include "RtAudio.h"
 #include "tonic_lua.hpp"
 #include "RtAudio.h"
@@ -42,9 +43,8 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 	} else if (msgtype == 0x90) {
 		std::cout << "MIDI Note ON   C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
 		poly.noteOn(b1, b2);
-	}
-	else if (msgtype == 0xB0) {
-//		std::cout << "MIDI CC ON   C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
+	} 	else if (msgtype == 0xB0) {
+		std::cout << "MIDI CC ON     C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
 		std::vector<string> commonParams;
 
 		//try to set a common parameter for all synths. NOTE: only works if all synthesizers have the same public parameters
@@ -105,6 +105,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 		std::cout << "MIDI Program change  C: " << chan << " P: " << b1 << std::endl;
 		current_program = b1;
 	}
+
 }
 
 int main(int argc, const char * argv[]) {
@@ -120,7 +121,7 @@ int main(int argc, const char * argv[]) {
 	rtParams.deviceId = dac.getDefaultOutputDevice();
 	rtParams.nChannels = nChannels;
 	unsigned int sampleRate = 44100;
-	unsigned int bufferFrames = 512; // 512 sample frames
+	unsigned int bufferFrames = 64; // 512 sample frames
 
 	RtMidiIn *midiIn = new RtMidiIn();
 
