@@ -2,7 +2,7 @@
 #include "kaguya/kaguya.hpp"
 #include <iostream>
 #include <boost/program_options.hpp>
-
+#include <unistd.h>
 #include "RtAudio.h"
 #include "tonic_lua.hpp"
 #include "RtAudio.h"
@@ -158,8 +158,8 @@ int main(int argc, const char * argv[]) {
    RtAudio::StreamParameters rtParams;
    rtParams.deviceId = audioIndex;
    rtParams.nChannels = nChannels;
-   unsigned int sampleRate = 44100;
-   unsigned int bufferFrames = 32; // 512 sample frames
+   unsigned int sampleRate = 48000;
+   unsigned int bufferFrames = 512; // 512 sample frames
 
 	RtMidiIn *midiIn = new RtMidiIn();
 
@@ -187,9 +187,8 @@ int main(int argc, const char * argv[]) {
     dac.openStream( &rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL );
     dac.startStream();
 
-		printf("\n\nPress Enter to stop\n\n");
-		cin.get();
-		dac.stopStream();
+	while(true) { sleep(10); };		
+dac.stopStream();
 	} catch (RtError& e) {
 		std::cout << '\n' << e.getMessage() << '\n' << std::endl;
 		cin.get();
