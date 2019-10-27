@@ -44,8 +44,6 @@ typedef struct {
 	LilvWorld*        world;
 	const LilvPlugin* plugin;
 	LilvInstance*     instance;
-	const char*       in_path;
-	const char*       out_path;
 	unsigned          n_ports;
 	unsigned          n_audio_in;
 	unsigned          n_audio_out;
@@ -162,11 +160,12 @@ namespace Tonic {
   protected:
   	std::map<const char*, ControlParameter> params;
     LV2Struct self = {
-    		NULL, NULL, NULL, NULL, NULL, 0, 0, 0, NULL
+    		NULL, NULL, NULL, 0, 0, 0, NULL
     	};
   	float* in_buf = nullptr;
   	float* out_buf = nullptr;
   	const LilvPlugin*  plugin = nullptr;
+
     void computeSynthesisBlock( const SynthesisContext_ &context );
 
   public:
@@ -270,12 +269,19 @@ namespace Tonic {
 
   	TonicFloat *inptr = &dryFrames_[0];
   	TonicFloat *outptr = &outputFrames_[0];
+    unsigned int nSamples = (unsigned int)outputFrames_.size();
 
-   	in_buf[0] = *(inptr);
-   	in_buf[1] = *(inptr + 1);
+
+
+    while (nSamples--){
+      if(self.n_audio_in > 0) {
+        in_buf[0] = *(inptr++);
+     	}
+//    in_buf[1] = *(inptr++);
    	lilv_instance_run(self.instance, 1);
-  	*(outptr) = out_buf[0];
-  	*(outptr + 1) = out_buf[1];
+  	*(outptr++) = out_buf[0];
+//  	*(outptr++) = out_buf[1];
+    }
   }
 
 }
