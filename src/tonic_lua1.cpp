@@ -1,4 +1,5 @@
 #include "tonic_lua.hpp"
+#include "lvplugin.hpp"
 
 using namespace Tonic;
 
@@ -116,5 +117,12 @@ void bindings1(kaguya::State& state) {
 					(StereoDelay& (StereoDelay::*)(Generator))&StereoDelay::delayTimeRight,
 					(StereoDelay& (StereoDelay::*)(float))&StereoDelay::delayTimeRight,
 					(StereoDelay& (StereoDelay::*)(ControlGenerator))&StereoDelay::delayTimeRight)
+					));
+
+	state["LV2Plugin"].setClass(make_wet_dry(state,
+			kaguya::UserdataMetatable<LV2Effect,TemplatedWetDryEffect<LV2Effect,Tonic_::LV2Effect_>>()
+			.setConstructors<LV2Effect(const char*)>()
+			.addFunction("setControl", &LV2Effect::setControl)
+			.addFunction("getControlNames", &LV2Effect::getControlNames)
 					));
 }
