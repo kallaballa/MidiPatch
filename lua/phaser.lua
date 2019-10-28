@@ -14,7 +14,7 @@ local env = ADSR()
 :doesSustain(1)
 :trigger(gate);
 
-local phaser = LV2Plugin("http://calf.sourceforge.net/plugins/Reverb")
+local phaser = LV2Plugin("http://calf.sourceforge.net/plugins/Flanger")
 phaser:input(tone);
 
 for k, v in pairs(phaser:getControlNames()) do

@@ -175,7 +175,15 @@ int main(int argc, const char * argv[]) {
 		state.dofile(patchFiles[i]);
 		poly.addVoice(s[i]);
 	}
-	synth.setOutputGen(poly);
+
+	//add a slight ADSR to prevent clicking
+	ADSR adsr;
+	adsr.attack(0.01);
+	adsr.decay(0);
+	adsr.sustain(1);
+	adsr.release(0.01);
+
+	synth.setOutputGen(poly * adsr);
 
 	// open rtaudio stream and rtmidi port
 	try {

@@ -273,14 +273,15 @@ namespace Tonic {
 
 
 
-    while (nSamples--){
+    for(size_t i = 0; i < (nSamples/2); ++i){
       if(self.n_audio_in > 0) {
         in_buf[0] = *(inptr++);
+        in_buf[1] = *(inptr++);
      	}
 //    in_buf[1] = *(inptr++);
    	lilv_instance_run(self.instance, 1);
   	*(outptr++) = out_buf[0];
-//  	*(outptr++) = out_buf[1];
+  	*(outptr++) = out_buf[1];
     }
   }
 

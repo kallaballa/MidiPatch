@@ -53,6 +53,23 @@ template<class Tclass, class Tclass_> kaguya::UserdataMetatable<Tclass,Templated
 	return make_generator_operators(tbl);
 }
 
+template<class Tclass, class Tclass_> kaguya::UserdataMetatable<Tclass,TemplatedEffect<Tclass, Tclass_>> make_effect(kaguya::State& state, kaguya::UserdataMetatable<Tclass,TemplatedEffect<Tclass, Tclass_>>& tbl) {
+	typedef TemplatedGenerator<Tclass_> TG_t;
+	state[string("TemplatedGenerator") + typeid(Tclass).name()].setClass(
+				kaguya::UserdataMetatable<TG_t,Generator>());
+
+	typedef TemplatedEffect<Tclass, Tclass_> TG1_t;
+	state[string("TemplatedEffect") + typeid(Tclass).name()].setClass(
+				kaguya::UserdataMetatable<TG1_t,TG_t>()
+				.addFunction("setIsStereoInput", &Tclass::setIsStereoInput)
+				.addOverloadedFunctions("bypass",
+						(Tclass& (Tclass::*)(float))&Tclass::bypass,
+						(Tclass& (Tclass::*)(ControlGenerator))&Tclass::bypass)
+				);
+
+	return make_generator_operators(tbl);
+}
+
 template<class Tclass, class Tclass_> kaguya::UserdataMetatable<Tclass,TemplatedControlGenerator<Tclass_>> make_control(kaguya::State& state, kaguya::UserdataMetatable<Tclass,TemplatedControlGenerator<Tclass_>>& tbl) {
 	typedef TemplatedControlGenerator<Tclass_> TG_t;
 	state[string("TemplatedControlGenerator") + typeid(Tclass).name()].setClass(

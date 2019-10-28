@@ -125,4 +125,12 @@ void bindings1(kaguya::State& state) {
 			.addFunction("setControl", &LV2Effect::setControl)
 			.addFunction("getControlNames", &LV2Effect::getControlNames)
 					));
+
+	state["BitCrusher"].setClass(make_effect(state,
+			kaguya::UserdataMetatable<BitCrusher,TemplatedEffect<BitCrusher,Tonic_::BitCrusher_>>()
+			.setConstructors<BitCrusher()>()
+			.addOverloadedFunctions("bitDepth",
+										(BitCrusher& (BitCrusher::*)(float))&BitCrusher::bitDepth,
+										(BitCrusher& (BitCrusher::*)(ControlGenerator))&BitCrusher::bitDepth))
+					);
 }
