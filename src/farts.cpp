@@ -177,13 +177,7 @@ int main(int argc, const char * argv[]) {
 	}
 
 	//add a slight ADSR to prevent clicking
-	ADSR adsr;
-	adsr.attack(0.01);
-	adsr.decay(0);
-	adsr.sustain(1);
-	adsr.release(0.01);
-
-	synth.setOutputGen(poly * adsr);
+	synth.setOutputGen(poly);
 
 	// open rtaudio stream and rtmidi port
 	try {
