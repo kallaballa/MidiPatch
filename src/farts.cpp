@@ -9,6 +9,7 @@
 #include "RtMidi.h"
 #include "RtError.h"
 #include "PolySynth.hpp"
+#include "LCD.hpp"
 
 using namespace Tonic;
 
@@ -20,6 +21,7 @@ static PolySynth poly;
 
 uint8_t current_program = 127;
 size_t controlNumberOffset = 0;
+LCD* lcd = nullptr;
 
 int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime,
 		RtAudioStreamStatus status, void *userData) {
@@ -80,7 +82,8 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 
 				if ((b1 - 52) < publicParameters.size()) {
 					const string& name = publicParameters[b1 - 52];
-					std::cout << name << ": " << (float) b2 / 127.0 << std::endl;
+					if(lcd)
+						lcd->print(0,0,name + ": " + std::to_string(b2 / 127.0f) );
 					s.setParameter(name, (float) b2 / 127.0);
 				}
 			}
@@ -115,6 +118,7 @@ int main(int argc, const char * argv[]) {
   unsigned int sampleRate = 48000;
   unsigned int bufferFrames = 512;
 	std::vector<string> patchFiles;
+	string ttyLCD;
 
 	namespace po = boost::program_options;
 	po::options_description desc("Options");
@@ -124,6 +128,7 @@ int main(int argc, const char * argv[]) {
 			("audio,a", po::value<int>(&audioIndex)->default_value(audioIndex), "The index of the audio output device to use.")
 			("rate,r", po::value<unsigned int>(&sampleRate)->default_value(sampleRate), "The audio output sample rate")
 			("buffer,b", po::value<unsigned int>(&bufferFrames)->default_value(bufferFrames), "Number of frames per buffer")
+			("lcd,l", po::value<string>(&ttyLCD), "The tty file for the LCD display.")
 			("offset,o", po::value<size_t>(&controlNumberOffset)->default_value(controlNumberOffset), "The control number offset for parameter mapping");
 
 	po::options_description hidden("Hidden options");
@@ -148,6 +153,9 @@ int main(int argc, const char * argv[]) {
 		exit(1);
 	}
 
+	if(!ttyLCD.empty()) {
+		lcd = new LCD(ttyLCD.c_str());
+	}
 	po::notify(vm); // throws on error, so do after help in case
 									// there are any problems
 
