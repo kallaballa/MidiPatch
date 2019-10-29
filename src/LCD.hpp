@@ -16,7 +16,9 @@ public:
 	LCD(const char* ttyPath) : ttyOut_(ttyPath) {
 	}
 
-	void print(uint8_t row, uint8_t col, const std::string& s);
+	LCD& print(uint8_t row, uint8_t col, const std::string& s);
+	LCD& clear();
+
 };
 
 #endif /* SRC_LCD_HPP_ */

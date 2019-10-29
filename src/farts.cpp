@@ -83,7 +83,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 				if ((b1 - 52) < publicParameters.size()) {
 					const string& name = publicParameters[b1 - 52];
 					if(lcd)
-						lcd->print(0,0,name + ": " + std::to_string(b2 / 127.0f) );
+						lcd->clear().print(0,0,name + ": " + std::to_string(b2 / 127.0f) );
 					s.setParameter(name, (float) b2 / 127.0);
 				}
 			}
@@ -160,7 +160,8 @@ int main(int argc, const char * argv[]) {
 									// there are any problems
 
 
-
+	if(lcd)
+		lcd->clear().print(0,0, "Starting...");
 	kaguya::State state;
 	bindings0(state);
 	bindings1(state);
@@ -179,6 +180,8 @@ int main(int argc, const char * argv[]) {
 	std::vector<Synth> s(patchFiles.size());
 
 	for (size_t i = 0; i < patchFiles.size(); ++i) {
+		if(lcd)
+			lcd->clear().print(0,0, "Loading: " + patchFiles[i]);
 		state["synth"] = &s[i];
 		state.dofile(patchFiles[i]);
 		poly.addVoice(s[i]);
@@ -199,6 +202,8 @@ int main(int argc, const char * argv[]) {
 
     dac.openStream( &rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL );
     dac.startStream();
+		if(lcd)
+			lcd->clear().print(0,0, "Running");
 
 	while(true) { sleep(10); };		
 dac.stopStream();
