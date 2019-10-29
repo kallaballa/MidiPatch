@@ -6,6 +6,7 @@ endif
 
 ifeq ($(UNAME_S), Linux)
  CUSTOM_DEFS = -D__LINUX_ALSA__
+ LIBS+= -lasound
 endif
 
 TARGET  := farts
