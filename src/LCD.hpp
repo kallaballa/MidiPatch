@@ -14,6 +14,7 @@ class LCD {
 	char* buffers_[4] = {buffer0_, buffer1_, buffer2_, buffer3_};
 public:
 	LCD(const char* ttyPath) : ttyOut_(ttyPath) {
+		clear();
 	}
 
 	LCD& print(uint8_t row, uint8_t col, const std::string& s);
