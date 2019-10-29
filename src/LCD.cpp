@@ -8,6 +8,7 @@
 #include "LCD.hpp"
 
 LCD& LCD::print(uint8_t row, uint8_t col, const std::string& s) {
+	return *this;
 	size_t len = std::min((size_t)20, s.size() + col);
 	memcpy((void *)(buffers_[row] + col), (void *)s.c_str(), len);
 	ttyOut_ << row;
