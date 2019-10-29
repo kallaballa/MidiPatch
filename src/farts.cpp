@@ -95,7 +95,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 					if(lcd)
 						lcd->clear()
 							.print(0,0, parent)
-							.print(0,0,child + ": " + std::to_string(b2 / 127.0f));
+							.print(1,0,child + ": " + std::to_string(b2 / 127.0f));
 					s.setParameter(name, (float) b2 / 127.0);
 				}
 			}
