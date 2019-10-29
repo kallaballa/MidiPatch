@@ -1,9 +1,10 @@
 #include "Tonic.h"
 #include "kaguya/kaguya.hpp"
 #include <iostream>
-#include <boost/program_options.hpp>
 #include <unistd.h>
+#include "cxxopts.hpp"
 #include "RtAudio.h"
+
 #include "tonic_lua.hpp"
 #include "RtAudio.h"
 #include "RtMidi.h"
@@ -121,53 +122,36 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 
 }
 
-namespace po = boost::program_options;
 
-int main(int argc, const char * argv[]) {
+int main(int argc, char ** argv) {
 	std::string appName = argv[0];
 	int midiIndex = 0;
 	int audioIndex = 0;
   unsigned int sampleRate = 48000;
   unsigned int bufferFrames = 512;
 	std::vector<string> patchFiles;
-	string ttyLCD = "/dev/ttyS1";
+	string ttyLCD;
+	cxxopts::Options options(appName, "A scriptable, modular and real-time MIDI synthesizer");
+	options.add_options()
+					("h,help", "Print help messages")
+				  ("m,midi", "The index of the midi input device to use.", cxxopts::value<int>(midiIndex)->default_value("0"))
+				  ("a,audio", "The index of the audio output device to use.", cxxopts::value<int>(audioIndex)->default_value("0"))
+				  ("r,rate", "The audio output sample rate.", cxxopts::value<unsigned int>(sampleRate)->default_value("44100"))
+				  ("b,buffer", "Number of frames per buffer.", cxxopts::value<unsigned int>(bufferFrames)->default_value("32"))
+				  ("l,lcd", "The tty file for the LCD display.", cxxopts::value<string>(ttyLCD))
+				  ("o,offset", "The control number offset for parameter mapping", cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
+				  ("p,patchFiles", "The list of lua patchFiles to use as voices", cxxopts::value<std::vector<string>>(patchFiles))
 
-	namespace po = boost::program_options;
-	po::options_description desc("Options");
-	desc.add_options()
-			("help,h", "Print help messages")
-			("midi,m", po::value<int>(&midiIndex)->default_value(midiIndex), "The index of the midi input device to use.")
-			("audio,a", po::value<int>(&audioIndex)->default_value(audioIndex), "The index of the audio output device to use.")
-			("rate,r", po::value<unsigned int>(&sampleRate)->default_value(sampleRate), "The audio output sample rate")
-			("buffer,b", po::value<unsigned int>(&bufferFrames)->default_value(bufferFrames), "Number of frames per buffer")
-			("lcd,l", po::value<string>(&ttyLCD)->default_value(ttyLCD), "The tty file for the LCD display.")
-			("offset,o", po::value<size_t>(&controlNumberOffset)->default_value(controlNumberOffset), "The control number offset for parameter mapping");
+					;
 
-	po::options_description hidden("Hidden options");
-	hidden.add_options()("patch-files", po::value<vector<string>>(&patchFiles), "patch-files");
+	auto result = options.parse(argc, argv);
 
-	po::options_description cmdline_options;
-	cmdline_options.add(desc).add(hidden);
-
-	po::positional_options_description positionalOptions;
-	positionalOptions.add("patch-files", 32);
-
-	po::options_description visible;
-	visible.add(desc);
-	po::variables_map vm;
-
-	po::store(po::command_line_parser(argc, argv).options(cmdline_options).positional(positionalOptions).run(), vm); // throws on error
-
-	if (vm.count("help")) {
+	if (result["help"].count()) {
 		std::cerr << "Usage: farts [options] <patch file>..."
 				<< std::endl;
-		std::cerr << visible;
+		std::cerr << options.help() << std::endl;
 		exit(1);
 	}
-
-
-	po::notify(vm); // throws on error, so do after help in case
-							// there are any problems
 
 	if(!ttyLCD.empty()) {
 		std::cerr << "Enabling LCD on " + ttyLCD << std::endl;
