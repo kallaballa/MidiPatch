@@ -82,8 +82,20 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 
 				if ((b1 - 52) < publicParameters.size()) {
 					const string& name = publicParameters[b1 - 52];
+					auto delim = name.find(".");
+					string parent;
+					string child;
+					if(delim != string::npos) {
+						parent = name.substr(0, delim);
+						child = name.substr(delim+1);
+					} else {
+						parent = "Global";
+						child = name;
+					}
 					if(lcd)
-						lcd->clear().print(0,0,name + ": " + std::to_string(b2 / 127.0f) );
+						lcd->clear()
+							.print(0,0, parent)
+							.print(0,0,child + ": " + std::to_string(b2 / 127.0f));
 					s.setParameter(name, (float) b2 / 127.0);
 				}
 			}
@@ -118,7 +130,7 @@ int main(int argc, const char * argv[]) {
   unsigned int sampleRate = 48000;
   unsigned int bufferFrames = 512;
 	std::vector<string> patchFiles;
-	string ttyLCD;
+	string ttyLCD = "/dev/ttyS1";
 
 	namespace po = boost::program_options;
 	po::options_description desc("Options");
@@ -128,7 +140,7 @@ int main(int argc, const char * argv[]) {
 			("audio,a", po::value<int>(&audioIndex)->default_value(audioIndex), "The index of the audio output device to use.")
 			("rate,r", po::value<unsigned int>(&sampleRate)->default_value(sampleRate), "The audio output sample rate")
 			("buffer,b", po::value<unsigned int>(&bufferFrames)->default_value(bufferFrames), "Number of frames per buffer")
-			("lcd,l", po::value<string>(&ttyLCD), "The tty file for the LCD display.")
+			("lcd,l", po::value<string>(&ttyLCD)->default_value(ttyLCD), "The tty file for the LCD display.")
 			("offset,o", po::value<size_t>(&controlNumberOffset)->default_value(controlNumberOffset), "The control number offset for parameter mapping");
 
 	po::options_description hidden("Hidden options");
@@ -154,11 +166,11 @@ int main(int argc, const char * argv[]) {
 	}
 
 	if(!ttyLCD.empty()) {
+		std::cerr << "Enabling LCD on " + ttyLCD << std::endl;
 		lcd = new LCD(ttyLCD.c_str());
 	}
 	po::notify(vm); // throws on error, so do after help in case
-									// there are any problems
-
+							// there are any problems
 
 	if(lcd)
 		lcd->clear().print(0,0, "Starting...");
