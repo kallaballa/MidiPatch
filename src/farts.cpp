@@ -165,12 +165,14 @@ int main(int argc, const char * argv[]) {
 		exit(1);
 	}
 
+
+	po::notify(vm); // throws on error, so do after help in case
+							// there are any problems
+
 	if(!ttyLCD.empty()) {
 		std::cerr << "Enabling LCD on " + ttyLCD << std::endl;
 		lcd = new LCD(ttyLCD.c_str());
 	}
-	po::notify(vm); // throws on error, so do after help in case
-							// there are any problems
 
 	if(lcd)
 		lcd->clear().print(0,0, "Starting...");
