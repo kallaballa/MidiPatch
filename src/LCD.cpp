@@ -9,7 +9,7 @@ LCD& LCD::print(uint8_t row, uint8_t col, const std::string& s) {
 }
 
 LCD& LCD::clear() {
-	ttyOut_ << 4;
-	ttyOut_.flush();
+//	ttyOut_ << 4;
+//	ttyOut_.flush();
 	return *this;
 }
