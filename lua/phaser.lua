@@ -7,14 +7,14 @@ local voiceFreq = ControlMidiToFreq():input(noteNum)
 local tone = (SineWave():freq(voiceFreq) * 0.8) + (SquareWaveBL():freq(voiceFreq) * 0.2)
 
 local env = ADSR()
-:attack(synth:addParameter("attack",0.1))
-:decay(synth:addParameter("decay", 0 ))
-:sustain(synth:addParameter("sustain",1))
-:release(synth:addParameter("release",0.1))
+:attack(synth:addParameter("_attack",0.1))
+:decay(synth:addParameter("_decay", 0 ))
+:sustain(synth:addParameter("_sustain",1))
+:release(synth:addParameter("_release",0.1))
 :doesSustain(1)
 :trigger(gate);
 
-local phaser = LV2Plugin("http://calf.sourceforge.net/plugins/Phaser")
+local phaser = LV2Plugin("http://calf.sourceforge.net/plugins/Reverb")
 phaser:input(tone);
 
 for k, v in pairs(phaser:getControlNames()) do

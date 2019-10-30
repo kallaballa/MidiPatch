@@ -27,7 +27,8 @@
 typedef enum {
 	TYPE_CONTROL,
 	TYPE_AUDIO,
-	TYPE_CV
+	TYPE_CV,
+	TYPE_OTHER
 } PortType;
 
 /** Runtime port information */

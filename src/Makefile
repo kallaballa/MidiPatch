@@ -16,7 +16,7 @@ TARGET := farts.html
 endif
 
 SRCS  := farts.cpp tonic_lua0.cpp tonic_lua1.cpp tonic_lua2.cpp PolySynth.cpp ../third/RtMidi/RtMidi.cpp ../third/RtAudio/RtAudio.cpp lvplugin.cpp LCD.cpp
-CXXFLAGS += -I../third/kaguya/include -I../third/lua-5.3.5/src -I../third/Tonic/src -I../third/cxxopts-2.2.0/include -I../third/RtMidi -I../third/RtAudio ${CUSTOM_DEFS}
+CXXFLAGS += -I/usr/lib64/ -I../third/kaguya/include -I../third/lua-5.3.5/src -I../third/Tonic/src -I../third/cxxopts-2.2.0/include -I../third/RtMidi -I../third/RtAudio ${CUSTOM_DEFS}
 LIBS += -ltonic -llua -ldl -llilv-0
 LDFLAGS += -L../third/lua-5.3.5/src -L../third/Tonic/src
 

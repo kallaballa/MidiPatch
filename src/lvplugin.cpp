@@ -175,7 +175,6 @@ namespace Tonic {
   	TonicFloat *outptr = &outputFrames_[0];
     unsigned int nSamples = (unsigned int)outputFrames_.size();
 
-    std::cerr << "DS:" + dryFrames_.size() << std::endl;
     for(size_t i = 0; i < nSamples; ++i){
       for(size_t j = 0; j < self.n_audio_in; ++j) {
         in_buf[j] = *inptr;

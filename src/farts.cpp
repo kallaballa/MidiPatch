@@ -83,6 +83,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 
 				if ((b1 - 52) < publicParameters.size()) {
 					const string& name = publicParameters[b1 - 52];
+
 					auto delim = name.find(".");
 					string parent;
 					string child;
@@ -98,6 +99,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 							.print(0,0, parent)
 							.print(1,0,child + ": " + std::to_string(b2 / 127.0f));
 					s.setParameter(name, (float) b2 / 127.0);
+					std::cerr << name << ": " << (float)b2/127.0 << std::endl;
 				}
 			}
 		} else if(current_program < poly.getVoices().size()) {
@@ -111,7 +113,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 			}
 			if((b1 - 52) < publicParameters.size()) {
 				const string& name = publicParameters[b1 - 52];
-				std::cout << name << ": " << (float)b2/127.0 << std::endl;
+				std::cerr << name << ": " << (float)b2/127.0 << std::endl;
 				s.setParameter(name, (float)b2/127.0);
 			}
 		}
