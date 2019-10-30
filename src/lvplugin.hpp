@@ -271,18 +271,16 @@ namespace Tonic {
   	TonicFloat *outptr = &outputFrames_[0];
     unsigned int nSamples = (unsigned int)outputFrames_.size();
 
-
-
-    for(size_t i = 0; i < (nSamples/2); ++i){
-      if(self.n_audio_in > 0) {
-        in_buf[0] = *(inptr++);
-        in_buf[1] = *(inptr++);
-     	}
-//    in_buf[1] = *(inptr++);
-   	lilv_instance_run(self.instance, 1);
-  	*(outptr++) = out_buf[0];
-  	*(outptr++) = out_buf[1];
-    }
+    std::cerr << "DS:" + dryFrames_.size() << std::endl;
+//    for(size_t i = 0; i < (nSamples/self.n_audio_in); ++i){
+//      for(size_t j = 0; j < self.n_audio_in; ++j) {
+//        in_buf[j] = *(inptr++);
+//     	}
+//	//    in_buf[1] = *(inptr++);
+//			lilv_instance_run(self.instance, 1);
+//			*(outptr++) = out_buf[0];
+//			*(outptr++) = out_buf[1];
+//    }
   }
 
 }
