@@ -11,16 +11,22 @@
 #include <cstdint>
 #include <cstddef>
 #include <string>
+#include <set>
+#include <mutex>
+#include "App.h"
 
 namespace farts {
 
 class Websocket {
+	std::set<uWS::WebSocket<false, true>*> clients;
+	std::vector<std::string> buffers_;
+	std::mutex mutex_;
 public:
 	Websocket(size_t port);
 	virtual ~Websocket();
 	void clear();
 	void print(const uint8_t& col, const uint8_t& row, const std::string& s);
-	void send(const std::string& s);
+	void flush();
 };
 
 } /* namespace farts */

@@ -11,6 +11,7 @@
 #include "RtError.h"
 #include "PolySynth.hpp"
 #include "LCD.hpp"
+#include "Websocket.hpp"
 
 using namespace Tonic;
 
@@ -23,6 +24,25 @@ static PolySynth poly;
 uint8_t current_program = 127;
 size_t controlNumberOffset = 0;
 LCD* lcd = nullptr;
+static farts::Websocket* websocket = new farts::Websocket(8080);
+
+inline void ui_print(const uint8_t& col, const uint8_t& row, const string& s) {
+	if(lcd)
+		lcd->print(col, row, s);
+	if(websocket)
+		websocket->print(col, row, s);
+}
+
+inline void ui_clear() {
+	if(lcd)
+		lcd->clear();
+	if(websocket)
+		websocket->clear();
+}
+
+inline void ui_flush() {
+	websocket->flush();
+}
 
 int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime,
 		RtAudioStreamStatus status, void *userData) {
@@ -98,10 +118,10 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 					std::cerr << name << ": " << (float)b2/127.0 << std::endl;
 				}
 
-				if(lcd)
-					lcd->clear()
-						.print(0,0, parent)
-						.print(1,0,child + ": " + std::to_string(b2 / 127.0f));
+					ui_clear();
+					ui_print(0,0, parent);
+					ui_print(0,1,child + ": " + std::to_string(b2 / 127.0f));
+					ui_flush();
 			}
 		}
 	} else if (msgtype == 0xC0) {
@@ -146,8 +166,9 @@ int main(int argc, char ** argv) {
 		lcd = new LCD(ttyLCD.c_str());
 	}
 
-	if(lcd)
-		lcd->clear().print(0,0, "Starting...");
+	ui_clear();
+	ui_print(0,0, "Starting...");
+	ui_flush();
 	kaguya::State state;
 	bindings0(state);
 	bindings1(state);
@@ -163,8 +184,9 @@ int main(int argc, char ** argv) {
 	// You don't necessarily have to do this - it will default to 44100 if not set.
 	Tonic::setSampleRate(sampleRate);
 	std::vector<Synth> s(numVoices);
-	if(lcd)
-		lcd->clear().print(0,0, string("Loading patch..."));
+	ui_clear();
+	ui_print(0,0, string("Loading patch..."));
+	ui_flush();
 
 	for (size_t i = 0; i < numVoices; ++i) {
 		state["synth"] = &s[i];
@@ -193,9 +215,9 @@ int main(int argc, char ** argv) {
 
     dac.openStream( &rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL );
     dac.startStream();
-		if(lcd)
-			lcd->clear().print(0,0, "Running");
-
+  	ui_clear();
+  	ui_print(0,0, "Running");
+  	ui_flush();
 	while(true) { sleep(10); };		
 dac.stopStream();
 	} catch (RtError& e) {

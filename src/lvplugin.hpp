@@ -133,7 +133,6 @@ namespace Tonic {
     	std::vector<const char*> names;
   	 	for (uint32_t p = 0, i = 0, o = 0; p < lilv_plugin_get_num_ports(plugin); ++p) {
   	 		const char* symbol = lilv_node_as_string (lilv_port_get_symbol(plugin, self.ports[p].lilv_port));
-  	 		std::cerr << symbol << std::endl;
   	 		if (self.ports[p].type == TYPE_CONTROL && !(ends_with(string(symbol), string("_in")) || ends_with(string(symbol), string("_out")) || ends_with(string(symbol), string("_outL"))|| ends_with(string(symbol), string("_outR")) || ends_with(string(symbol), string("_inL")) || ends_with(string(symbol), string("_inR")))) {
     			names.push_back(symbol);
     		}
