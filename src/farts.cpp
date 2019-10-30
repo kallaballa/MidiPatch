@@ -141,7 +141,7 @@ int main(int argc, char ** argv) {
 	}
 
 	if(!ttyLCD.empty()) {
-		std::cerr << "Enabling LCD on " + ttyLCD << std::endl;
+		std::cerr << "Enabling LCD on " << ttyLCD << std::endl;
 		lcd = new LCD(ttyLCD.c_str());
 	}
 
@@ -163,9 +163,9 @@ int main(int argc, char ** argv) {
 	Tonic::setSampleRate(sampleRate);
 	std::vector<Synth> s(numVoices);
 	if(lcd)
-		lcd->clear().print(0,0, "Loading: " + patchFile);
-	for (size_t i = 0; i < numVoices; ++i) {
+		lcd->clear().print(0,0, string("Loading patch..."));
 
+	for (size_t i = 0; i < numVoices; ++i) {
 		state["synth"] = &s[i];
 		state.dofile(patchFile);
 		poly.addVoice(s[i]);
