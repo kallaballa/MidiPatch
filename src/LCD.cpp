@@ -8,18 +8,15 @@
 #include "LCD.hpp"
 
 LCD& LCD::print(uint8_t row, uint8_t col, const std::string& s) {
-	size_t len = std::min((size_t)20, s.size() + col);
-	memcpy((void *)(buffers_[row] + col), (void *)s.c_str(), len);
 	ttyOut_ << row;
-	ttyOut_.write(buffers_[row], 20);
+	for(size_t i = 0; i < col; ++i)
+		ttyOut_ << ' ';
+	ttyOut_.write(s.c_str(), 20 - col);
 	ttyOut_.flush();
 	return *this;
 }
 
 LCD& LCD::clear() {
-	for(size_t i = 0; i < 4; ++i) {
-		memset(buffers_[i], 20, 20);
-	}
 	ttyOut_ << 4;
 	ttyOut_.flush();
 	return *this;
