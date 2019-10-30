@@ -169,7 +169,6 @@ int main(int argc, char ** argv) {
    RtAudio::StreamParameters rtParams;
    rtParams.deviceId = audioIndex;
    rtParams.nChannels = nChannels;
- // 512 sample frames
 
 	RtMidiIn *midiIn = new RtMidiIn();
 
@@ -195,8 +194,14 @@ int main(int argc, char ** argv) {
 			cin.get();
 			exit(0);
 		}
+		std::cerr << "Opening MIDI port: " + midiIndex << std::endl;
 		midiIn->openPort(midiIndex);
 		midiIn->setCallback(&midiCallback);
+
+		std::cerr << "Opening audio port: " << rtParams.deviceId <<
+				" channels: "	<< rtParams.nChannels <<
+				" rate: " << sampleRate <<
+				" frames: "	<< bufferFrames << std::endl;
 
     dac.openStream( &rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL );
     dac.startStream();
