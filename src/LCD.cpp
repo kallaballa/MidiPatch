@@ -17,6 +17,9 @@ LCD& LCD::print(uint8_t row, uint8_t col, const std::string& s) {
 }
 
 LCD& LCD::clear() {
+	for(size_t i = 0; i < 4; ++i) {
+		memset(buffers_[i], 20, 20);
+	}
 	ttyOut_ << 4;
 	ttyOut_.flush();
 	return *this;
