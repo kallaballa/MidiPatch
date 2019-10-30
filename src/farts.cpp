@@ -141,14 +141,11 @@ int main(int argc, char ** argv) {
 				  ("l,lcd", "The tty file for the LCD display.", cxxopts::value<string>(ttyLCD))
 				  ("o,offset", "The control number offset for parameter mapping", cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
 				  ("p,patchFiles", "The list of lua patchFiles to use as voices", cxxopts::value<std::vector<string>>(patchFiles))
-
 					;
 
 	auto result = options.parse(argc, argv);
 
 	if (result["help"].count()) {
-		std::cerr << "Usage: farts [options] <patch file>..."
-				<< std::endl;
 		std::cerr << options.help() << std::endl;
 		exit(1);
 	}
@@ -194,7 +191,7 @@ int main(int argc, char ** argv) {
 			cin.get();
 			exit(0);
 		}
-		std::cerr << "Opening MIDI port: " + midiIndex << std::endl;
+		std::cerr << "Opening MIDI port: " << midiIndex << std::endl;
 		midiIn->openPort(midiIndex);
 		midiIn->setCallback(&midiCallback);
 
