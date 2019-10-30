@@ -26,7 +26,8 @@
 /** Port type (only float ports are supported) */
 typedef enum {
 	TYPE_CONTROL,
-	TYPE_AUDIO
+	TYPE_AUDIO,
+	TYPE_CV
 } PortType;
 
 /** Runtime port information */
@@ -47,6 +48,8 @@ typedef struct {
 	unsigned          n_ports;
 	unsigned          n_audio_in;
 	unsigned          n_audio_out;
+	unsigned          n_cv_in;
+	unsigned          n_cv_out;
 	Port*             ports;
 } LV2Struct;
 
@@ -92,6 +95,7 @@ create_ports(LV2Struct* self)
 	LilvNode* lv2_OutputPort         = lilv_new_uri(world, LV2_CORE__OutputPort);
 	LilvNode* lv2_AudioPort          = lilv_new_uri(world, LV2_CORE__AudioPort);
 	LilvNode* lv2_ControlPort        = lilv_new_uri(world, LV2_CORE__ControlPort);
+	LilvNode* lv2_CVPort        		 = lilv_new_uri(world, LV2_CORE__CVPort);
 	LilvNode* lv2_connectionOptional = lilv_new_uri(world, LV2_CORE__connectionOptional);
 
 	for (uint32_t i = 0; i < n_ports; ++i) {
@@ -122,7 +126,14 @@ create_ports(LV2Struct* self)
 			} else {
 				++self->n_audio_out;
 			}
-		} else if (!port->optional) {
+		} else if (lilv_port_is_a(self->plugin, lport, lv2_CVPort)) {
+			port->type = TYPE_CV;
+			if (port->is_input) {
+				++self->n_cv_in;
+			} else {
+				++self->n_cv_out;
+			}
+		}else if (!port->optional) {
 			return fatal(self, 1, "Port %d has unsupported type\n", i);
 		}
 	}
@@ -160,10 +171,12 @@ namespace Tonic {
   protected:
   	std::map<const char*, ControlParameter> params;
     LV2Struct self = {
-    		NULL, NULL, NULL, 0, 0, 0, NULL
+    		NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL
     	};
   	float* in_buf = nullptr;
   	float* out_buf = nullptr;
+  	float* incv_buf = nullptr;
+  	float* outcv_buf = nullptr;
   	const LilvPlugin*  plugin = nullptr;
 
     void computeSynthesisBlock( const SynthesisContext_ &context );
@@ -201,8 +214,9 @@ namespace Tonic {
     	const uint32_t n_ports = lilv_plugin_get_num_ports(plugin);
     	in_buf = new float[self.n_audio_in];
     	out_buf = new float[self.n_audio_out];
-    	std::cerr << self.n_audio_in << std::endl;
-    	std::cerr << self.n_audio_out << std::endl;
+    	incv_buf = new float[self.n_cv_in];
+    	outcv_buf = new float[self.n_cv_out]
+														;
     	self.instance = lilv_plugin_instantiate(
     		self.plugin, Tonic::sampleRate(), NULL);
     	for (uint32_t p = 0, i = 0, o = 0; p < n_ports; ++p) {
@@ -214,7 +228,14 @@ namespace Tonic {
     			} else {
     				lilv_instance_connect_port(self.instance, p, out_buf + o++);
     			}
-    		} else {
+    		} else if (self.ports[p].type == TYPE_CV) {
+    			if (self.ports[p].is_input) {
+    				lilv_instance_connect_port(self.instance, p, incv_buf + i++);
+    			} else {
+    				lilv_instance_connect_port(self.instance, p, outcv_buf + o++);
+    			}
+    		}
+    		else {
     			lilv_instance_connect_port(self.instance, p, NULL);
     		}
     	}
@@ -271,17 +292,17 @@ namespace Tonic {
   	TonicFloat *outptr = &outputFrames_[0];
     unsigned int nSamples = (unsigned int)outputFrames_.size();
 
-
-
-    for(size_t i = 0; i < (nSamples/2); ++i){
-      if(self.n_audio_in > 0) {
-        in_buf[0] = *(inptr++);
-        in_buf[1] = *(inptr++);
+    std::cerr << "DS:" + dryFrames_.size() << std::endl;
+    for(size_t i = 0; i < nSamples; ++i){
+      for(size_t j = 0; j < self.n_audio_in; ++j) {
+        in_buf[j] = *inptr;
      	}
-//    in_buf[1] = *(inptr++);
-   	lilv_instance_run(self.instance, 1);
-  	*(outptr++) = out_buf[0];
-  	*(outptr++) = out_buf[1];
+      ++inptr;
+			lilv_instance_run(self.instance, 1);
+      for(size_t j = 0; j < self.n_audio_out; ++j) {
+        (*outptr) = out_buf[j];
+     	}
+      ++outptr;
     }
   }
 
