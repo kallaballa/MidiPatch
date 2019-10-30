@@ -5,7 +5,7 @@ ifeq ($(UNAME_S), Darwin)
 endif
 
 CXX      := g++
-CXXFLAGS := -pthread -fno-strict-aliasing -std=c++11 -pedantic -Wall
+CXXFLAGS := -pthread -fno-strict-aliasing -std=c++17 -pedantic -Wall
 LDFLAGS  := -L/opt/local/lib
 LIBS     := -lpthread -lm 
 .PHONY: all release debian-release info debug clean debian-clean distclean asan

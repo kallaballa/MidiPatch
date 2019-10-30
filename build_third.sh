@@ -10,5 +10,7 @@ cd build
 cmake ..
 make clean
 make -j8
-
-
+cd ../../uSockets-0.3.2
+make clean
+make -j8
+mv uSockets.a libuSockets.a
