@@ -77,7 +77,8 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 			}
 
 			std::vector<string> publicParameters = currentParams;
-
+			string parent;
+			string child;
 			for (auto& pv : poly.getVoices()) {
 				s = pv.synth;
 
@@ -85,8 +86,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 					const string& name = publicParameters[b1 - controlNumberOffset];
 
 					auto delim = name.find(".");
-					string parent;
-					string child;
+
 					if(delim != string::npos) {
 						parent = name.substr(0, delim);
 						child = name.substr(delim+1);
@@ -94,13 +94,14 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 						parent = "Global";
 						child = name;
 					}
-					if(lcd)
-						lcd->clear()
-							.print(0,0, parent)
-							.print(1,0,child + ": " + std::to_string(b2 / 127.0f));
 					s.setParameter(name, (float) b2 / 127.0);
 					std::cerr << name << ": " << (float)b2/127.0 << std::endl;
 				}
+
+				if(lcd)
+					lcd->clear()
+						.print(0,0, parent)
+						.print(1,0,child + ": " + std::to_string(b2 / 127.0f));
 			}
 		}
 	} else if (msgtype == 0xC0) {
