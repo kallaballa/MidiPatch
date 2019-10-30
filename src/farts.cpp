@@ -49,7 +49,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 		std::vector<string> commonParams;
 
 		//try to set a common parameter for all synths. NOTE: only works if all synthesizers have the same public parameters
-		if(current_program == 127 && !poly.getVoices().empty()) {
+		if(!poly.getVoices().empty()) {
 			Synth s;
 			std::vector<string> currentParams;
 			bool first = true;
@@ -81,8 +81,8 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 			for (auto& pv : poly.getVoices()) {
 				s = pv.synth;
 
-				if ((b1 - 52) < publicParameters.size()) {
-					const string& name = publicParameters[b1 - 52];
+				if ((b1 - controlNumberOffset) < publicParameters.size()) {
+					const string& name = publicParameters[b1 - controlNumberOffset];
 
 					auto delim = name.find(".");
 					string parent;
@@ -102,20 +102,6 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 					std::cerr << name << ": " << (float)b2/127.0 << std::endl;
 				}
 			}
-		} else if(current_program < poly.getVoices().size()) {
-			Synth s = poly.getVoices()[current_program].synth;
-			std::vector<string> publicParameters;
-			for(auto& cp : s.getParameters()) {
-				const string name = cp.getDisplayName();
-				if(!name.empty() && name.at(0) != '_') {
-					publicParameters.push_back(name);
-				}
-			}
-			if((b1 - 52) < publicParameters.size()) {
-				const string& name = publicParameters[b1 - 52];
-				std::cerr << name << ": " << (float)b2/127.0 << std::endl;
-				s.setParameter(name, (float)b2/127.0);
-			}
 		}
 	} else if (msgtype == 0xC0) {
 		std::cout << "MIDI Program change  C: " << chan << " P: " << b1 << std::endl;
@@ -131,8 +117,9 @@ int main(int argc, char ** argv) {
 	int audioIndex = 0;
   unsigned int sampleRate = 48000;
   unsigned int bufferFrames = 512;
-	std::vector<string> patchFiles;
+	string patchFile;
 	string ttyLCD;
+	size_t numVoices;
 	cxxopts::Options options(appName, "A scriptable, modular and real-time MIDI synthesizer");
 	options.add_options()
 					("h,help", "Print help messages")
@@ -142,7 +129,8 @@ int main(int argc, char ** argv) {
 				  ("b,buffer", "Number of frames per buffer.", cxxopts::value<unsigned int>(bufferFrames)->default_value("32"))
 				  ("l,lcd", "The tty file for the LCD display.", cxxopts::value<string>(ttyLCD))
 				  ("o,offset", "The control number offset for parameter mapping", cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
-				  ("p,patchFiles", "The list of lua patchFiles to use as voices", cxxopts::value<std::vector<string>>(patchFiles))
+				  ("v,voices", "The number of voices to run", cxxopts::value<size_t>(numVoices)->default_value("8"))
+					("p,patchFile", "The lua patchFile to use for the voices", cxxopts::value<string>(patchFile))
 					;
 
 	auto result = options.parse(argc, argv);
@@ -173,13 +161,13 @@ int main(int argc, char ** argv) {
 
 	// You don't necessarily have to do this - it will default to 44100 if not set.
 	Tonic::setSampleRate(sampleRate);
-	std::vector<Synth> s(patchFiles.size());
+	std::vector<Synth> s(numVoices);
+	if(lcd)
+		lcd->clear().print(0,0, "Loading: " + patchFile);
+	for (size_t i = 0; i < numVoices; ++i) {
 
-	for (size_t i = 0; i < patchFiles.size(); ++i) {
-		if(lcd)
-			lcd->clear().print(0,0, "Loading: " + patchFiles[i]);
 		state["synth"] = &s[i];
-		state.dofile(patchFiles[i]);
+		state.dofile(patchFile);
 		poly.addVoice(s[i]);
 	}
 
