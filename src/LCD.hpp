@@ -7,11 +7,6 @@
 
 class LCD {
 	std::ofstream ttyOut_;
-	char buffer0_[20];
-	char buffer1_[20];
-	char buffer2_[20];
-	char buffer3_[20];
-	char* buffers_[4] = {buffer0_, buffer1_, buffer2_, buffer3_};
 public:
 	LCD(const char* ttyPath) : ttyOut_(ttyPath) {
 		clear();
