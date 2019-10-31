@@ -63,6 +63,8 @@ Websocket::Websocket(PolySynth& synth, size_t port) : buffers_(4){
       		std::map<string, std::map<string, float>> hierachie;
       		for(size_t i = 0; i < params.size(); ++i) {
       		      const string& name = params[i].getName();
+      		      if(name.empty() || name.at(0) == '_')
+      		      	continue;
       		      string parent;
       		      string child;
       		      auto pos = name.find(".");
@@ -73,6 +75,7 @@ Websocket::Websocket(PolySynth& synth, size_t port) : buffers_(4){
       		      	parent = "Global";
       		      	child = name;
       		      }
+
       		      hierachie[parent].insert({child, params[i].getValue()});
       		}
 
