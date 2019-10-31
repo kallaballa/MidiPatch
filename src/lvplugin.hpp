@@ -143,7 +143,7 @@ namespace Tonic {
     std::vector<float> getControlDefaults() {
     	std::vector<float> defaults;
   	 	for (uint32_t p = 0, i = 0, o = 0; p < lilv_plugin_get_num_ports(plugin); ++p) {
-    		LilvNode*       sym   = lilv_port_get_symbol(plugin, self.ports[p].lilv_port);
+    		const LilvNode* sym = lilv_port_get_symbol(plugin, self.ports[p].lilv_port);
     		const char* symbol = lilv_node_as_string(sym);
     		const LilvPort* port  = lilv_plugin_get_port_by_symbol(plugin, sym);
     		LilvNode *min, *max, *def;
@@ -151,7 +151,6 @@ namespace Tonic {
   	 		if (self.ports[p].type == TYPE_CONTROL && !(ends_with(string(symbol), string("_in")) || ends_with(string(symbol), string("_out")) || ends_with(string(symbol), string("_outL"))|| ends_with(string(symbol), string("_outR")) || ends_with(string(symbol), string("_inL")) || ends_with(string(symbol), string("_inR")))) {
     			defaults.push_back(lilv_node_as_float(def));
     		}
-    		lilv_node_free(sym);
     		lilv_node_free(min);
     		lilv_node_free(max);
     		lilv_node_free(def);
