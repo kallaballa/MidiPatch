@@ -62,7 +62,7 @@ Websocket::Websocket(PolySynth& synth, size_t port) : buffers_(4){
       		auto params = synth.getParameters();
       		for(size_t i = 0; i < params.size(); ++i) {
       			ControlParameter& p = params[i];
-      			ss << '{ \"name\": "' << escape_json(p.getName()) << "\", \"value\": \"" << p.getValue() << "\" }";
+      			ss << "{ \"name\": \"" << escape_json(p.getName()) << "\", \"value\": \"" << p.getValue() << "\" }";
 
       			if(i < params.size() - 1)
         			ss << ',';
