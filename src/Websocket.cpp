@@ -60,6 +60,7 @@ Websocket::Websocket(PolySynth& synth, size_t port) : buffers_(4){
         	ss << "{ \"type\": \"control-list\", \"data\": [ ";
 
       		auto params = synth.getVoices()[0].synth.getParameters();
+      		std::vector<string> parents;
       		std::map<string, std::map<string, float>> hierachie;
       		for(size_t i = 0; i < params.size(); ++i) {
       		      const string& name = params[i].getName();
@@ -75,14 +76,16 @@ Websocket::Websocket(PolySynth& synth, size_t port) : buffers_(4){
       		      	parent = "Global";
       		      	child = name;
       		      }
-
+      		      if(std::find(parents.begin(), parents.end(), parent) == parents.end()) {
+      		      	parents.push_back(parent);
+      		      }
       		      hierachie[parent].insert({child, params[i].getValue()});
       		}
 
       		size_t i = 0;
-      		for(const auto& p : hierachie) {
-      			const string& module = p.first;
-      			const std::map<string,float>& children = p.second;
+      		for(const auto& parent : parents) {
+      			const string& module = parent;
+      			const std::map<string,float>& children = hierachie[parent];
       			ss << "{ \"name\": \"" << escape_json(module) << "\", \"controls\": [";
       			size_t j = 0;
       			for(const auto& child : children) {
