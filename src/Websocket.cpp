@@ -69,7 +69,7 @@ Websocket::Websocket(PolySynth& synth, size_t port) : buffers_(4){
       		      if(pos != string::npos && pos < name.size() - 1) {
       		      	parent = name.substr(0, pos);
       		      	child = name.substr(pos + 1);
-      		      } else {
+      		      } else if(!name.empty()){
       		      	parent = "Global";
       		      	child = name;
       		      }
