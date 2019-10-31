@@ -52,16 +52,21 @@ Websocket::Websocket(PolySynth& synth, size_t port) : buffers_(4){
       	std::cerr << "WS client connected" << std::endl;
       	clients.insert(ws);
       },
-      .message = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
+      .message = [&](auto *ws, std::string_view message, uWS::OpCode opCode) {
       	json msg = json::parse(std::string(message));
       	std::string type = msg["type"];
       	std::ostringstream ss;
       	ss << "{ \"type\": \"control-list\", \"data\": [ ";
       	if(type == "list-controls") {
-      		for(const ControlParameter& p : synth.getParameters()) {
-      			std::string name = p.getName();
-      			ss << '"' << escape_json(name) << "\",";
+      		auto params = synth.getParameters();
+      		for(size_t i = 0; i < params.size(); ++i) {
+      			ControlParameter& p = params[i];
+      			ss << '{ \"name\": "' << escape_json(p.getName()) << "\", \"value\": \"" << p.getValue() << "\" }";
+
+      			if(i < params.size() - 1)
+        			ss << ',';
       		}
+
       		ss << "]}";
       		ws->send(ss.str(), uWS::TEXT);
       	}

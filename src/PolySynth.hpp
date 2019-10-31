@@ -1,10 +1,4 @@
-//
-//  PolySynth.cpp
-//  PolyMIDIDemo
-//
-//  Created by Michael Dewberry on 6/7/13.
-//
-//
+#pragma once
 
 #include "Tonic.h"
 

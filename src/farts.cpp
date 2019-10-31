@@ -24,7 +24,7 @@ static PolySynth poly;
 uint8_t current_program = 127;
 size_t controlNumberOffset = 0;
 LCD* lcd = nullptr;
-static farts::Websocket* websocket = new farts::Websocket(8080);
+static farts::Websocket* websocket;
 
 inline void ui_print(const uint8_t& col, const uint8_t& row, const string& s) {
 	if(lcd)
@@ -41,7 +41,8 @@ inline void ui_clear() {
 }
 
 inline void ui_flush() {
-	websocket->flush();
+	if(websocket)
+		websocket->flush();
 }
 
 int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime,
@@ -193,6 +194,7 @@ int main(int argc, char ** argv) {
 		poly.addVoice(s[i]);
 	}
 
+	websocket = new farts::Websocket(poly,8080);
 	//add a slight ADSR to prevent clicking
 	synth.setOutputGen(poly);
 
