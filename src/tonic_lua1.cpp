@@ -124,6 +124,7 @@ void bindings1(kaguya::State& state) {
 			.setConstructors<LV2Effect(const char*)>()
 			.addFunction("setControl", &LV2Effect::setControl)
 			.addFunction("getControlNames", &LV2Effect::getControlNames)
+			.addFunction("getControlDefaults", &LV2Effect::getControlDefaults)
 					));
 
 	state["BitCrusher"].setClass(make_effect(state,
