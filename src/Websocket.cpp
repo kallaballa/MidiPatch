@@ -61,7 +61,7 @@ Websocket::Websocket(PolySynth& synth, size_t port) : buffers_(4){
 
       		auto params = synth.getVoices()[0].synth.getParameters();
       		std::vector<string> parents;
-      		std::map<string, std::map<string, float>> hierachie;
+      		std::map<string, std::vector<std::pair<string, float>>> hierachie;
       		for(size_t i = 0; i < params.size(); ++i) {
       		      const string& name = params[i].getName();
       		      if(name.empty() || name.at(0) == '_')
@@ -79,13 +79,13 @@ Websocket::Websocket(PolySynth& synth, size_t port) : buffers_(4){
       		      if(std::find(parents.begin(), parents.end(), parent) == parents.end()) {
       		      	parents.push_back(parent);
       		      }
-      		      hierachie[parent].insert({child, params[i].getValue()});
+      		      hierachie[parent].push_back({child, params[i].getValue()});
       		}
 
       		size_t i = 0;
       		for(const auto& parent : parents) {
       			const string& module = parent;
-      			const std::map<string,float>& children = hierachie[parent];
+      			const std::vector<std::pair<string,float>>& children = hierachie[parent];
       			ss << "{ \"name\": \"" << escape_json(module) << "\", \"controls\": [";
       			size_t j = 0;
       			for(const auto& child : children) {
