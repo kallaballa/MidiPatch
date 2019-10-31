@@ -60,14 +60,40 @@ Websocket::Websocket(PolySynth& synth, size_t port) : buffers_(4){
         	ss << "{ \"type\": \"control-list\", \"data\": [ ";
 
       		auto params = synth.getVoices()[0].synth.getParameters();
+      		std::map<string, std::map<string, float>> hierachie;
       		for(size_t i = 0; i < params.size(); ++i) {
-      			ControlParameter& p = params[i];
-      			ss << "{ \"name\": \"" << escape_json(p.getName()) << "\", \"value\": \"" << p.getValue() << "\" }";
-
-      			if(i < params.size() - 1)
-        			ss << ',';
+      		      const string& name = params[i].getName();
+      		      string parent;
+      		      string child;
+      		      auto pos = name.find(".");
+      		      if(pos != string::npos && pos < name.size() - 1) {
+      		      	parent = name.substr(0, pos);
+      		      	child = name.substr(pos + 1);
+      		      } else {
+      		      	parent = "Global";
+      		      	child = name;
+      		      }
+      		      hierachie[parent].insert({child, params[i].getValue()});
       		}
 
+      		size_t i = 0;
+      		for(const auto& p : hierachie) {
+      			const string& module = p.first;
+      			const std::map<string,float>& children = p.second;
+      			ss << "{ \"name\": \"" << escape_json(module) << "\", \"controls\": [";
+      			size_t j = 0;
+      			for(const auto& child : children) {
+      				ss << "{ \"name\" :\"" << escape_json(child.first) << "\", \"value\": \"" << child.second << "\" }";
+      				if(j < children.size() - 1)
+      					ss << ',';
+
+      				++j;
+      			}
+      			ss << "]}";
+     				if(i < hierachie.size() - 1)
+        					ss << ',';
+      			++i;
+      		}
       		ss << "]}";
       		ws->send(ss.str(), uWS::TEXT);
       	} else if(type == "set-control") {
