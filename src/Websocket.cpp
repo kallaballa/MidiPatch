@@ -24,7 +24,6 @@ Websocket::Websocket(size_t port) : buffers_(4){
       	std::scoped_lock lock(mutex_);
       	std::cerr << "WS client connected" << std::endl;
       	clients.insert(ws);
-      	ws->subscribe("broadcast");
       },
       .message = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
 
@@ -81,10 +80,10 @@ void Websocket::print(const uint8_t& col, const uint8_t& row, const std::string&
 
 void Websocket::flush() {
 	std::scoped_lock lock(mutex_);
-	if(!clients.empty()) {
-		std::ostringstream ss;
-		ss << buffers_[0] << buffers_[1] << buffers_[2] << buffers_[3];
-		(*clients.begin())->publish("broadcast", ss.str(), uWS::TEXT);
+	std::ostringstream ss;
+	ss << buffers_[0] << buffers_[1] << buffers_[2] << buffers_[3];
+	for(auto& client: clients) {
+		client->send(ss.str(), uWS::TEXT);
 	}
 }
 } /* namespace farts */
