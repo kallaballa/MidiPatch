@@ -59,13 +59,13 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 		b2 = (*msg)[2];
 
 	if (msgtype == 0x80 || (msgtype == 0x90 && b2 == 0)) {
-		std::cout << "MIDI Note OFF  C: " << chan << " N: " << b1 << std::endl;
+//		std::cout << "MIDI Note OFF  C: " << chan << " N: " << b1 << std::endl;
 		poly.noteOff(b1);
 	} else if (msgtype == 0x90) {
-		std::cout << "MIDI Note ON   C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
+//		std::cout << "MIDI Note ON   C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
 		poly.noteOn(b1, b2);
 	} 	else if (msgtype == 0xB0) {
-		std::cout << "MIDI CC ON     C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
+//		std::cout << "MIDI CC ON     C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
 		std::vector<string> commonParams;
 
 		//try to set a common parameter for all synths. NOTE: only works if all synthesizers have the same public parameters
@@ -115,7 +115,6 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 						child = name;
 					}
 					s.setParameter(name, (float) b2 / 127.0);
-					std::cerr << name << ": " << (float)b2/127.0 << std::endl;
 				}
 
 					ui_clear();
@@ -125,7 +124,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 			}
 		}
 	} else if (msgtype == 0xC0) {
-		std::cout << "MIDI Program change  C: " << chan << " P: " << b1 << std::endl;
+//		std::cout << "MIDI Program change  C: " << chan << " P: " << b1 << std::endl;
 		current_program = b1;
 	}
 
@@ -221,7 +220,7 @@ int main(int argc, char ** argv) {
 	while(true) { sleep(10); };		
 dac.stopStream();
 	} catch (RtError& e) {
-		std::cout << '\n' << e.getMessage() << '\n' << std::endl;
+		std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
 		cin.get();
 		exit(0);
 	}
