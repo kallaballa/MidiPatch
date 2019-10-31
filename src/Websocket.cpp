@@ -160,7 +160,17 @@ void Websocket::print(const uint8_t& col, const uint8_t& row, const std::string&
 void Websocket::updateParameter(const string& name, const float& value) {
 	std::scoped_lock lock(mutex_);
 	std::ostringstream ss;
-	ss << "{ \"type\": \"update-control\", \"data\": { \"name\": \"" << escape_json(name) <<  "\", \"value\": \"" << value << "\"} }";
+  string parent;
+  string child;
+  auto pos = name.find(".");
+  if(pos != string::npos && pos < name.size() - 1) {
+  	parent = name.substr(0, pos);
+  	child = name.substr(pos + 1);
+  } else if(!name.empty()){
+  	parent = "Global";
+  	child = name;
+  }
+	ss << "{ \"type\": \"update-control\", \"data\": { \"parent\": \"" << escape_json(parent) <<  "\", \"child\": \"" << escape_json(child) <<  "\", \"value\": \"" << value << "\"} }";
 	for(auto& client: clients) {
 		client->send(ss.str(), uWS::TEXT);
 	}
