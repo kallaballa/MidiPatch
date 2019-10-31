@@ -28,6 +28,7 @@ public:
 	void clear();
 	void print(const uint8_t& col, const uint8_t& row, const std::string& s);
 	void flush();
+	void updateParameter(const string& name, const float& value);
 };
 
 } /* namespace farts */

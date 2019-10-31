@@ -157,7 +157,14 @@ void Websocket::print(const uint8_t& col, const uint8_t& row, const std::string&
 	buffers_[row] = ss.str();
 }
 
-
+void Websocket::updateParameter(const string& name, const float& value) {
+	std::scoped_lock lock(mutex_);
+	std::ostringstream ss;
+	ss << "{ \"type\": \"update-control\", \"data\": { \"name\": \"" << escape_json(name) <<  "\", \"value\": \"" << value << "\"} }";
+	for(auto& client: clients) {
+		client->send(ss.str(), uWS::TEXT);
+	}
+}
 void Websocket::flush() {
 	std::scoped_lock lock(mutex_);
 	std::ostringstream ss;

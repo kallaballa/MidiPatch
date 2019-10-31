@@ -116,6 +116,8 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 						child = name;
 					}
 					s.setParameter(name, (float) b2 / 127.0);
+					if(websocket)
+						websocket->updateParameter(name, (float) b2 / 127.0);
 				}
 
 					ui_clear();
