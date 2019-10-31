@@ -108,6 +108,13 @@ Websocket::Websocket(PolySynth& synth, size_t port) : buffers_(4){
       		for(auto& voice : synth.getVoices()) {
       			voice.synth.setParameter(name, value);
       		}
+      	} else if(type == "note-on") {
+      		size_t note = msg["note"].get<size_t>();
+      		size_t velocity = msg["velocity"].get<size_t>();
+      		synth.noteOn(note,velocity);
+      	} else if(type == "note-off") {
+      		size_t note = msg["note"].get<size_t>();
+      		synth.noteOff(note);
       	}
       },
       .drain = [](auto *ws) {
