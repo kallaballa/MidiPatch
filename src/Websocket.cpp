@@ -3,6 +3,10 @@
 #include <thread>
 #include <mutex>
 #include <iomanip>
+#include "nlohmann/json.hpp"
+
+// for convenience
+using json = nlohmann::json;
 
 namespace farts {
 
@@ -29,7 +33,7 @@ std::string escape_json(const std::string &s) {
     return o.str();
 }
 
-Websocket::Websocket(size_t port) : buffers_(4){
+Websocket::Websocket(PolySynth& synth, size_t port) : buffers_(4){
   struct PerSocketData {
 
   };
@@ -49,7 +53,18 @@ Websocket::Websocket(size_t port) : buffers_(4){
       	clients.insert(ws);
       },
       .message = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
-
+      	json msg = json::parse(std::string(message));
+      	std::string type = msg["type"];
+      	std::ostringstream ss;
+      	ss << "{ \"type\": \"control-list\", \"data\": [ ";
+      	if(type == "list-controls") {
+      		for(const ControlParameter& p : synth.getParameters()) {
+      			std::string name = p.getName();
+      			ss << '"' << escape_json(name) << "\",";
+      		}
+      		ss << "]}";
+      		ws->send(ss.str(), uWS::TEXT);
+      	}
       },
       .drain = [](auto *ws) {
           /* Check getBufferedAmount here */

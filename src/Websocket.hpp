@@ -14,6 +14,7 @@
 #include <set>
 #include <mutex>
 #include "App.h"
+#include "PolySynth.hpp"
 
 namespace farts {
 
@@ -22,7 +23,7 @@ class Websocket {
 	std::vector<std::string> buffers_;
 	std::mutex mutex_;
 public:
-	Websocket(size_t port);
+	Websocket(PolySynth& synth, size_t port);
 	virtual ~Websocket();
 	void clear();
 	void print(const uint8_t& col, const uint8_t& row, const std::string& s);
