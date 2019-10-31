@@ -194,9 +194,9 @@ int main(int argc, char ** argv) {
 		poly.addVoice(s[i]);
 	}
 
-	websocket = new farts::Websocket(poly,8080);
 	//add a slight ADSR to prevent clicking
 	synth.setOutputGen(poly);
+	websocket = new farts::Websocket(poly,8080);
 
 	// open rtaudio stream and rtmidi port
 	try {

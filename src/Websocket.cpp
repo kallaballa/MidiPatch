@@ -59,7 +59,7 @@ Websocket::Websocket(PolySynth& synth, size_t port) : buffers_(4){
         	std::ostringstream ss;
         	ss << "{ \"type\": \"control-list\", \"data\": [ ";
 
-      		auto params = synth.getParameters();
+      		auto params = synth.getVoices()[0].synth.getParameters();
       		for(size_t i = 0; i < params.size(); ++i) {
       			ControlParameter& p = params[i];
       			ss << "{ \"name\": \"" << escape_json(p.getName()) << "\", \"value\": \"" << p.getValue() << "\" }";
