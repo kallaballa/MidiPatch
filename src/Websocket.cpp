@@ -70,6 +70,12 @@ Websocket::Websocket(PolySynth& synth, size_t port) : buffers_(4){
 
       		ss << "]}";
       		ws->send(ss.str(), uWS::TEXT);
+      	} else if(type == "set-control") {
+      		string name = msg["name"];
+      		float value = msg["value"].get<float>();
+      		for(auto& voice : synth.getVoices()) {
+      			voice.synth.setParameter(name, value);
+      		}
       	}
       },
       .drain = [](auto *ws) {
