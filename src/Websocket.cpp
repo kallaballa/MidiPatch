@@ -81,7 +81,7 @@ void Websocket::print(const uint8_t& col, const uint8_t& row, const std::string&
 void Websocket::flush() {
 	std::scoped_lock lock(mutex_);
 	std::ostringstream ss;
-	ss << buffers_[0] << buffers_[1] << buffers_[2] << buffers_[3];
+	ss << "{ type: 'display', data: '" << buffers_[0] << buffers_[1] << buffers_[2] << buffers_[3] << "'}";
 	for(auto& client: clients) {
 		client->send(ss.str(), uWS::TEXT);
 	}
