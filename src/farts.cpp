@@ -137,6 +137,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 }
 
 void save_parameters () {
+	std::cerr << "saving..." << std::endl;
 	auto params = poly.getVoices()[0].synth.getParameters();
 	ofstream ofs(save_file);
 	for(auto& p : params) {
