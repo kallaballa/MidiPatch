@@ -243,6 +243,8 @@ int main(int argc, char ** argv) {
 
 	load_parameters();
 	signal(SIGINT, signalHandler);
+	signal(SIGTERM, signalHandler);
+	signal(SIGKILL, signalHandler);
 	std::atexit(save_parameters);
 
 	//add a slight ADSR to prevent clicking
