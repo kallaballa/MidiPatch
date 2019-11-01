@@ -163,7 +163,7 @@ void load_parameters () {
 		for(auto& p : params) {
 			auto it = loadMap.find(p.getName());
 			if(it != loadMap.end()) {
-				synth.setParameter(p.getName(), (*it).second);
+				synth.addParameter(p.getName(), (*it).second);
 			}
 		}
 	}
