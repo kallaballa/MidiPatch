@@ -136,7 +136,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 }
 
 void save_parameters () {
-	auto& params = poly.getVoices()[0].synth.getParameters();
+	auto params = poly.getVoices()[0].synth.getParameters();
 	ofstream ofs("farts.save");
 	for(auto& p : params) {
 		ofs << p.getName() << (char)0 << std::to_string(p.getValue()) << (char)0;
@@ -154,7 +154,7 @@ void load_parameters () {
 	}
 
 	for(auto& v : poly.getVoices()) {
-		auto& params = v.synth.getParameters();
+		auto params = v.synth.getParameters();
 
 		for(auto& p : params) {
 			auto it = loadMap.find(p.getName());
