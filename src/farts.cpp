@@ -155,6 +155,7 @@ void load_parameters () {
 	std::map<string, float> loadMap;
 	while(ifs.getline(buf0, 1024, (char)0) && ifs.getline(buf1, 1024, (char)0)) {
 		loadMap[string(buf0)] = std::stof(string(buf1));
+		std::cerr << string(buf0) << ": " << string(buf1) << std::endl;
 	}
 
 	for(auto& v : poly.getVoices()) {
@@ -246,7 +247,6 @@ int main(int argc, char ** argv) {
 	signal(SIGINT, signalHandler);
 	signal(SIGTERM, signalHandler);
 	signal(SIGKILL, signalHandler);
-	std::atexit(save_parameters);
 
 	//add a slight ADSR to prevent clicking
 	synth.setOutputGen(poly);
