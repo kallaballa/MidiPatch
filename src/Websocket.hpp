@@ -22,13 +22,18 @@ class Websocket {
 	std::set<uWS::WebSocket<false, true>*> clients;
 	std::vector<std::string> buffers_;
 	std::mutex mutex_;
+	bool audioStreamEnabled_ = false;
 public:
-	Websocket(PolySynth& synth, size_t port);
+	Websocket(PolySynth& poly, size_t port);
 	virtual ~Websocket();
 	void clear();
 	void print(const uint8_t& col, const uint8_t& row, const std::string& s);
 	void flush();
+	void sendAudio(float* audioBuffer, size_t len);
 	void updateParameter(const string& name, const float& value);
+	bool isAudioStreamEnabled() {
+		return audioStreamEnabled_;
+	}
 };
 
 } /* namespace farts */

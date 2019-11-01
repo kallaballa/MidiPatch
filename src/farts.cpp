@@ -52,6 +52,9 @@ inline void ui_flush() {
 int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime,
 		RtAudioStreamStatus status, void *userData) {
 	synth.fillBufferOfFloats((float*) outputBuffer, nBufferFrames, nChannels);
+	if(websocket && websocket->isAudioStreamEnabled()) {
+		websocket->sendAudio((float*)outputBuffer, nBufferFrames * nChannels);
+	}
 	return 0;
 }
 
@@ -138,7 +141,6 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 }
 
 void save_parameters () {
-	std::cerr << "saving parameters..." << std::endl;
 	auto params = poly.getVoices()[0].synth.getParameters();
 	ofstream ofs(save_file);
 	for(auto& p : params) {
@@ -147,7 +149,6 @@ void save_parameters () {
 }
 
 void load_parameters () {
-	std::cerr << "loading parameters..." << std::endl;
 	ifstream ifs(save_file);
 	char buf0[1024];
 	char buf1[1024];
@@ -155,7 +156,6 @@ void load_parameters () {
 	std::map<string, float> loadMap;
 	while(ifs.getline(buf0, 1024, (char)0) && ifs.getline(buf1, 1024, (char)0)) {
 		loadMap[string(buf0)] = std::stof(string(buf1));
-		std::cerr << string(buf0) << ": " << string(buf1) << std::endl;
 	}
 
 	for(auto& v : poly.getVoices()) {
