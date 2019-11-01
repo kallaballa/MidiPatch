@@ -1,6 +1,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <fstream>
+#include <csignal>
 
 #include "Tonic.h"
 #include "kaguya/kaguya.hpp"
@@ -167,6 +168,11 @@ void load_parameters () {
 	}
 }
 
+void signalHandler( int signum ) {
+	save_parameters();
+	exit(signum);
+}
+
 int main(int argc, char ** argv) {
 	std::string appName = argv[0];
 	int midiIndex = 0;
@@ -236,6 +242,7 @@ int main(int argc, char ** argv) {
 	}
 
 	load_parameters();
+	signal(SIGINT, signalHandler);
 	std::atexit(save_parameters);
 
 	//add a slight ADSR to prevent clicking
