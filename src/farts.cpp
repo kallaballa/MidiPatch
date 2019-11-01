@@ -27,6 +27,7 @@ uint8_t current_program = 127;
 size_t controlNumberOffset = 0;
 LCD* lcd = nullptr;
 static farts::Websocket* websocket;
+string save_file;
 
 inline void ui_print(const uint8_t& col, const uint8_t& row, const string& s) {
 	if(lcd)
@@ -137,14 +138,14 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 
 void save_parameters () {
 	auto params = poly.getVoices()[0].synth.getParameters();
-	ofstream ofs("farts.save");
+	ofstream ofs(save_file);
 	for(auto& p : params) {
 		ofs << p.getName() << (char)0 << std::to_string(p.getValue()) << (char)0;
 	}
 }
 
 void load_parameters () {
-	ifstream ifs("farts.save");
+	ifstream ifs(save_file);
 	char buf0[1024];
 	char buf1[1024];
 
@@ -173,6 +174,7 @@ int main(int argc, char ** argv) {
   unsigned int bufferFrames = 512;
 	string patchFile;
 	string ttyLCD;
+	string saveFile;
 	size_t numVoices;
 	cxxopts::Options options(appName, "A scriptable, modular and real-time MIDI synthesizer");
 	options.add_options()
@@ -184,6 +186,7 @@ int main(int argc, char ** argv) {
 				  ("l,lcd", "The tty file for the LCD display.", cxxopts::value<string>(ttyLCD))
 				  ("o,offset", "The control number offset for parameter mapping", cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
 				  ("v,voices", "The number of voices to run", cxxopts::value<size_t>(numVoices)->default_value("8"))
+					("s,save", "The file where current patch settings are stored", cxxopts::value<string>(saveFile)->default_value("/tmp/farts.save"))
 					("p,patchFile", "The lua patchFile to use for the voices", cxxopts::value<string>(patchFile))
 					;
 
@@ -197,6 +200,10 @@ int main(int argc, char ** argv) {
 	if(!ttyLCD.empty()) {
 		std::cerr << "Enabling LCD on " << ttyLCD << std::endl;
 		lcd = new LCD(ttyLCD.c_str());
+	}
+
+	if(!saveFile.empty()) {
+		save_file = saveFile;
 	}
 
 	ui_clear();
