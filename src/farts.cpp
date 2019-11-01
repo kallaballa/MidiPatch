@@ -1,7 +1,9 @@
-#include "Tonic.h"
-#include "kaguya/kaguya.hpp"
 #include <iostream>
 #include <unistd.h>
+#include <fstream>
+
+#include "Tonic.h"
+#include "kaguya/kaguya.hpp"
 #include "cxxopts.hpp"
 #include "RtAudio.h"
 
@@ -133,6 +135,35 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 
 }
 
+void save_parameters () {
+	auto& params = poly.getVoices()[0].synth.getParameters();
+	ofstream ofs("farts.save");
+	for(auto& p : params) {
+		ofs << p.getName() << (char)0 << std::to_string(p.getValue()) << (char)0;
+	}
+}
+
+void load_parameters () {
+	ifstream ifs("farts.save");
+	char buf0[1024];
+	char buf1[1024];
+
+	std::map<string, float> loadMap;
+	while(ifs.getline(buf0, 1024, (char)0) && ifs.getline(buf1, 1024, (char)0)) {
+		loadMap[string(buf0)] = std::stof(string(buf1));
+	}
+
+	for(auto& v : poly.getVoices()) {
+		auto& params = v.synth.getParameters();
+
+		for(auto& p : params) {
+			auto it = loadMap.find(p.getName());
+			if(it != loadMap.end()) {
+				synth.setParameter(p.getName(), (*it).second);
+			}
+		}
+	}
+}
 
 int main(int argc, char ** argv) {
 	std::string appName = argv[0];
@@ -195,6 +226,9 @@ int main(int argc, char ** argv) {
 		state.dofile(patchFile);
 		poly.addVoice(s[i]);
 	}
+
+	load_parameters();
+	std::atexit(save_parameters);
 
 	//add a slight ADSR to prevent clicking
 	synth.setOutputGen(poly);
