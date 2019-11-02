@@ -61,11 +61,11 @@ int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFr
   size_t lenBuf = nBufferFrames * nChannels;
 	std::vector<int16_t> samples(lenBuf,0);
 
-		for(size_t i = 0; i < lenBuf; ++i) {
-				samples[i] = ((((float*)outputBuffer)[i] * 2.0) - 1.0) * std::numeric_limits<int16_t>::max();
-		}
-		if(udp)
-			udp->send(samples);
+	for (size_t i = 0; i < lenBuf; ++i) {
+		samples[i] = ((((float*) outputBuffer)[i] * 2.0) - 1.0) * std::numeric_limits<int16_t>::max();
+	}
+	if (udp)
+		udp->send(samples);
 //		if(websocket)
 //			websocket->sendAudio(samples.data(), lenBuf);
 	return 0;
