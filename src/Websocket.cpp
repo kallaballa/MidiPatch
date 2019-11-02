@@ -301,9 +301,10 @@ void Websocket::updateParameter(const string& name, const float& value) {
 		client->send(ss.str(), uWS::TEXT);
 	}
 }
-void Websocket::sendAudio(float* audioBuffer, size_t len) {
+
+void Websocket::sendAudio(int16_t* audioBuffer, size_t len) {
 	std::scoped_lock lock(mutex_);
-	string data = base64_encode((const unsigned char*)audioBuffer, sizeof(float) * len);
+	string data = base64_encode((const unsigned char*)audioBuffer, sizeof(int16_t) * len);
 	std::ostringstream ss;
 	ss << "{ \"type\": \"audio-buffer\", \"data\": \"" << data <<  "\"}";
 	for(auto& client: clients) {

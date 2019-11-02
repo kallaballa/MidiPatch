@@ -66,6 +66,8 @@ int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFr
 		}
 		if(udp)
 			udp->send(samples);
+		if(websocket)
+			websocket->sendAudio(samples.data(), lenBuf);
 	return 0;
 }
 
