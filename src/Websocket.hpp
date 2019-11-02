@@ -24,7 +24,7 @@ class Websocket {
 	std::mutex mutex_;
 	bool audioStreamEnabled_ = false;
 public:
-	Websocket(PolySynth& poly, size_t port);
+	Websocket(Synth& synth, PolySynth& poly, size_t port, const unsigned int& channels, const unsigned int& bufferFrames);
 	virtual ~Websocket();
 	void clear();
 	void print(const uint8_t& col, const uint8_t& row, const std::string& s);

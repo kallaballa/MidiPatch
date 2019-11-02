@@ -2,6 +2,10 @@
 #include <unistd.h>
 #include <fstream>
 #include <csignal>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
 #include "Tonic.h"
 #include "kaguya/kaguya.hpp"
@@ -15,6 +19,7 @@
 #include "PolySynth.hpp"
 #include "LCD.hpp"
 #include "Websocket.hpp"
+#include "UDP.hpp"
 
 using namespace Tonic;
 
@@ -28,6 +33,7 @@ uint8_t current_program = 127;
 size_t controlNumberOffset = 0;
 LCD* lcd = nullptr;
 static farts::Websocket* websocket;
+static farts::UDP* udp;
 string save_file;
 
 inline void ui_print(const uint8_t& col, const uint8_t& row, const string& s) {
@@ -52,9 +58,14 @@ inline void ui_flush() {
 int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime,
 		RtAudioStreamStatus status, void *userData) {
 	synth.fillBufferOfFloats((float*) outputBuffer, nBufferFrames, nChannels);
-	if(websocket && websocket->isAudioStreamEnabled()) {
-		websocket->sendAudio((float*)outputBuffer, nBufferFrames * nChannels);
-	}
+  size_t lenBuf = nBufferFrames * nChannels;
+	std::vector<int16_t> samples(lenBuf,0);
+
+		for(size_t i = 0; i < lenBuf; ++i) {
+				samples[i] = ((((float*)outputBuffer)[i] * 2.0) - 1.0) * std::numeric_limits<int16_t>::max();
+		}
+		if(udp)
+			udp->send(samples);
 	return 0;
 }
 
@@ -250,8 +261,8 @@ int main(int argc, char ** argv) {
 
 	//add a slight ADSR to prevent clicking
 	synth.setOutputGen(poly);
-	websocket = new farts::Websocket(poly,8080);
-
+	websocket = new farts::Websocket(synth, poly,8080, nChannels, bufferFrames);
+	udp = new farts::UDP(8000);
 	// open rtaudio stream and rtmidi port
 	try {
 		if (midiIn->getPortCount() == 0) {

@@ -5,6 +5,8 @@
 #include <iomanip>
 #include "nlohmann/json.hpp"
 #include <iostream>
+#include <fstream>
+
 
 // for convenience
 using json = nlohmann::json;
@@ -123,7 +125,7 @@ std::string escape_json(const std::string &s) {
     return o.str();
 }
 
-Websocket::Websocket(PolySynth& poly, size_t port) : buffers_(4){
+Websocket::Websocket(Synth& synth, PolySynth& poly, size_t port, const unsigned int& channels, const unsigned int& bufferFrames) : buffers_(4){
   struct PerSocketData {
 
   };
@@ -131,7 +133,28 @@ Websocket::Websocket(PolySynth& poly, size_t port) : buffers_(4){
   std::thread t([&]() {
   /* Very simple WebSocket echo server */
   uWS::App()
-  		.ws<PerSocketData>("/*", {
+  		.get("/hello", [&](auto *res, auto *req) {
+					size_t len = bufferFrames * channels;
+					unsigned int bf = bufferFrames;
+					unsigned int cn = channels;
+					std::vector<float> buffer(len,0);
+					std::vector<int16_t> sample(len,0);
+//  				std::ifstream ifs("test.wav");
+      		res->writeHeader("Content-Type", "audio/wav");
+//      		char header[1024];
+//      		ifs.read(header, 1024);
+//    			res->write(std::string_view(header, 1024));
+
+      		while(true) {
+      			synth.fillBufferOfFloats(buffer.data(), bf, cn);
+
+      			for(size_t i = 0; i < bufferFrames * channels; ++i) {
+      					sample[i] = ((buffer[i] * 2.0) - 1.0) * std::numeric_limits<int16_t>().max();
+      			}
+
+      			res->write(std::string_view((char*)sample.data(), bufferFrames * channels * sizeof(int16_t)));
+      		}
+    		}).ws<PerSocketData>("/*", {
       /* Settings */
       .compression = uWS::SHARED_COMPRESSOR,
       .maxPayloadLength = 16 * 1024,
