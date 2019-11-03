@@ -13,25 +13,45 @@
 #include <string>
 #include <set>
 #include <memory>
+#include <iomanip>
 #include <mutex>
 #include "App.h"
 #include "PolySynth.hpp"
 
+std::string escape_json(const std::string &s);
+
 namespace farts {
 
 class Websocket {
-	PolySynth& poly_;
 	us_listen_socket_t* socket_;
 	std::set<uWS::WebSocket<false, true>*> clients_;
 	std::vector<std::string> buffers_;
 	std::mutex mutex_;
 	bool audioStreamEnabled_ = false;
 	bool restart_ = false;
+	std::function<void(string, float)> setControlCallback_;
+	std::function<void(size_t, size_t)> noteOnCallback_;
+	std::function<void(size_t)> noteOffCallback_;
+	std::function<string()> sendControlListCallback_;
 
 public:
-	Websocket(PolySynth& poly, size_t port, const string& logFile, const string& bankFile);
+	Websocket(size_t port, const string& logFile, const string& bankFile);
 	virtual ~Websocket();
-	void sendControlList();
+	void setSendControlListCallback_(std::function<string()> callback) {
+		sendControlListCallback_ = callback;
+	}
+
+	void setSetControlCallback(std::function<void(string, float)> callback) {
+		setControlCallback_ = callback;
+	}
+
+	void setNoteOnCallback(std::function<void(size_t, size_t)> callback) {
+		noteOnCallback_ = callback;
+	}
+
+	void setNoteOffCallback(std::function<void(size_t)> callback) {
+		noteOffCallback_ = callback;
+	}
 	void clear();
 	void print(const uint8_t& col, const uint8_t& row, const std::string& s);
 	void flush();
@@ -42,8 +62,14 @@ public:
 	}
 
 	bool isRestartRequested() {
-			return restart_;
-		}
+		return restart_;
+	}
+
+	void reset() {
+		audioStreamEnabled_ = false;
+		restart_ = false;
+	}
+	void sendControlList();
 };
 
 } /* namespace farts */

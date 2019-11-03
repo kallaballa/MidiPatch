@@ -10,6 +10,42 @@
 extern char _binary_index_min_pack_start;
 extern char _binary_index_min_pack_end;
 
+std::string escape_json(const std::string &s) {
+	std::ostringstream o;
+	for (auto c = s.cbegin(); c != s.cend(); c++) {
+		switch (*c) {
+		case '"':
+			o << "\\\"";
+			break;
+		case '\\':
+			o << "\\\\";
+			break;
+		case '\b':
+			o << "\\b";
+			break;
+		case '\f':
+			o << "\\f";
+			break;
+		case '\n':
+			o << "\\n";
+			break;
+		case '\r':
+			o << "\\r";
+			break;
+		case '\t':
+			o << "\\t";
+			break;
+		default:
+			if ('\x00' <= *c && *c <= '\x1f') {
+				o << "\\u" << std::hex << std::setw(4) << std::setfill('0') << (int) *c;
+			} else {
+				o << *c;
+			}
+		}
+	}
+	return o.str();
+}
+
 // for convenience
 using json = nlohmann::json;
 
@@ -124,44 +160,10 @@ std::string base64_decode(std::string const& encoded_string) {
 	return ret;
 }
 
-std::string escape_json(const std::string &s) {
-	std::ostringstream o;
-	for (auto c = s.cbegin(); c != s.cend(); c++) {
-		switch (*c) {
-		case '"':
-			o << "\\\"";
-			break;
-		case '\\':
-			o << "\\\\";
-			break;
-		case '\b':
-			o << "\\b";
-			break;
-		case '\f':
-			o << "\\f";
-			break;
-		case '\n':
-			o << "\\n";
-			break;
-		case '\r':
-			o << "\\r";
-			break;
-		case '\t':
-			o << "\\t";
-			break;
-		default:
-			if ('\x00' <= *c && *c <= '\x1f') {
-				o << "\\u" << std::hex << std::setw(4) << std::setfill('0') << (int) *c;
-			} else {
-				o << *c;
-			}
-		}
-	}
-	return o.str();
-}
 
-Websocket::Websocket(PolySynth& poly, size_t port, const string& logFile, const string& patchFile) :
-		poly_(poly), buffers_(4) {
+
+Websocket::Websocket(size_t port, const string& logFile, const string& patchFile) :
+		buffers_(4) {
 	struct PerSocketData {
 
 	};
@@ -171,7 +173,6 @@ Websocket::Websocket(PolySynth& poly, size_t port, const string& logFile, const 
 					res->writeHeader("Content-Type", "text/html");
 					char* start = &_binary_index_min_pack_start;
 					char* end = &_binary_index_min_pack_end;
-					std::cerr << (size_t) start << " -> " << (size_t)end << std::endl;
 					char* p = start;
 					std::ostringstream ss;
 					while(p != end) {
@@ -234,7 +235,12 @@ Websocket::Websocket(PolySynth& poly, size_t port, const string& logFile, const 
 						std::scoped_lock lock(mutex_);
 						std::cerr << "WS client connected" << std::endl;
 						clients_.insert(ws);
-						sendControlList();
+						if(sendControlListCallback_) {
+							string list = sendControlListCallback_();
+							for (auto& client : clients_) {
+								client->send(list, uWS::TEXT);
+							}
+						}
 					},
 					.message = [&](auto *ws, std::string_view message, uWS::OpCode opCode) {
 						json msg = json::parse(std::string(message));
@@ -242,24 +248,20 @@ Websocket::Websocket(PolySynth& poly, size_t port, const string& logFile, const 
 						if(type == "set-control") {
 							string name = msg["name"];
 							float value = msg["value"].get<float>();
-							for(auto& voice : poly.getVoices()) {
-								voice.synth.setParameter(name, value);
-							}
+							if(setControlCallback_)
+								setControlCallback_(name,value);
 						} else if(type == "note-on") {
 							size_t note = msg["note"].get<size_t>();
 							size_t velocity = msg["velocity"].get<size_t>();
-							poly.noteOn(note,velocity);
+							if(noteOnCallback_)
+								noteOnCallback_(note,velocity);
 						} else if(type == "note-off") {
 							size_t note = msg["note"].get<size_t>();
-							poly.noteOff(note);
+							if(noteOffCallback_)
+								noteOffCallback_(note);
 						} else if(type == "audio-stream-enabled") {
 							audioStreamEnabled_ = msg["data"].get<bool>();
 						} else if(type == "restart") {
-							us_listen_socket_close(0, socket_);
-							std::cerr << "socket closed" << std::endl;
-							for(auto& client : clients_) {
-								client->close();
-							}
 							restart_ = true;
 						}
 					},
@@ -291,56 +293,6 @@ Websocket::Websocket(PolySynth& poly, size_t port, const string& logFile, const 
 Websocket::~Websocket() {
 }
 
-void Websocket::sendControlList() {
-	std::ostringstream ss;
-	ss << "{ \"type\": \"control-list\", \"data\": [ ";
-
-	auto params = poly_.getVoices()[0].synth.getParameters();
-	std::vector<string> parents;
-	std::map<string, std::vector<std::pair<string, float>>> hierachie;
-	for (size_t i = 0; i < params.size(); ++i) {
-		const string& name = params[i].getName();
-		if (name.empty() || name.at(0) == '_')
-			continue;
-		string parent;
-		string child;
-		auto pos = name.find(".");
-		if (pos != string::npos && pos < name.size() - 1) {
-			parent = name.substr(0, pos);
-			child = name.substr(pos + 1);
-		} else if (!name.empty()) {
-			parent = "Global";
-			child = name;
-		}
-		if (std::find(parents.begin(), parents.end(), parent) == parents.end()) {
-			parents.push_back(parent);
-		}
-		hierachie[parent].push_back( { child, params[i].getValue() });
-	}
-
-	size_t i = 0;
-	for (const auto& parent : parents) {
-		const string& module = parent;
-		const std::vector<std::pair<string, float>>& children = hierachie[parent];
-		ss << "{ \"name\": \"" << escape_json(module) << "\", \"controls\": [";
-		size_t j = 0;
-		for (const auto& child : children) {
-			ss << "{ \"name\" :\"" << escape_json(child.first) << "\", \"value\": \"" << child.second << "\" }";
-			if (j < children.size() - 1)
-				ss << ',';
-
-			++j;
-		}
-		ss << "]}";
-		if (i < hierachie.size() - 1)
-			ss << ',';
-		++i;
-	}
-	ss << "]}";
-	for (auto& client : clients_) {
-		client->send(ss.str(), uWS::TEXT);
-	}
-}
 void Websocket::clear() {
 	buffers_[0] = "\n";
 	buffers_[1] = "\n";
@@ -400,6 +352,16 @@ void Websocket::flush() {
 			<< "\"}";
 	for (auto& client : clients_) {
 		client->send(ss.str(), uWS::TEXT);
+	}
+}
+
+void Websocket::sendControlList() {
+	std::scoped_lock lock(mutex_);
+	if(sendControlListCallback_) {
+		string list = sendControlListCallback_();
+		for (auto& client : clients_) {
+			client->send(list, uWS::TEXT);
+		}
 	}
 }
 } /* namespace farts */

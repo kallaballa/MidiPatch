@@ -119,13 +119,13 @@ void bindings1(kaguya::State& state) {
 					(StereoDelay& (StereoDelay::*)(ControlGenerator))&StereoDelay::delayTimeRight)
 					));
 
-	state["LV2Plugin"].setClass(make_wet_dry(state,
-			kaguya::UserdataMetatable<LV2Effect,TemplatedWetDryEffect<LV2Effect,Tonic_::LV2Effect_>>()
-			.setConstructors<LV2Effect(const char*)>()
-			.addFunction("setControl", &LV2Effect::setControl)
-			.addFunction("getControlNames", &LV2Effect::getControlNames)
-			.addFunction("getControlDefaults", &LV2Effect::getControlDefaults)
-					));
+//	state["LV2Plugin"].setClass(make_wet_dry(state,
+//			kaguya::UserdataMetatable<LV2Effect,TemplatedWetDryEffect<LV2Effect,Tonic_::LV2Effect_>>()
+//			.setConstructors<LV2Effect(const char*)>()
+//			.addFunction("setControl", &LV2Effect::setControl)
+//			.addFunction("getControlNames", &LV2Effect::getControlNames)
+//			.addFunction("getControlDefaults", &LV2Effect::getControlDefaults)
+//					));
 
 	state["BitCrusher"].setClass(make_effect(state,
 			kaguya::UserdataMetatable<BitCrusher,TemplatedEffect<BitCrusher,Tonic_::BitCrusher_>>()
