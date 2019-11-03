@@ -35,16 +35,16 @@ function loadPatch() {
 }
 
 function savePatch() {
-	var code=codeMirror.getValue();
+  var code=codeMirror.getValue();
     $.post('/cgi-bin/savePatch.cgi',
-		{ code: code },
-		function(data, status, jqXHR) {
-		  $.notify("Patch saved", "success");
+    { code: code },
+    function(data, status, jqXHR) {
+      $.notify("Patch saved", "success");
       if($( "#restartonsave" ).prop('checked')) {
         restart();
       }
 }
-	)
+  )
 }
 
 
@@ -108,20 +108,21 @@ function connect() {
 
     socket.onmessage = function(event) {
     var obj = jQuery.parseJSON( event.data );
-    if(obj.type == "display") {
+    if(obj.type == "update-control") {
+      $(obj.data.parent + "_" + obj.data.child).val(obj.data.value); 
+    } else if(obj.type == "display") {
     } else if(obj.type == "control-list") {
-	if(lastControlListData == event.data) {
-          lastControlListData = event.data;
-	  return;
+        if(lastControlListData == event.data) {
+           return;
         }
         lastControlListData = event.data;
-	$( "#rack" ).html("");
+        $( "#rack" ).html("");
         var rackDiv = "<div id=\"rackdiv\">";
         for(var i = 0; i < obj.data.length; ++i) {
         rackDiv += "<div class=\"control-row\" style=\"background-color: " + arrColors[Math.round((arrColors.length - 1) * Math.random())]  + ";\" id=\"" + obj.data[i].name + "\"><label class=\"moduleLabel\">" + obj.data[i].name  + "</label>"
         for(var j = 0; j < obj.data[i].controls.length; ++j) {
             if(obj.data[i].controls[j].name.charAt(0) != '_') {
-            rackDiv += "<div class=\"control-cell\"><label>" + obj.data[i].controls[j].name + "</label><br/><input id=\"" + obj.data[i].name + "_" + obj.data[i].controls[j].name + "\"class=\"knob\" data-width=\"50\" data-fgColor=\"#000000\" data-height=\"50\" value=\"" + obj.data[i].controls[j].value + "\"></div>";
+            rackDiv += "<div class=\"control-cell\"><label>" + obj.data[i].controls[j].name + "</label><br/><input id=\"" + obj.data[i].name + "_" + obj.data[i].controls[j].name + "\" class=\"knob\" data-width=\"50\" data-fgColor=\"#000000\" data-height=\"50\" value=\"" + obj.data[i].controls[j].value + "\"></div>";
             }
         }
         rackDiv += "<div style=\"width: 100%;\"></div></div><br/>";

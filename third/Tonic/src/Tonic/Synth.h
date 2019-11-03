@@ -101,7 +101,9 @@ namespace Tonic{
   class Synth  : public TemplatedBufferFiller<Tonic_::Synth_> {
     
   public:
-        
+    virtual ~Synth() {
+
+    }
     //! Set the output gen that produces audio for the Synth
     void  setOutputGen(Generator generator){
       gen()->setOutputGen(generator);

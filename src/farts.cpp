@@ -256,6 +256,7 @@ int main(int argc, char ** argv) {
 	ui_print(0, 0, string("Loading patch..."));
 	ui_flush();
 	websocket = new farts::Websocket(8080, logFile, patchFile);
+	RtMidiIn* midiIn;
 
 	while (true) {
 		RtAudio dac;
@@ -263,9 +264,9 @@ int main(int argc, char ** argv) {
 		rtParams.deviceId = audioIndex;
 		rtParams.nChannels = nChannels;
 
-		RtMidiIn midiIn;
 		synth = new Synth();
 		poly = new PolySynth();
+		midiIn = new RtMidiIn();
 
 		for (size_t i = 0; i < numVoices; ++i) {
 			if(s[i] != nullptr) {
@@ -350,14 +351,14 @@ int main(int argc, char ** argv) {
 		websocket->sendControlList();
 		websocket->reset();
 		try {
-			if (midiIn.getPortCount() == 0) {
+			if (midiIn->getPortCount() == 0) {
 				std::cerr << "No MIDI ports available!\n";
 				cin.get();
 				exit(0);
 			}
 			std::cerr << "Opening MIDI port: " << midiIndex << std::endl;
-			midiIn.openPort(midiIndex);
-			midiIn.setCallback(&midiCallback);
+			midiIn->openPort(midiIndex);
+			midiIn->setCallback(&midiCallback);
 
 			std::cerr << "Opening audio port: " << rtParams.deviceId << " channels: " << rtParams.nChannels << " rate: "
 					<< sampleRate << " frames: " << bufferFrames << std::endl;
@@ -372,12 +373,13 @@ int main(int argc, char ** argv) {
 				sleep(1);
 			}
 			std::cerr << "Restarting" << std::endl;
-			midiIn.cancelCallback();
-			midiIn.closePort();
+			midiIn->cancelCallback();
+			midiIn->closePort();
 			dac.abortStream();
 			dac.closeStream();
 			delete(synth);
 			delete(poly);
+			delete(midiIn);
 			while(dac.isStreamOpen()) {
 				std::cerr << "Stream still open" << std::endl;
 				sleep(1);
