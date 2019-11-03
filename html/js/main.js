@@ -237,6 +237,9 @@ myLayout.on( 'stateChanged', function(){
 });
 
 myLayout.init();
+$(window).resize(function () {
+myLayout.updateSize($(window).width(), $(window).height() - 10);
+});
 
 }
 $( document ).ready(function() {
@@ -300,8 +303,5 @@ codeMirror = CodeMirror.fromTextArea(document.getElementById("editor"), {
   });
 
 loadPatch();
-$(window).resize(function () {
-myLayout.updateSize($(window).width(), $(window).height() - 10);
-});
 
 });
