@@ -33,7 +33,6 @@ uint8_t current_program = 127;
 size_t controlNumberOffset = 0;
 LCD* lcd = nullptr;
 farts::Websocket* websocket;
-farts::UDP* udp;
 string save_file;
 
 inline void ui_print(const uint8_t& col, const uint8_t& row, const string& s) {
@@ -60,15 +59,15 @@ int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFr
 
 	synth.fillBufferOfFloats((float*) outputBuffer, nBufferFrames, nChannels);
 
-	if (websocket->isAudioStreamEnabled() && udp) {
-		size_t lenBuf = nBufferFrames * nChannels;
-		std::vector<int16_t> samples(lenBuf, 0);
-
-		for (size_t i = 0; i < lenBuf; ++i) {
-			samples[i] = ((((float*) outputBuffer)[i] * 2.0) - 1.0) * std::numeric_limits<int16_t>::max();
-		}
-		udp->send(samples);
-	}
+//	if (websocket->isAudioStreamEnabled() && udp) {
+//		size_t lenBuf = nBufferFrames * nChannels;
+//		std::vector<int16_t> samples(lenBuf, 0);
+//
+//		for (size_t i = 0; i < lenBuf; ++i) {
+//			samples[i] = ((((float*) outputBuffer)[i] * 2.0) - 1.0) * std::numeric_limits<int16_t>::max();
+//		}
+//		udp->send(samples);
+//	}
 //		if(websocket)
 //			websocket->sendAudio(samples.data(), lenBuf);
 	return 0;
@@ -219,9 +218,7 @@ int main(int argc, char ** argv) {
 
 	auto result = options.parse(argc, argv);
 
-	std::ofstream ofLog(logFile);
-	std::cout.rdbuf(ofLog.rdbuf());
-	std::cerr.rdbuf(ofLog.rdbuf());
+
 
 	if (result["help"].count()) {
 		std::cerr << options.help() << std::endl;
@@ -236,6 +233,10 @@ int main(int argc, char ** argv) {
 	if (!saveFile.empty()) {
 		save_file = saveFile;
 	}
+
+	std::ofstream ofLog(logFile);
+	std::cout.rdbuf(ofLog.rdbuf());
+	std::cerr.rdbuf(ofLog.rdbuf());
 
 	ui_clear();
 	ui_print(0, 0, "Starting...");
@@ -274,7 +275,6 @@ int main(int argc, char ** argv) {
 	//add a slight ADSR to prevent clicking
 	synth.setOutputGen(poly);
 	websocket = new farts::Websocket(poly,8080, logFile, patchFile);
-	udp = new farts::UDP(8000);
 	// open rtaudio stream and rtmidi port
 	try {
 		if (midiIn->getPortCount() == 0) {

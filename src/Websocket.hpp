@@ -21,7 +21,6 @@ namespace farts {
 
 class Websocket {
 	PolySynth& poly_;
-	std::shared_ptr<uWS::App> app_;
 	us_listen_socket_t* socket_;
 	std::set<uWS::WebSocket<false, true>*> clients_;
 	std::vector<std::string> buffers_;

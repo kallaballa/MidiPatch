@@ -167,10 +167,7 @@ Websocket::Websocket(PolySynth& poly, size_t port, const string& logFile, const 
 	};
 
 	std::thread t([&]() {
-		app_.reset(new uWS::App());
-		/* Very simple WebSocket echo server */
-		std::shared_ptr<uWS::App> app = app_;
-		app->get("/index.html", [&](auto *res, auto *req) {
+		uWS::App().get("/index.html", [&](auto *res, auto *req) {
 					res->writeHeader("Content-Type", "text/html");
 					char* start = &_binary_index_min_pack_start;
 					char* end = &_binary_index_min_pack_end;
