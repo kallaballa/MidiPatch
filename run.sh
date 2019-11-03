@@ -2,5 +2,5 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:third/Tonic/src/:/third/lua-5.3.5/src/:
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$DIR"
-src/farts $@;
+src/farts $@ &> /tmp/farts-boot.log;
 
