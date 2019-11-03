@@ -42,10 +42,10 @@ asan: ${TARGET}
 ${TARGET}: ../html/index.o ${OBJS}
 	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS} 
 
-../html/index.o: ../html/index.min.pack $(ASSET_DIRS) $(ASSET_FILES)
+../html/index.o: ../html/index.min.pack
 	cd ../html; ld -r -b binary -o index.o index.min.pack
 
-../html/index.min.pack:
+../html/index.min.pack: $(ASSET_DIRS) $(ASSET_FILES)
 	cd ../html; inliner -m index.html > index.min.pack
 
 ${OBJS}: %.o: %.cpp %.dep ${GCH}
