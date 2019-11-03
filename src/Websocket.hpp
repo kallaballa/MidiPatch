@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <string>
 #include <set>
+#include <memory>
 #include <mutex>
 #include "App.h"
 #include "PolySynth.hpp"
@@ -19,13 +20,19 @@
 namespace farts {
 
 class Websocket {
-	std::set<uWS::WebSocket<false, true>*> clients;
+	PolySynth& poly_;
+	std::shared_ptr<uWS::App> app_;
+	us_listen_socket_t* socket_;
+	std::set<uWS::WebSocket<false, true>*> clients_;
 	std::vector<std::string> buffers_;
 	std::mutex mutex_;
 	bool audioStreamEnabled_ = false;
+	bool restart_ = false;
+
 public:
-	Websocket(Synth& synth, PolySynth& poly, size_t port, const unsigned int& channels, const unsigned int& bufferFrames);
+	Websocket(PolySynth& poly, size_t port, const string& logFile, const string& bankFile);
 	virtual ~Websocket();
+	void sendControlList();
 	void clear();
 	void print(const uint8_t& col, const uint8_t& row, const std::string& s);
 	void flush();
@@ -34,6 +41,10 @@ public:
 	bool isAudioStreamEnabled() {
 		return audioStreamEnabled_;
 	}
+
+	bool isRestartRequested() {
+			return restart_;
+		}
 };
 
 } /* namespace farts */

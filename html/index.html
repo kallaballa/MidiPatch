@@ -1,0 +1,111 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="text/javascript">
+if (!document.registerElement) {
+  document.writeln(decodeURI('%3Cscript%20src=%22https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.7.12/webcomponents.min.js%22%20type=%22text/javascript%22%3E%3C/script%3E'));
+}
+</script>
+
+<link rel="stylesheet" href="js/codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="js/codemirror/theme/midnight.css">
+<link rel="stylesheet" href="css/js-piano.css">
+<link type="text/css" rel="stylesheet" href="css/goldenlayout-base.css" />
+<link type="text/css" rel="stylesheet" href="css/goldenlayout-dark-theme.css" />
+<link rel="stylesheet" type="text/css" href="css/main.css">
+
+<script src="js/reconnecting-websocket.min.js"></script>
+</head>
+<body>
+<div id="buttonbar"><button id="restart">Restart</button><button id="savepatch">Save</button>
+<input type="checkbox" id="restartonsave" value="Restart on save" checked/><label for="restartonsave" id="restartonsavelbl">Restart on save</label>
+
+<div id="fileselect">
+File: 
+<span class="myarrow"><input type="text" list="filenames"></span>
+	<datalist id="filenames">
+   </datalist>
+</div>
+<button id="loadfile">Load</button><button id="savefile">Save</button>
+<div id="editorselect">
+Mode: 
+<select>
+  <option value="sublime">Sublime</option>
+  <option value="vim">Vim</option>
+  <option value="emacs">Emacs</option>
+</select>
+</div>
+</div>
+<section id="panel">
+  <section id="panelrow"><section id="editorpane"><textarea id="editor"></textarea></section><textarea id="log"></textarea></section><section id="rack"></section>
+</section>
+<section id="piano">
+    <div class="keys">
+      <div data-key="60" data-combo="ctrl+1" class="key border-right">
+      </div>
+      <div data-key="61" data-combo="ctrl+2" class="key black">
+      </div>
+      <div data-key="62" data-combo="ctrl+3" class="key border-right">
+      </div>
+      <div data-key="63" data-combo="ctrl+4" class="key black">
+      </div>
+      <div data-key="64" data-combo="ctrl+5" class="key border-right">
+      </div>
+      <div data-key="65" data-combo="ctrl+6" class="key border-right">
+      </div>
+      <div data-key="66" data-combo="ctrl+7" class="key black">
+      </div>
+      <div data-key="67" data-combo="ctrl+8" class="key border-right">
+      </div>
+      <div data-key="68" data-combo="ctrl+9" class="key black">
+      </div>
+      <div data-key="69" data-combo="ctrl+0" class="key border-right">
+      </div>
+      <div data-key="70" data-combo="ctrl+q" class="key black">
+      </div>
+      <div data-key="71" data-combo="ctrl+w" class="key border-right">
+      </div>
+      <div data-key="72" data-combo="ctrl+e" class="key border-right">
+      </div>
+      <div data-key="73" data-combo="alt+1" class="key border-right">
+      </div>
+      <div data-key="74" data-combo="alt+2" class="key black">
+      </div>
+      <div data-key="75" data-combo="alt+3" class="key border-right">
+      </div>
+      <div data-key="76" data-combo="alt+4" class="key black">
+      </div>
+      <div data-key="77" data-combo="alt+5" class="key border-right">
+      </div>
+      <div data-key="78" data-combo="alt+6" class="key border-right">
+      </div>
+      <div data-key="79" data-combo="alt+7" class="key black">
+      </div>
+      <div data-key="80" data-combo="alt+8" class="key border-right">
+      </div>
+      <div data-key="81" data-combo="alt+9" class="key black">
+      </div>
+      <div data-key="82" data-combo="alt+0" class="key border-right">
+      </div>
+      <div data-key="83" data-combo="alt+q" class="key black">
+      </div>
+      <div data-key="84" data-combo="alt+w" class="key border-right">
+      </div>
+      <div data-key="85" data-combo="alt+e" class="key border-right">
+      </div>
+    </div>
+</section>
+<script src="js/jquery-3.4.1.min.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" src="js/goldenlayout.min.js"></script>
+<script src="js/codemirror/lib/codemirror.js"></script>
+<script src="js/codemirror/mode/lua/lua.js"></script>
+<script src="js/codemirror/keymap/sublime.js"></script>
+<script src="js/codemirror/keymap/vim.js"></script>
+<script src="js/codemirror/keymap/emacs.js"></script>
+<script type="text/javascript" src="js/jquery.knob.min.js"></script>
+<script src="js/notify.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/keyboard.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/main.js" type="text/javascript" charset="utf-8"></script>
+
+</body>
+</html>

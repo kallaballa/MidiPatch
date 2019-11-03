@@ -1,0 +1,48 @@
+.keys {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: black;
+  border: 3px solid white;
+  height: 200px;
+  width: 1000px;
+  padding: 10px;
+  margin:auto;
+}
+
+.key {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+
+  width: 60px;
+  height: 204px;
+  padding-bottom: 5px;
+
+  text-align: center;
+  transition: all .07s ease;
+
+  color: black;
+  background-color: white;
+}
+
+.black {
+  width: 36px;
+  height: 154px;
+  background-color: black;
+  color: white;
+  margin-top: -50px;
+  margin-left: -18px;
+  margin-right: -18px;
+  z-index: 0;
+}
+
+.border-right {
+  border-right: 1px solid black;
+}
+
+.playing {
+  transform:scale(1.1);
+}
+
+

@@ -24,10 +24,10 @@ LDFLAGS += -L../third/lua-5.3.5/src -L../third/Tonic/src -L../third/uSockets-0.3
 HEADERS := tonic_lua.hpp 
 
 GCH     := ${HEADERS:.hpp=.gch}
-OBJS    := ${SRCS:.cpp=.o} 
+OBJS    := ${SRCS:.cpp=.o}
 DEPS    := ${SRCS:.cpp=.dep} 
 
-.PHONY: all release debug clean distclean 
+.PHONY: all release debug clean distclean ../html/index.o ../html/index.min.pack
 
 all: release
 release: ${TARGET}
@@ -37,8 +37,14 @@ profile: ${TARGET}
 hardcore: ${TARGET}
 asan: ${TARGET}
 
-${TARGET}: ${OBJS} 
+${TARGET}: ../html/index.o ${OBJS}
 	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS} 
+
+../html/index.o: ../html/index.min.pack
+	cd ../html; ld -r -b binary -o index.o index.min.pack
+
+../html/index.min.pack:
+	cd ../html; inliner -m index.html > index.min.pack
 
 ${OBJS}: %.o: %.cpp %.dep ${GCH}
 	${CXX} ${CXXFLAGS} -o $@ -c $< 
@@ -57,7 +63,7 @@ uninstall:
 	rm ${DESTDIR}/${PREFIX}/bin/${TARGET}
 
 clean:
-	rm -f *~ ${DEPS} ${OBJS} ${GCH} ${TARGET} 
+	rm -f *~ ${DEPS} ${OBJS} ${GCH} ${TARGET} ../html/index.o ../html/index.min.pack
 
 distclean: clean
 

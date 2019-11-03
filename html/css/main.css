@@ -1,0 +1,219 @@
+* {
+	font-size: 14px;
+}
+
+body {
+  height: 95% !important;
+}
+
+.lm_root {
+  height: 90% !important;
+}
+
+.lm_content {
+overflow-x:auto;
+overflow-y:auto;
+}
+#rack {
+  display: table;
+  width: 100%;
+}
+.moduleLabel {
+  padding: 5px;
+  font-weight: bolder;
+  color:white;
+  background-color:black;
+  margin: 3px;
+}
+
+.loading {
+  margin:auto;
+  color:white;
+  font-weight:bolder;
+}
+#rackdiv div {
+  color: black;
+}
+
+.control-row {
+  border: 3px solid white;
+  display: table-row; 
+  width: 100%;
+}
+.control-cell {
+  padding: 10px 10px 10px 10px; 
+  display: inline-table; 
+  border: 1px solid black;
+  width: 0%;
+}
+
+input::-webkit-calendar-picker-indicator {
+  display: none;/* remove default arrow */
+}
+
+.myarrow:after {
+    content: url(https://i.stack.imgur.com/i9WFO.png);
+    margin-left: -20px; 
+    padding: .1em;
+    pointer-events:none;
+}
+
+
+#panel {
+    width: 100%;
+    height: 100%;
+    display: table-row;
+}
+
+#panelrow {
+  display:table-cell;
+  height: 100%;
+}
+
+
+.CodeMirror {
+  height: 99%;
+}
+
+
+
+#log {
+	color: white;
+	background-color: #303030;
+	width: 100%;
+  height: 100%;
+  float: bottom;
+  margin: 0px;
+  border: 1px solid white;
+}
+
+#buttonbar {
+	margin: auto;
+	display: block;
+	width: 90%;
+  margin-left: 3px;
+  padding-bottom: 3px;
+}
+
+#savebank {
+  margin-left: 0px;
+  margin-right: 0px;
+  padding-top: 4px;
+}
+
+#loadbank {
+  margin-left: 0px;
+  margin-right: 0px;
+  padding-top: 4px;
+}
+
+#saveallbanks {
+  margin-left: 5px;
+  margin-right: 0px;
+  padding-top: 4px;
+}
+
+#restartonsave {
+  vertical-align: middle;
+}
+
+#restartonsavelbl {
+  display: inline;
+  color: white;
+  background-color: black;
+  padding: 5px 0px 5px 6px;
+  margin: 0px;
+  margin-left: 0px;
+  margin-top: 4px;
+
+}
+
+#fileselect {
+  display: inline;
+  color: white;
+  background-color: #404040;
+  border: 1px solid white;
+  padding: 5px 4px 5px 6px;
+  margin: 0px;
+  margin-left: 10px;
+  margin-top: 4px;
+}
+
+#fileselect input {
+  border: 0;
+	margin-top: 10px;
+}
+
+#loadfile {
+  margin-left: 0px;
+  margin-right: 0px;
+  padding-top: 4px;
+}
+
+#savefile {
+  margin-left: 0px;
+	margin-right: 0px;
+  padding-top: 4px;
+}
+
+#editorselect {
+  display: inline;
+  color: white;
+  background-color: #404040;
+  border: 1px solid white;
+  padding: 5px 4px 5px 6px;
+  margin: 0px;
+  margin-left: 10px;
+  margin-top: 4px;
+}
+
+#editorselect select {
+  border: 0;
+    color: white;
+  background-color: #404040;
+  margin-top: 10px;
+}
+
+body {
+	background-color: black;
+	width: 95%;
+}
+
+button {
+  color: white;
+  background-color: black;
+  border: 1px solid white;
+	padding: 5px;
+	margin: 3px 8px 3px 8px;
+}
+
+@media only screen and (max-width: 1000px) {
+.CodeMirror {
+  width: 96vw;
+}
+#rack {
+  margin-top: 120px;
+}
+
+#rackdiv { 
+  margin-top: 20px;
+  display: table-row;
+  width: 100px;
+}
+.control-row {
+  width: 100%;
+}
+
+.control-cell {
+  padding: 0px 10px 0px 10px;
+  width: 0%;
+}
+
+#panelrow {
+  display: inline;
+}
+
+#rack {
+  display: inline;
+}
+}
