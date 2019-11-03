@@ -5,77 +5,85 @@
 using namespace Tonic;
 
 template<typename VoiceAllocator>
-class PolySynthWithAllocator : public Synth
-{
+class PolySynthWithAllocator: public Synth {
 public:
-    PolySynthWithAllocator() : Synth() 
-    {
-        setOutputGen(mixer); 
-    }
+	PolySynthWithAllocator() :
+			Synth() {
+		setOutputGen(mixer);
+	}
 
-    void addVoice(Synth synth)
-    {
-        allocator.addVoice(synth);
-        mixer.addInput(synth);
-    }
+	virtual ~PolySynthWithAllocator() {
 
-    std::vector<typename VoiceAllocator::PolyVoice>& getVoices() {
-    	return allocator.getVoices();
-    }
+	}
 
-    typedef Synth (VoiceCreateFn)();
-    void addVoices(VoiceCreateFn createFn, int count)
-    {
-        for (int i = 0; i < count; i++)
-            addVoice(createFn());
-    }
+	void addVoice(Synth synth) {
+		allocator.addVoice(synth);
+		mixer.addInput(synth);
+	}
 
-    void noteOn(int note, int velocity)
-    {
-        allocator.noteOn(note, velocity);
-    }
+	std::vector<typename VoiceAllocator::PolyVoice>& getVoices() {
+		return allocator.getVoices();
+	}
 
-    void noteOff(int note)
-    {
-        allocator.noteOff(note);
-    }
+	typedef Synth (VoiceCreateFn)();
+	void addVoices(VoiceCreateFn createFn, int count) {
+		for (int i = 0; i < count; i++)
+			addVoice(createFn());
+	}
+
+	void noteOn(int note, int velocity) {
+		allocator.noteOn(note, velocity);
+	}
+
+	void noteOff(int note) {
+		allocator.noteOff(note);
+	}
 
 protected:
-    Mixer mixer;
-    VoiceAllocator allocator;
+	Mixer mixer;
+	VoiceAllocator allocator;
 };
 
-class BasicPolyphonicAllocator
-{
+class BasicPolyphonicAllocator {
 public:
-    class PolyVoice
-    {
-    public:
-        int currentNote;
-        Synth synth;
-    };
+	class PolyVoice {
+	public:
+		int currentNote;
+		Synth synth;
+	};
 
-    void addVoice(Synth synth);
-    void noteOn(int noteNumber, int velocity);
-    void noteOff(int noteNumber);
-    vector<PolyVoice>& getVoices();
+	virtual ~BasicPolyphonicAllocator() {
+
+	}
 protected:
-    virtual int getNextVoice(int note);
-    vector<PolyVoice> voiceData;
-    list<int> inactiveVoiceQueue;
-    list<int> activeVoiceQueue;
+
+	void addVoice(Synth synth);
+	void noteOn(int noteNumber, int velocity);
+	void noteOff(int noteNumber);
+	vector<PolyVoice>& getVoices();
+protected:
+	virtual int getNextVoice(int note);
+	vector<PolyVoice> voiceData;
+	list<int> inactiveVoiceQueue;
+	list<int> activeVoiceQueue;
 };
 
-class OldestNoteStealingPolyphonicAllocator : public BasicPolyphonicAllocator
-{
+class OldestNoteStealingPolyphonicAllocator: public BasicPolyphonicAllocator {
+public:
+	virtual ~OldestNoteStealingPolyphonicAllocator() {
+
+	}
 protected:
-    virtual int getNextVoice(int note);
+	virtual int getNextVoice(int note);
 };
 
-class LowestNoteStealingPolyphonicAllocator : public BasicPolyphonicAllocator
-{
+class LowestNoteStealingPolyphonicAllocator: public BasicPolyphonicAllocator {
+public:
+	virtual ~LowestNoteStealingPolyphonicAllocator() {
+
+	}
 protected:
-    virtual int getNextVoice(int note);
+	virtual int getNextVoice(int note);
 };
 
 typedef PolySynthWithAllocator<LowestNoteStealingPolyphonicAllocator> PolySynth;
