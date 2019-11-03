@@ -55,8 +55,6 @@ public:
 	virtual ~BasicPolyphonicAllocator() {
 
 	}
-protected:
-
 	void addVoice(Synth synth);
 	void noteOn(int noteNumber, int velocity);
 	void noteOff(int noteNumber);
