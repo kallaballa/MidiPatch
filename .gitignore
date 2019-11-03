@@ -19,4 +19,5 @@ src/*.dep
 .project
 .settings/
 src/farts
-
+html/index.min.pack
+html/index.o
