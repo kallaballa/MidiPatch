@@ -209,14 +209,15 @@ Websocket::Websocket(size_t port, const string& logFile, const string& patchFile
 				}).post("/cgi-bin/savePatch.cgi", [&](auto *res, auto *req) {
 					try {
 						res->writeHeader("Content-Type", "text/plain");
+						std::shared_ptr<ofstream> ofs(new std::ofstream(patchFile));
 						res->onData([=](std::string_view data, bool isLast) {
-									std::ofstream ofs(patchFile);
+									std::shared_ptr<ofstream> copy = ofs;
 									string str(data);
 									auto delim = str.find('=');
 									if(delim != string::npos && str.size() > delim) {
 										str = str.substr(delim + 1);
 									}
-									ofs << url_decode(str);
+									(*copy) << url_decode(str);
 									if(isLast)
 									res->end("");
 								});
