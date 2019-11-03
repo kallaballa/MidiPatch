@@ -102,7 +102,7 @@ function str2ab(str) {
 }
 
 function connect() {
-    socket = new ReconnectingWebSocket("ws://127.0.0.1:8080");
+    socket = new ReconnectingWebSocket("ws://" + window.location.hostname + ":8080");
     socket.onopen = function(e) {
     };
 
