@@ -44,11 +44,14 @@ The following code creates a MIDI patch with a square wave tone and an ADSR enve
 
 At the moment only linux is supported but it shouldn't be hard to port it to other platforms.
 
-Dependencies: -lasound -ltonic -llua -ldl -lboost_program_options -llilv-0 
+First install inliner:
+
+    sudo npm install -g inliner
+
+Dependencies: -lasound -llua -ldl -llilv-0 
 
 - libdl
 - libasound (ALSA)
-- libboost_program_options
 - liblilv-0
 
 After you installed the dependencies all you have to do is type
