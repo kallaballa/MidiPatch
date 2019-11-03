@@ -243,8 +243,8 @@ myLayout.updateSize($(window).width(), $(window).height() - 10);
 
 }
 $( document ).ready(function() {
-   //if(screen.width > 640)
-   //   makeLayout();
+    if(screen.width > 640)
+      makeLayout();
     window.setInterval(refreshLog, 1000);
 
     $( "#restart" ).click(function() {
