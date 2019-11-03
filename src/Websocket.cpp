@@ -169,7 +169,7 @@ Websocket::Websocket(size_t port, const string& logFile, const string& patchFile
 	};
 
 	std::thread t([&]() {
-		uWS::App().get("/index.html", [&](auto *res, auto *req) {
+		uWS::App().get("/", [&](auto *res, auto *req) {
 					res->writeHeader("Content-Type", "text/html");
 					char* start = &_binary_index_min_pack_start;
 					char* end = &_binary_index_min_pack_end;
