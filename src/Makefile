@@ -9,13 +9,13 @@ ifeq ($(UNAME_S), Linux)
  LIBS+= -lasound
 endif
 
-TARGET  := farts
+TARGET  := midipatch
 
 ifdef JAVASCRIPT
-TARGET := farts.html
+TARGET := midipatch.html
 endif
 
-SRCS  := farts.cpp tonic_lua0.cpp tonic_lua1.cpp tonic_lua2.cpp PolySynth.cpp ../third/RtMidi/RtMidi.cpp ../third/RtAudio/RtAudio.cpp lvplugin.cpp LCD.cpp Websocket.cpp UDP.cpp
+SRCS  := midipatch.cpp tonic_lua0.cpp tonic_lua1.cpp tonic_lua2.cpp PolySynth.cpp ../third/RtMidi/RtMidi.cpp ../third/RtAudio/RtAudio.cpp lvplugin.cpp LCD.cpp Websocket.cpp UDP.cpp
 CXXFLAGS += -I/usr/lib64/ -I../third/uSockets-0.3.2/src/ -I../third/uWebSockets-0.16.1/src -I../third/kaguya/include -I../third/lua-5.3.5/src -I../third/Tonic/src -I../third/cxxopts-2.2.0/include -I../third/nlohmann-json-3.7.0/ -I../third/RtMidi -I../third/RtAudio ${CUSTOM_DEFS}
 LIBS += -ltonic -llua -ldl -llilv-0 -luSockets -lz
 LDFLAGS += -L../third/lua-5.3.5/src -L../third/Tonic/src -L../third/uSockets-0.3.2/

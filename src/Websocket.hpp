@@ -20,7 +20,7 @@
 
 std::string escape_json(const std::string &s);
 
-namespace farts {
+namespace midipatch {
 
 class Websocket {
 	us_listen_socket_t* socket_;
@@ -72,6 +72,6 @@ public:
 	void sendControlList();
 };
 
-} /* namespace farts */
+} /* namespace midipatch */
 
 #endif /* SRC_WEBSOCKET_HPP_ */

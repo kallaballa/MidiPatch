@@ -18,6 +18,6 @@ src/*.dep
 .cproject
 .project
 .settings/
-src/farts
+src/midipatch
 html/index.min.pack
 html/index.o

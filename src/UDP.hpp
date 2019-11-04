@@ -11,7 +11,7 @@
 #include <vector>
 #include <netinet/in.h>
 
-namespace farts {
+namespace midipatch {
 
 class UDP {
 	int sockfd;
@@ -22,6 +22,6 @@ public:
 	void send(const std::vector<int16_t>& data);
 };
 
-} /* namespace farts */
+} /* namespace midipatch */
 
 #endif /* SRC_UDP_HPP_ */

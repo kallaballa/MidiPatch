@@ -9,7 +9,7 @@
 
 #include "UDP.hpp"
 
-namespace farts {
+namespace midipatch {
 
 UDP::UDP(size_t port) {
   // Creating socket file descriptor
@@ -35,4 +35,4 @@ void UDP::send(const std::vector<int16_t>& samples) {
   sendto(sockfd, (const char *) samples.data(), lenBuf * sizeof(int16_t),
 	MSG_CONFIRM, (const struct sockaddr *) &servaddr, sizeof(servaddr));
 }
-} /* namespace farts */
+} /* namespace midipatch */

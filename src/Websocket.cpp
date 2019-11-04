@@ -49,7 +49,7 @@ std::string escape_json(const std::string &s) {
 // for convenience
 using json = nlohmann::json;
 
-namespace farts {
+namespace midipatch {
 
 static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		"abcdefghijklmnopqrstuvwxyz"
@@ -365,4 +365,4 @@ void Websocket::sendControlList() {
 		}
 	}
 }
-} /* namespace farts */
+} /* namespace midipatch */

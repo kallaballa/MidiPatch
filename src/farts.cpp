@@ -32,7 +32,7 @@ PolySynth* poly;
 uint8_t current_program = 127;
 size_t controlNumberOffset = 0;
 LCD* lcd = nullptr;
-farts::Websocket* websocket;
+midipatch::Websocket* websocket;
 string save_file;
 
 inline void ui_print(const uint8_t& col, const uint8_t& row, const string& s) {
@@ -216,9 +216,9 @@ int main(int argc, char ** argv) {
 			cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))("v,voices", "The number of voices to run",
 			cxxopts::value<size_t>(numVoices)->default_value("8"))("s,save",
 			"The file where current patch settings are stored",
-			cxxopts::value<string>(saveFile)->default_value("/tmp/farts.save"))("p,patchFile",
+			cxxopts::value<string>(saveFile)->default_value("/tmp/midipatch.save"))("p,patchFile",
 			"The lua patchFile to use for the voices", cxxopts::value<string>(patchFile))("f,logFile", "The file to log to",
-			cxxopts::value<string>(logFile)->default_value("/tmp/farts.log"));
+			cxxopts::value<string>(logFile)->default_value("/tmp/midipatch.log"));
 
 	auto result = options.parse(argc, argv);
 
@@ -255,7 +255,7 @@ int main(int argc, char ** argv) {
 	ui_clear();
 	ui_print(0, 0, string("Loading patch..."));
 	ui_flush();
-	websocket = new farts::Websocket(8080, logFile, patchFile);
+	websocket = new midipatch::Websocket(8080, logFile, patchFile);
 	RtMidiIn* midiIn;
 
 	while (true) {
