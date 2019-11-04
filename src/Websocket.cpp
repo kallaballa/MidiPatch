@@ -206,7 +206,7 @@ Websocket::Websocket(size_t port, const string& logFile, const string& patchFile
 						std::cerr << ex.what() << std::endl;
 					}
 					res->end("");
-				}).post("/cgi-bin/savePatch.cgi", [&](auto *res, auto *req) {
+				}).post("/cgi-bin/storePatch.cgi", [&](auto *res, auto *req) {
 					try {
 						res->writeHeader("Content-Type", "text/plain");
 						std::shared_ptr<ofstream> ofs(new std::ofstream(patchFile));
