@@ -14,10 +14,24 @@ body {
 overflow-x:auto;
 overflow-y:auto;
 }
+
 #rack {
   display: table;
   width: 100%;
 }
+
+#rackHidden {
+  display: none;
+}
+
+#editorpaneHidden {
+  display: none;
+}
+
+#pianoHidden {
+  display: none
+}
+
 .moduleLabel {
   padding: 5px;
   font-weight: bolder;
@@ -87,6 +101,9 @@ input::-webkit-calendar-picker-indicator {
   border: 1px solid white;
 }
 
+#logHidden {
+    display: none;
+}
 #buttonbar {
 	margin: auto;
 	display: block;

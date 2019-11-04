@@ -20,7 +20,7 @@ CXXFLAGS += -I/usr/lib64/ -I../third/uSockets-0.3.2/src/ -I../third/uWebSockets-
 LIBS += -ltonic -llua -ldl -llilv-0 -luSockets -lz
 LDFLAGS += -L../third/lua-5.3.5/src -L../third/Tonic/src -L../third/uSockets-0.3.2/
 ASSET_DIRS = $(shell find ../html/ -type d -not -name ".." -not -name "html")
-ASSET_FILES = $(shell find ../html/ -type f -not -name index.o -not -name index.min.pack -not -name index.html)
+ASSET_FILES = $(shell find ../html/ -type f -not -name index.o -not -name index.min.pack)
 
 #precompiled headers
 HEADERS := tonic_lua.hpp 
