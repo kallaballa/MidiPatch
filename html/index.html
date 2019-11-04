@@ -17,25 +17,6 @@ if (!document.registerElement) {
 <script src="js/reconnecting-websocket.min.js"></script>
 </head>
 <body>
-<div id="buttonbar"><button id="restart">Restart</button><button id="loadpatch">Load Patch</button><button id="storepatch">Store Patch</button>
-<input type="checkbox" id="restartonsave" value="Restart on save" checked/><label for="restartonsave" id="restartonsavelbl">Restart on store</label><button id="resetlayout">Reset Layout</button>
-
-<div id="fileselect">
-File: 
-<span class="myarrow"><input type="text" list="filenames"></span>
-	<datalist id="filenames">
-   </datalist>
-</div>
-<button id="loadfile">Load</button><button id="savefile">Save</button>
-<div id="editorselect">
-Mode: 
-<select>
-  <option value="sublime">Sublime</option>
-  <option value="vim">Vim</option>
-  <option value="emacs">Emacs</option>
-</select>
-</div>
-</div>
 <script src="js/jquery-3.4.1.min.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" src="js/goldenlayout.min.js"></script>
 <script src="js/codemirror/lib/codemirror.js"></script>

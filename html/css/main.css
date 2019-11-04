@@ -3,11 +3,10 @@
 }
 
 body {
-  height: 95% !important;
+  background-color: grey;
 }
 
 .lm_root {
-  height: 90% !important;
 }
 
 .lm_content {
@@ -18,18 +17,6 @@ overflow-y:auto;
 #rack {
   display: table;
   width: 100%;
-}
-
-#rackHidden {
-  display: none;
-}
-
-#editorpaneHidden {
-  display: none;
-}
-
-#pianoHidden {
-  display: none
 }
 
 .moduleLabel {
@@ -94,16 +81,12 @@ input::-webkit-calendar-picker-indicator {
 #log {
 	color: white;
 	background-color: #303030;
-	width: 100%;
-  height: 90%;
-  float: bottom;
+  width: 100%;
+  height: 100%;
   margin: 0px;
   border: 1px solid white;
 }
 
-#logHidden {
-    display: none;
-}
 #buttonbar {
 	margin: auto;
 	display: block;
@@ -145,22 +128,6 @@ input::-webkit-calendar-picker-indicator {
 
 }
 
-#fileselect {
-  display: inline;
-  color: white;
-  background-color: #404040;
-  border: 1px solid white;
-  padding: 5px 4px 5px 6px;
-  margin: 0px;
-  margin-left: 10px;
-  margin-top: 4px;
-}
-
-#fileselect input {
-  border: 0;
-	margin-top: 10px;
-}
-
 #loadfile {
   margin-left: 0px;
   margin-right: 0px;
@@ -189,11 +156,6 @@ input::-webkit-calendar-picker-indicator {
     color: white;
   background-color: #404040;
   margin-top: 10px;
-}
-
-body {
-	background-color: black;
-	width: 95%;
 }
 
 button {

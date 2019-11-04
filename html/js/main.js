@@ -190,22 +190,28 @@ function makeLayout() {
                 type: 'row',
                 content: [{
                     type: 'component',
-                    componentName: 'editorComponent',
+                    componentName: 'Toolbar',
+                }]
+            }, {
+                type: 'row',
+                content: [{
+                    type: 'component',
+                    componentName: 'Editor',
                 }, {
                     type: 'component',
-                    componentName: 'rackComponent',
+                    componentName: 'Rack',
                 }]
             }, {
                 type: 'row',
                 content: [{
                     type: 'component',
-                    componentName: 'pianoComponent',
+                    componentName: 'Keyboard',
                 }]
             }, {
                 type: 'row',
                 content: [{
                     type: 'component',
-                    componentName: 'logComponent',
+                    componentName: 'Log',
                 }]
             }]
         }]
@@ -218,7 +224,11 @@ function makeLayout() {
         myLayout = new GoldenLayout(config);
     }
 
-    myLayout.registerComponent('editorComponent', function(container, componentState) {
+    myLayout.registerComponent('Toolbar', function(container, componentState) {
+        container.getElement().html('<div id="buttonbar"><button id="restart">Restart</button><button id="loadpatch">Load Patch</button><button id="storepatch">Store Patch</button><input type="checkbox" id="restartonsave" value="Restart on save" checked/><label for="restartonsave" id="restartonsavelbl">Restart on store</label><button id="resetlayout">Reset Layout</button><div id="editorselect">Mode: <select><option value="sublime">Sublime</option><option value="vim">Vim</option><option value="emacs">Emacs</option></select></div></div>');
+    });
+
+    myLayout.registerComponent('Editor', function(container, componentState) {
         container.getElement().html("<section id=\"editorpane\"><textarea id=\"editor\"></textarea></section>");
 
         window.setTimeout(function() {
@@ -242,15 +252,15 @@ function makeLayout() {
         }, 100);
     });
 
-    myLayout.registerComponent('rackComponent', function(container, componentState) {
+    myLayout.registerComponent('Rack', function(container, componentState) {
         container.getElement().html('<section id="rack"></section>');
     });
 
-    myLayout.registerComponent('pianoComponent', function(container, componentState) {
+    myLayout.registerComponent('Keyboard', function(container, componentState) {
         container.getElement().html('<section id="piano"><div class="keys">       <div data-key="60" data-combo="ctrl+1" class="key border-right">       </div>       <div data-key="61" data-combo="ctrl+2" class="key black">       </div>       <div data-key="62" data-combo="ctrl+3" class="key border-right">       </div>       <div data-key="63" data-combo="ctrl+4" class="key black">       </div>       <div data-key="64" data-combo="ctrl+5" class="key border-right">       </div>       <div data-key="65" data-combo="ctrl+6" class="key border-right">       </div>       <div data-key="66" data-combo="ctrl+7" class="key black">       </div>       <div data-key="67" data-combo="ctrl+8" class="key border-right">       </div>       <div data-key="68" data-combo="ctrl+9" class="key black">       </div>       <div data-key="69" data-combo="ctrl+0" class="key border-right">       </div>       <div data-key="70" data-combo="ctrl+q" class="key black">       </div>       <div data-key="71" data-combo="ctrl+w" class="key border-right">       </div>       <div data-key="72" data-combo="ctrl+e" class="key border-right">       </div>       <div data-key="73" data-combo="alt+1" class="key border-right">       </div>       <div data-key="74" data-combo="alt+2" class="key black">       </div>       <div data-key="75" data-combo="alt+3" class="key border-right">       </div>       <div data-key="76" data-combo="alt+4" class="key black">       </div>       <div data-key="77" data-combo="alt+5" class="key border-right">       </div>       <div data-key="78" data-combo="alt+6" class="key border-right">       </div>       <div data-key="79" data-combo="alt+7" class="key black">       </div>       <div data-key="80" data-combo="alt+8" class="key border-right">       </div>       <div data-key="81" data-combo="alt+9" class="key black">       </div>       <div data-key="82" data-combo="alt+0" class="key border-right">       </div>       <div data-key="83" data-combo="alt+q" class="key black">       </div>       <div data-key="84" data-combo="alt+w" class="key border-right">       </div>       <div data-key="85" data-combo="alt+e" class="key border-right">       </div>     </div></section>');
     });
 
-    myLayout.registerComponent('logComponent', function(container, componentState) {
+    myLayout.registerComponent('Log', function(container, componentState) {
         container.getElement().html('<textarea id="log"></textarea>');
     });
 
@@ -266,8 +276,7 @@ function makeLayout() {
 
 }
 $(document).ready(function() {
-    if (screen.width > 640)
-        makeLayout();
+    makeLayout();
     window.setInterval(refreshLog, 1000);
 
     $("#restart").click(function() {
