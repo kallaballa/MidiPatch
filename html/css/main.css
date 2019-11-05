@@ -145,6 +145,7 @@ label {
 }
 
 .button {
+  cursor: default;
   display: inline;
   color: white;
   background-color: black;
