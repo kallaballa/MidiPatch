@@ -412,14 +412,21 @@ int main(int argc, char ** argv) {
 					exit(0);
 				}
 				std::cerr << "Opening MIDI port: " << midiIndex << std::endl;
-				midiIn->openPort(midiIndex);
-				midiIn->setCallback(&midiCallback);
+				try {
+					midiIn->openPort(midiIndex);
+					midiIn->setCallback(&midiCallback);
+				} catch (std::exception& e) {
+					print_red("Midi port not found!", false);
+				}
 
 				std::cerr << "Opening audio port: " << rtParams.deviceId << " channels: " << rtParams.nChannels << " rate: "
 						<< sampleRate << " frames: " << bufferFrames << std::endl;
-
-				dac.openStream(&rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL);
-				dac.startStream();
+				try {
+					dac.openStream(&rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL);
+					dac.startStream();
+				} catch (std::exception& e) {
+					print_red("Unable to open audio port!", false);
+				}
 				ui_clear();
 				ui_print(0, 0, "Running");
 				ui_flush();
