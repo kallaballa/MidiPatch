@@ -5,9 +5,6 @@ body {
   margin: 0;
 }
 
-.lm_root {
-}
-
 .lm_content {
 overflow-x:auto;
 overflow-y:auto;
@@ -85,8 +82,16 @@ input::-webkit-calendar-picker-indicator {
   font-size: 1em;
 }
 
+
 #log pre {
- display: inline
+  display: inline;
+}
+
+#log pre span {
+  display: inline;
+  text-decoration: underline;
+  cursor: pointer;
+  color: #bb0000;
 }
 
 #buttonbar {

@@ -308,6 +308,14 @@ int main(int argc, char ** argv) {
 				}
 				poly->addVoice(*s[i]);
 			}
+			websocket->setSendConfigCallback([&]() {
+				std::ostringstream ss;
+				ss << "{ \"type\": \"config\", \"data\": { ";
+				ss << "\"patchFile\": \"" << patchFile << "\"";
+				ss << "}}";
+				return ss.str();
+			});
+			websocket->sendConfig();
 
 			if (!poly->getVoices().empty()) {
 				load_parameters();
@@ -379,13 +387,7 @@ int main(int argc, char ** argv) {
 					ss << "]}";
 					return ss.str();
 				});
-				websocket->setSendConfigCallback([&]() {
-					std::ostringstream ss;
-					ss << "{ \"type\": \"config\", \"data\": { ";
-					ss << "\"patchFile\": \"" << patchFile << "\"";
-					ss << "}}";
-					return ss.str();
-				});
+
 
 				websocket->sendConfig();
 				websocket->sendControlList();

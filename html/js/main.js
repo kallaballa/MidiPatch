@@ -33,13 +33,19 @@ function refreshLog() {
         var lines = data.split('\n');
         for(var i = 0;i < lines.length;i++){
           var tokens = lines[i].split(":");
-          console.log(patchFile);
           if(tokens.length > 1 && patchFile && $(ansi_up.ansi_to_html(tokens[0])).unwrap().html().trim() == patchFile) {
-             alert(tokens[0] + " == " + patchFile);
-            var lineNum = parseInt(tokens[1], 10);
-            alert(lineNum);
+            var lineNum = parseInt(tokens[1], 10) - 1;
+            var logline = "<pre>    <span>" + patchFile + ":" + (lineNum + 1) + ":" + tokens[2] + " </span></pre>";
+            $("#log").append(logline).last().click(function() {
+              codeMirror.focus();
+              codeMirror.scrollIntoView({line: lineNum, ch:0});
+              codeMirror.setCursor({line: lineNum, ch: 0})
+              codeMirror.setSelection({line: lineNum, ch: 0}, {line: lineNum, ch: 200});
+            })
+          } else {
+            $("#log").append(ansi_up.ansi_to_html(lines[i]));
           }
-          $("#log").append(ansi_up.ansi_to_html(lines[i])).append("<br/>");
+          $("#log").append("<br/>");
         }
         $("#log").parent().attr("id","logparent");
         scrollToBottom("logparent");
@@ -154,7 +160,6 @@ function connect() {
     socket.onmessage = function(event) {
         var obj = jQuery.parseJSON(event.data);
         if(obj.type == "config") {
-          alert("config")
           patchFile = obj.data.patchFile;     
         } else if (obj.type == "update-control") {
             $(obj.data.parent + "_" + obj.data.child).val(obj.data.value);
@@ -251,6 +256,8 @@ function makeLayout() {
         window.setTimeout(function() {
         codeMirror = CodeMirror.fromTextArea(document.getElementById("editor"), {
           lineNumbers: true,
+          styleSelectedText: true,
+          styleActiveLine: {nonEmpty: true},
           mode: "lua",
           theme: "midnight",
         });
