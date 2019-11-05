@@ -275,9 +275,13 @@ function makeLayout() {
         codeMirror = CodeMirror.fromTextArea(document.getElementById("editor"), {
           lineNumbers: true,
           styleSelectedText: true,
+          keyMap: "sublime",
           styleActiveLine: {nonEmpty: true},
+          matchBrackets: true,
+          showCursorWhenSelecting: true,
           mode: "lua",
           theme: "midnight",
+          inputStyle: "contenteditable"
         });
         codeMirror.setValueAsk = function(content) {
           $( function() {
@@ -363,6 +367,13 @@ $(document).ready(function() {
         clearAllNotes();
     });
 
+    $("#editorselect").change(function() {
+      if($("#editorselect").val() == "vim") {
+        codeMirror.setOption("vimMode", true);
+        $(".CodeMirror-cursors").css('visibility', 'visible');
+      }
+      codeMirror.setOption("keyMap", $("#editorselect").val());
+    });
 
     connect();
     const keys = Array.from(document.querySelectorAll('.key'));
