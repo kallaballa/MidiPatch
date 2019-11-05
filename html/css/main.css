@@ -45,6 +45,10 @@ overflow-y:auto;
   width: 0%;
 }
 
+.control-cell label {
+  color:black;
+}
+
 .CodeMirror {
   height: 99%;
 }
@@ -99,6 +103,14 @@ overflow-y:auto;
   vertical-align: middle;
 }
 
+#holdmode {
+  vertical-align: middle;
+}
+
+#holdmodesection {
+  display: inline;
+  margin-right: 3px;
+}
 label {
   display: inline;
   color: white;
@@ -139,6 +151,9 @@ label {
   padding: 3px;
 }
 
+#piano {
+  margin-top: 3px;
+}
 @media only screen and (max-width: 1000px) {
 .CodeMirror {
   width: 96vw;
