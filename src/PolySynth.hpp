@@ -39,6 +39,9 @@ public:
 		allocator.noteOff(note);
 	}
 
+	void clearAllNotes() {
+		allocator.clearAllNotes();
+	}
 protected:
 	Mixer mixer;
 	VoiceAllocator allocator;
@@ -58,6 +61,8 @@ public:
 	void addVoice(Synth synth);
 	void noteOn(int noteNumber, int velocity);
 	void noteOff(int noteNumber);
+	void clearAllNotes();
+
 	vector<PolyVoice>& getVoices();
 protected:
 	virtual int getNextVoice(int note);

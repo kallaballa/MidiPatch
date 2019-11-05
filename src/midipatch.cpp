@@ -339,6 +339,10 @@ int main(int argc, char ** argv) {
 				websocket->setNoteOffCallback([&](size_t note) {
 					poly->noteOff(note);
 				});
+
+				websocket->setClearAllNotesCallback([&]() {
+					poly->clearAllNotes();
+				});
 				websocket->setSendControlListCallback([&]() {
 					std::ostringstream ss;
 					ss << "{ \"type\": \"control-list\", \"data\": [ ";

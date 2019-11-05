@@ -265,6 +265,9 @@ Websocket::Websocket(size_t port, const string& logFile, const string& patchFile
 							size_t note = msg["note"].get<size_t>();
 							if(noteOffCallback_)
 								noteOffCallback_(note);
+						} else if(type == "clear-all-notes") {
+							if(clearAllNotesCallback_)
+								clearAllNotesCallback_();
 						} else if(type == "audio-stream-enabled") {
 							audioStreamEnabled_ = msg["data"].get<bool>();
 						} else if(type == "restart") {
