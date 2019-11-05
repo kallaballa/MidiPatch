@@ -91,10 +91,12 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 
 	if (msgtype == 0x80 || (msgtype == 0x90 && b2 == 0)) {
 //		std::cout << "MIDI Note OFF  C: " << chan << " N: " << b1 << std::endl;
+		websocket->sendNoteOff(b1);
 		poly->noteOff(b1);
 	} else if (msgtype == 0x90) {
 //		std::cout << "MIDI Note ON   C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
 		poly->noteOn(b1, b2);
+		websocket->sendNoteOn(b1,b2);
 	} else if (msgtype == 0xB0) {
 //		std::cout << "MIDI CC ON     C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
 		std::vector<string> commonParams;

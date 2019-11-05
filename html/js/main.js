@@ -181,6 +181,12 @@ function connect() {
           patchFile = obj.data.patchFile;     
         } else if (obj.type == "update-control") {
             $(obj.data.parent + "_" + obj.data.child).val(obj.data.value);
+        } else if (obj.type == "update-note") {
+          if(obj.isOn)
+            $(".key").eq(obj.note % 12).css("background-color","red");
+          else
+            $(".key").eq(obj.note % 12).css("background-color","");
+
         } else if (obj.type == "display") {} else if (obj.type == "control-list") {
             if (lastControlListData == event.data) {
                 return;

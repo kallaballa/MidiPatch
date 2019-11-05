@@ -66,6 +66,8 @@ public:
 	void clear();
 	void print(const uint8_t& col, const uint8_t& row, const std::string& s);
 	void flush();
+	void sendNoteOn(size_t note, size_t velocity);
+	void sendNoteOff(size_t note);
 	void sendAudio(int16_t* audioBuffer, size_t len);
 	void updateParameter(const string& name, const float& value);
 	bool isAudioStreamEnabled() {

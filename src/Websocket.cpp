@@ -363,6 +363,25 @@ void Websocket::flush() {
 	}
 }
 
+void Websocket::sendNoteOn(size_t note, size_t velocity) {
+	std::scoped_lock lock(mutex_);
+	std::ostringstream ss;
+	ss << "{ \"type\": \"update-note\", \"note\": " << note << ", \"isOn\": true, \"velocity\": " << velocity << " }";
+	for (auto& client : clients_) {
+		client->send(ss.str(), uWS::TEXT);
+	}
+}
+
+void Websocket::sendNoteOff(size_t note) {
+	std::scoped_lock lock(mutex_);
+	std::ostringstream ss;
+	ss << "{ \"type\": \"update-note\", \"note\": " << note << ", \"isOn\": false, \"velocity\": 0 }";
+	for (auto& client : clients_) {
+		client->send(ss.str(), uWS::TEXT);
+	}
+}
+
+
 void Websocket::sendConfig() {
 	std::scoped_lock lock(mutex_);
 	if(sendConfigCallback_) {
