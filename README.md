@@ -2,20 +2,27 @@ MidiPatch is a scriptable modular synthesizer. The scripting is done in [lua](ht
 
 # Usage
 
-    Usage: midipatch [options] <patch file>...
+    Usage:
+      src/midipatch [OPTION...]
 
-    Options:
-      -h [ --help ]               Print help messages
-      -m [ --midi ] arg (=0)      The index of the midi input device to use.
-      -a [ --audio ] arg (=0)     The index of the audio output device to use.
-      -r [ --rate ] arg (=48000)  The audio output sample rate
-      -b [ --buffer ] arg (=512)  Number of frames per buffer
-      -o [ --offset ] arg (=0)    The control number offset for parameter mapping
+      -h, --help           Print help messages
+      -m, --midi arg       The index of the midi input device to use. (default: 0)
+      -a, --audio arg      The index of the audio output device to use. (default: 0)
+      -r, --rate arg       The audio output sample rate. (default: 44100)
+      -b, --buffer arg     Number of frames per buffer. (default: 32)
+      -l, --lcd arg        The tty file for the LCD display.
+      -o, --offset arg     The control number offset for parameter mapping
+                           (default: 52)
+      -v, --voices arg     The number of voices to run (default: 8)
+      -s, --save arg       The file where current patch settings are stored
+                           (default: /tmp/midipatch.save)
+      -p, --patchFile arg  The lua patchFile to use for the voices
+      -f, --logFile arg    The file to log to (default: /tmp/midipatch.log)
 
 For example to create a midi synthesizer with 3 voices, connecting to the second midi port (port index starts at 0), which automatically maps patch parameters to control numbers, starting at the control number offset in ascending order:
 
-    src/midipatch -m1 -o 52 src/sin.lua src/sin.lua src/sin.lua src/sin.lua
-
+    src/midipatch -m 0 -a 0 -o 52 -v 8 -p /home/elchaschab/devel/MidiPatch/bank.lua -f log
+ 
 Note, that you can use a different patch per voice.
 
 # Example patch
