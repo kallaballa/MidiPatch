@@ -49,7 +49,6 @@ void BasicPolyphonicAllocator::noteOff(int note) {
 			voice.synth.setParameter("_polyGate", 0.0);
 
 			activeVoiceQueue.remove(voiceNumber);
-			inactiveVoiceQueue.remove(voiceNumber);
 			inactiveVoiceQueue.push_back(voiceNumber);
 
 			break;
@@ -62,12 +61,11 @@ void BasicPolyphonicAllocator::clearAllNotes() {
 		PolyVoice& voice = voiceData[voiceNumber];
 		if (voice.currentNote != 0) {
 			voice.synth.setParameter("_polyGate", 0.0);
-
-			activeVoiceQueue.remove(voiceNumber);
-			inactiveVoiceQueue.remove(voiceNumber);
-			inactiveVoiceQueue.push_back(voiceNumber);
 		}
+		inactiveVoiceQueue.remove(voiceNumber);
+		inactiveVoiceQueue.push_back(voiceNumber);
 	}
+	activeVoiceQueue.clear();
 }
 
 vector<BasicPolyphonicAllocator::PolyVoice>& BasicPolyphonicAllocator::getVoices() {

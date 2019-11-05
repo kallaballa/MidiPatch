@@ -122,7 +122,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 				} else {
 					if (currentParams != commonParams) {
 						std::cerr << "Synth parameters differ, can't set parameters globally" << std::endl;
-						return;
+						break;
 					}
 				}
 			}
@@ -228,7 +228,7 @@ int main(int argc, char ** argv) {
 
 	if (result["help"].count()) {
 		std::cerr << options.help() << std::endl;
-		exit(1);
+		exit(4);
 	}
 
 	if (!ttyLCD.empty()) {

@@ -50,6 +50,7 @@ overflow-y:auto;
 
 .control-cell label {
   color:black;
+  margin: auto;
 }
 
 .CodeMirror {
