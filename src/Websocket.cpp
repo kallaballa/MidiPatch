@@ -235,6 +235,12 @@ Websocket::Websocket(size_t port, const string& logFile, const string& patchFile
 					.open = [&](auto *ws, auto *req) {
 						std::scoped_lock lock(mutex_);
 						clients_.insert(ws);
+						if(sendConfigCallback_) {
+							string config = sendConfigCallback_();
+							for (auto& client : clients_) {
+								client->send(config, uWS::TEXT);
+							}
+						}
 						if(sendControlListCallback_) {
 							string list = sendControlListCallback_();
 							for (auto& client : clients_) {
@@ -354,6 +360,15 @@ void Websocket::flush() {
 	}
 }
 
+void Websocket::sendConfig() {
+	std::scoped_lock lock(mutex_);
+	if(sendConfigCallback_) {
+		string config = sendConfigCallback_();
+		for (auto& client : clients_) {
+			client->send(config, uWS::TEXT);
+		}
+	}
+}
 void Websocket::sendControlList() {
 	std::scoped_lock lock(mutex_);
 	if(sendControlListCallback_) {

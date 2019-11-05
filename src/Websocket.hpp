@@ -33,11 +33,12 @@ class Websocket {
 	std::function<void(size_t, size_t)> noteOnCallback_;
 	std::function<void(size_t)> noteOffCallback_;
 	std::function<string()> sendControlListCallback_;
+	std::function<string()> sendConfigCallback_;
 
 public:
 	Websocket(size_t port, const string& logFile, const string& bankFile);
 	virtual ~Websocket();
-	void setSendControlListCallback_(std::function<string()> callback) {
+	void setSendControlListCallback(std::function<string()> callback) {
 		sendControlListCallback_ = callback;
 	}
 
@@ -52,6 +53,11 @@ public:
 	void setNoteOffCallback(std::function<void(size_t)> callback) {
 		noteOffCallback_ = callback;
 	}
+
+	void setSendConfigCallback(std::function<string()> callback) {
+		sendConfigCallback_ = callback;
+	}
+
 	void clear();
 	void print(const uint8_t& col, const uint8_t& row, const std::string& s);
 	void flush();
@@ -69,6 +75,7 @@ public:
 		audioStreamEnabled_ = false;
 		restart_ = false;
 	}
+	void sendConfig();
 	void sendControlList();
 };
 

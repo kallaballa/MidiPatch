@@ -1,5 +1,8 @@
 body {
   background-color: grey;
+  height: 99%;
+  padding: 0;
+  margin: 0;
 }
 
 .lm_root {

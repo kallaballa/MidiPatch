@@ -331,7 +331,7 @@ int main(int argc, char ** argv) {
 				websocket->setNoteOffCallback([&](size_t note) {
 					poly->noteOff(note);
 				});
-				websocket->setSendControlListCallback_([&]() {
+				websocket->setSendControlListCallback([&]() {
 					std::ostringstream ss;
 					ss << "{ \"type\": \"control-list\", \"data\": [ ";
 
@@ -379,7 +379,15 @@ int main(int argc, char ** argv) {
 					ss << "]}";
 					return ss.str();
 				});
+				websocket->setSendConfigCallback([&]() {
+					std::ostringstream ss;
+					ss << "{ \"type\": \"config\", \"data\": { ";
+					ss << "\"patchFile\": \"" << patchFile << "\"";
+					ss << "}}";
+					return ss.str();
+				});
 
+				websocket->sendConfig();
 				websocket->sendControlList();
 				websocket->reset();
 
