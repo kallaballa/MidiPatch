@@ -36,7 +36,7 @@ midipatch::Websocket* websocket;
 string save_file;
 
 inline void print_red(const string& s, bool bold) {
-	std::cerr << "\033["<< (bold ? "1;" : "") << "31m" << s << "\033[0m" << std::endl;
+	std::cerr << "\033[" << (bold ? "1;" : "") << "31m" << s << "\033[0m" << std::endl;
 }
 
 inline void ui_print(const uint8_t& col, const uint8_t& row, const string& s) {
@@ -96,7 +96,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 	} else if (msgtype == 0x90) {
 //		std::cout << "MIDI Note ON   C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
 		poly->noteOn(b1, b2);
-		websocket->sendNoteOn(b1,b2);
+		websocket->sendNoteOn(b1, b2);
 	} else if (msgtype == 0xB0) {
 //		std::cout << "MIDI CC ON     C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
 		std::vector<string> commonParams;
@@ -251,30 +251,37 @@ int main(int argc, char ** argv) {
 	ui_flush();
 
 	kaguya::State state;
-	state.setErrorHandler([](int status, const char* msg){
-    switch (status) {
-    case LUA_ERRSYNTAX:
-          print_red("Syntax error:", true);
-          break;
-    case LUA_ERRRUN:
-      		print_red("Runtime error:", true);
-      		break;
-    case LUA_ERRMEM:
-      print_red("Lua memory allocation error:", true);
-      break;
-    case LUA_ERRERR:
-      print_red("Error running error:", true);
-      break;
+	state.setErrorHandler([](int status, const char* msg) {
+		switch (status) {
+			case LUA_ERRSYNTAX:
+			print_red("Syntax error:", true);
+			print_red(string("    ") + msg + "\n", false);
+			break;
+			case LUA_ERRRUN:
+			print_red("Runtime error:", true);
+			print_red(string("    ") + msg + "\n", false);
+			break;
+			case LUA_ERRMEM:
+			print_red("Lua memory allocation error:", true);
+			print_red(string("    ") + msg + "\n", false);
+			break;
+			case LUA_ERRERR:
+			print_red("Error running error:", true);
+			print_red(string("    ") + msg + "\n", false);
+			break;
 #if LUA_VERSION_NUM >= 502
-    case LUA_ERRGCMM:
-      		print_red("GC error:", true);
-      		break;
+			case LUA_ERRGCMM:
+			print_red("GC error:", true);
+			print_red(string("    ") + msg + "\n", false);
+			break;
 #endif
-    default:
-    	print_red("Lua unknown error:", true);
-    	break;
-    }
-		print_red(string("    ") + msg + "\n", false);
+			default:
+#ifdef __MIDIPATCH_DEBUG
+			print_red("Lua unknown error:", true);
+			print_red(string("    ") + msg + "\n", false);
+#endif
+			break;
+		}
 	});
 	bindings0(state);
 	bindings1(state);
@@ -305,7 +312,7 @@ int main(int argc, char ** argv) {
 				}
 				s[i] = new Synth();
 				state["synth"] = s[i];
-				if(!state.dofile(patchFile)) {
+				if (!state.dofile(patchFile)) {
 					break;
 				}
 				poly->addVoice(*s[i]);
@@ -349,7 +356,7 @@ int main(int argc, char ** argv) {
 					std::ostringstream ss;
 					ss << "{ \"type\": \"control-list\", \"data\": [ ";
 					if(poly->getVoices().empty())
-						return string("");
+					return string("");
 					auto params = poly->getVoices()[0].synth.getParameters();
 					std::vector<string> parents;
 					std::map<string, std::vector<std::pair<string, float>>> hierachie;
@@ -394,7 +401,6 @@ int main(int argc, char ** argv) {
 					ss << "]}";
 					return ss.str();
 				});
-
 
 				websocket->sendConfig();
 				websocket->sendControlList();
@@ -441,12 +447,12 @@ int main(int argc, char ** argv) {
 				sleep(1);
 			}
 		} catch (RtError& e) {
-			print_red("Exception:",true);
-			print_red(std::string("    ") + e.getMessage(),false);
+			print_red("Exception:", true);
+			print_red(std::string("    ") + e.getMessage(), false);
 			exit(2);
 		} catch (std::exception& ex) {
-			print_red("Exception:",true);
-			print_red(std::string("    ") + ex.what(),false);
+			print_red("Exception:", true);
+			print_red(std::string("    ") + ex.what(), false);
 			exit(2);
 		}
 	}
