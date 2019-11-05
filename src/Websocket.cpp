@@ -234,7 +234,6 @@ Websocket::Websocket(size_t port, const string& logFile, const string& patchFile
 					/* Handlers */
 					.open = [&](auto *ws, auto *req) {
 						std::scoped_lock lock(mutex_);
-						std::cerr << "WS client connected" << std::endl;
 						clients_.insert(ws);
 						if(sendControlListCallback_) {
 							string list = sendControlListCallback_();
@@ -277,7 +276,6 @@ Websocket::Websocket(size_t port, const string& logFile, const string& patchFile
 					},
 					.close = [&](auto *ws, int code, std::string_view message) {
 						std::scoped_lock lock(mutex_);
-						std::cerr << "WS client closed" << std::endl;
 						clients_.erase(ws);
 					}
 				}).listen(8080, [=](auto *token) {

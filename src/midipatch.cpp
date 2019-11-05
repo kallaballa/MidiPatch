@@ -35,6 +35,10 @@ LCD* lcd = nullptr;
 midipatch::Websocket* websocket;
 string save_file;
 
+inline void print_red(const string& s, bool bold) {
+	std::cerr << "\033["<< (bold ? "1;" : "") << "31m" << s << "\033[0m" << std::endl;
+}
+
 inline void ui_print(const uint8_t& col, const uint8_t& row, const string& s) {
 	if (lcd)
 		lcd->print(col, row, s);
@@ -56,7 +60,7 @@ inline void ui_flush() {
 
 int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime,
 		RtAudioStreamStatus status, void *userData) {
-	if(websocket->isRestartRequested())
+	if (websocket->isRestartRequested())
 		return 0;
 	synth->fillBufferOfFloats((float*) outputBuffer, nBufferFrames, nChannels);
 
@@ -75,7 +79,7 @@ int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFr
 }
 
 void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) {
-	if(websocket->isRestartRequested())
+	if (websocket->isRestartRequested())
 		return;
 
 	int chan = (*msg)[0] & 0xf;
@@ -245,6 +249,31 @@ int main(int argc, char ** argv) {
 	ui_flush();
 
 	kaguya::State state;
+	state.setErrorHandler([](int status, const char* msg){
+    switch (status) {
+    case LUA_ERRSYNTAX:
+          print_red("Syntax error:", true);
+          break;
+    case LUA_ERRRUN:
+      		print_red("Runtime error:", true);
+      		break;
+    case LUA_ERRMEM:
+      print_red("Lua memory allocation error:", true);
+      break;
+    case LUA_ERRERR:
+      print_red("Error running error:", true);
+      break;
+#if LUA_VERSION_NUM >= 502
+    case LUA_ERRGCMM:
+      		print_red("GC error:", true);
+      		break;
+#endif
+    default:
+    	print_red("Lua unknown error:", true);
+    	break;
+    }
+		print_red(string("    ") + msg + "\n", false);
+	});
 	bindings0(state);
 	bindings1(state);
 	bindings2(state);
@@ -267,125 +296,140 @@ int main(int argc, char ** argv) {
 		synth = new Synth();
 		poly = new PolySynth();
 		midiIn = new RtMidiIn();
-
-		for (size_t i = 0; i < numVoices; ++i) {
-			if(s[i] != nullptr) {
-				delete(s[i]);
-			}
-			s[i] = new Synth();
-			state["synth"] = s[i];
-			state.dofile(patchFile);
-			poly->addVoice(*s[i]);
-		}
-
-		load_parameters();
-		signal(SIGINT, signalHandler);
-		signal(SIGTERM, signalHandler);
-		signal(SIGKILL, signalHandler);
-
-		//add a slight ADSR to prevent clicking
-		synth->setOutputGen(*poly);
-		// open rtaudio stream and rtmidi port
-
-		websocket->setSetControlCallback([&](string n, float v) {
-			for(auto& voice : poly->getVoices()) {
-				voice.synth.setParameter(n, v);
-			}
-		});
-		websocket->setNoteOnCallback([&](size_t note, size_t velo) {
-			poly->noteOn(note, velo);
-		});
-
-		websocket->setNoteOffCallback([&](size_t note) {
-			poly->noteOff(note);
-		});
-		websocket->setSendControlListCallback_([&]() {
-			std::ostringstream ss;
-			ss << "{ \"type\": \"control-list\", \"data\": [ ";
-
-			auto params = poly->getVoices()[0].synth.getParameters();
-			std::vector<string> parents;
-			std::map<string, std::vector<std::pair<string, float>>> hierachie;
-			for (size_t i = 0; i < params.size(); ++i) {
-				const string& name = params[i].getName();
-				if (name.empty() || name.at(0) == '_')
-					continue;
-				string parent;
-				string child;
-				auto pos = name.find(".");
-				if (pos != string::npos && pos < name.size() - 1) {
-					parent = name.substr(0, pos);
-					child = name.substr(pos + 1);
-				} else if (!name.empty()) {
-					parent = "Global";
-					child = name;
-				}
-				if (std::find(parents.begin(), parents.end(), parent) == parents.end()) {
-					parents.push_back(parent);
-				}
-				hierachie[parent].push_back( { child, params[i].getValue() });
-			}
-
-			size_t i = 0;
-			for (const auto& parent : parents) {
-				const string& module = parent;
-				const std::vector<std::pair<string, float>>& children = hierachie[parent];
-				ss << "{ \"name\": \"" << escape_json(module) << "\", \"controls\": [";
-				size_t j = 0;
-				for (const auto& child : children) {
-					ss << "{ \"name\" :\"" << escape_json(child.first) << "\", \"value\": \"" << child.second << "\" }";
-					if (j < children.size() - 1)
-						ss << ',';
-
-					++j;
-				}
-				ss << "]}";
-				if (i < hierachie.size() - 1)
-					ss << ',';
-				++i;
-			}
-			ss << "]}";
-			return ss.str();
-		});
-
-		websocket->sendControlList();
-		websocket->reset();
 		try {
-			if (midiIn->getPortCount() == 0) {
-				std::cerr << "No MIDI ports available!\n";
-				cin.get();
-				exit(0);
+			for (size_t i = 0; i < numVoices; ++i) {
+				if (s[i] != nullptr) {
+					delete (s[i]);
+				}
+				s[i] = new Synth();
+				state["synth"] = s[i];
+				if(!state.dofile(patchFile)) {
+					break;
+				}
+				poly->addVoice(*s[i]);
 			}
-			std::cerr << "Opening MIDI port: " << midiIndex << std::endl;
-			midiIn->openPort(midiIndex);
-			midiIn->setCallback(&midiCallback);
 
-			std::cerr << "Opening audio port: " << rtParams.deviceId << " channels: " << rtParams.nChannels << " rate: "
-					<< sampleRate << " frames: " << bufferFrames << std::endl;
+			if (!poly->getVoices().empty()) {
+				load_parameters();
+				signal(SIGINT, signalHandler);
+				signal(SIGTERM, signalHandler);
+				signal(SIGKILL, signalHandler);
 
-			dac.openStream(&rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL);
-			dac.startStream();
-			ui_clear();
-			ui_print(0, 0, "Running");
-			ui_flush();
+				//add a slight ADSR to prevent clicking
+				synth->setOutputGen(*poly);
+				// open rtaudio stream and rtmidi port
 
-			while (!websocket->isRestartRequested()) {
-				sleep(1);
+				websocket->setSetControlCallback([&](string n, float v) {
+					for(auto& voice : poly->getVoices()) {
+						voice.synth.setParameter(n, v);
+					}
+				});
+				websocket->setNoteOnCallback([&](size_t note, size_t velo) {
+					poly->noteOn(note, velo);
+				});
+
+				websocket->setNoteOffCallback([&](size_t note) {
+					poly->noteOff(note);
+				});
+				websocket->setSendControlListCallback_([&]() {
+					std::ostringstream ss;
+					ss << "{ \"type\": \"control-list\", \"data\": [ ";
+
+					auto params = poly->getVoices()[0].synth.getParameters();
+					std::vector<string> parents;
+					std::map<string, std::vector<std::pair<string, float>>> hierachie;
+					for (size_t i = 0; i < params.size(); ++i) {
+						const string& name = params[i].getName();
+						if (name.empty() || name.at(0) == '_')
+						continue;
+						string parent;
+						string child;
+						auto pos = name.find(".");
+						if (pos != string::npos && pos < name.size() - 1) {
+							parent = name.substr(0, pos);
+							child = name.substr(pos + 1);
+						} else if (!name.empty()) {
+							parent = "Global";
+							child = name;
+						}
+						if (std::find(parents.begin(), parents.end(), parent) == parents.end()) {
+							parents.push_back(parent);
+						}
+						hierachie[parent].push_back( {child, params[i].getValue()});
+					}
+
+					size_t i = 0;
+					for (const auto& parent : parents) {
+						const string& module = parent;
+						const std::vector<std::pair<string, float>>& children = hierachie[parent];
+						ss << "{ \"name\": \"" << escape_json(module) << "\", \"controls\": [";
+						size_t j = 0;
+						for (const auto& child : children) {
+							ss << "{ \"name\" :\"" << escape_json(child.first) << "\", \"value\": \"" << child.second << "\" }";
+							if (j < children.size() - 1)
+							ss << ',';
+
+							++j;
+						}
+						ss << "]}";
+						if (i < hierachie.size() - 1)
+						ss << ',';
+						++i;
+					}
+					ss << "]}";
+					return ss.str();
+				});
+
+				websocket->sendControlList();
+				websocket->reset();
+
+				if (midiIn->getPortCount() == 0) {
+					std::cerr << "No MIDI ports available!\n";
+					cin.get();
+					exit(0);
+				}
+				std::cerr << "Opening MIDI port: " << midiIndex << std::endl;
+				midiIn->openPort(midiIndex);
+				midiIn->setCallback(&midiCallback);
+
+				std::cerr << "Opening audio port: " << rtParams.deviceId << " channels: " << rtParams.nChannels << " rate: "
+						<< sampleRate << " frames: " << bufferFrames << std::endl;
+
+				dac.openStream(&rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL);
+				dac.startStream();
+				ui_clear();
+				ui_print(0, 0, "Running");
+				ui_flush();
+
+				while (!websocket->isRestartRequested()) {
+					sleep(1);
+				}
+				std::cerr << "Restarting" << std::endl;
+				midiIn->cancelCallback();
+				midiIn->closePort();
+				dac.abortStream();
+				dac.closeStream();
+				delete (synth);
+				delete (poly);
+				delete (midiIn);
+			} else {
+				websocket->reset();
+				while (!websocket->isRestartRequested()) {
+					sleep(1);
+				}
+				std::cerr << "Restarting" << std::endl;
 			}
-			std::cerr << "Restarting" << std::endl;
-			midiIn->cancelCallback();
-			midiIn->closePort();
-			dac.abortStream();
-			dac.closeStream();
-			delete(synth);
-			delete(poly);
-			delete(midiIn);
-			while(dac.isStreamOpen()) {
+			while (dac.isStreamOpen()) {
 				std::cerr << "Stream still open" << std::endl;
 				sleep(1);
 			}
 		} catch (RtError& e) {
-			std::cerr << '\n' << e.getMessage() << '\n' << std::endl;
+			print_red("Exception:",true);
+			print_red(std::string("    ") + e.getMessage(),false);
+			exit(2);
+		} catch (std::exception& ex) {
+			print_red("Exception:",true);
+			print_red(std::string("    ") + ex.what(),false);
 			exit(2);
 		}
 	}
