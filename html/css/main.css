@@ -6,6 +6,9 @@ body {
   font-family: monospace;
 }
 
+#confirmoverwrite {
+  display: none;
+}
 .lm_content {
 overflow-x:auto;
 overflow-y:auto;

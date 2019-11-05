@@ -280,8 +280,23 @@ function makeLayout() {
           theme: "midnight",
         });
         codeMirror.setValueAsk = function(content) {
-          alert("really?");
-          codeMirror.setValue(content);
+          $( function() {
+          $( "#confirmoverwrite" ).dialog({
+            resizable: false,
+            height: "auto",
+            width: 400,
+            modal: true,
+            buttons: {
+              "Overwrite": function() {
+                codeMirror.setValue(content);
+                $( this ).dialog( "close" );
+              },
+              Cancel: function() {
+                $( this ).dialog( "close" );
+              }
+            }
+          });
+          });
         } 
         codeMirror.on("change", function(cm, change) {
            localStorage.setItem("savedEditorContent", cm.getValue());
