@@ -370,7 +370,7 @@ $(document).ready(function() {
     $("#editorselect").change(function() {
       if($("#editorselect").val() == "vim") {
         codeMirror.setOption("vimMode", true);
-        $(".CodeMirror-cursors").css('visibility', 'visible');
+//        $(".CodeMirror-cursors").css('visibility', 'visible');
       }
       codeMirror.setOption("keyMap", $("#editorselect").val());
     });
