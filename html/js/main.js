@@ -33,7 +33,8 @@ function refreshLog() {
         var lines = data.split('\n');
         for(var i = 0;i < lines.length;i++){
           var tokens = lines[i].split(":");
-          if(tokens.length > 1 && patchFile && $(ansi_up.ansi_to_html(tokens[0])).unwrap().html().trim() == patchFile) {
+          var converted = $(ansi_up.ansi_to_html(tokens[0])).unwrap().html();
+          if(tokens.length > 1 && patchFile && converted !== undefined && converted.trim() == patchFile) {
             var lineNum = parseInt(tokens[1], 10) - 1;
             var logline = "<pre>    <span>" + patchFile + ":" + (lineNum + 1) + ":" + tokens[2] + " </span></pre>";
             $("#log").append(logline).last().click(function() {

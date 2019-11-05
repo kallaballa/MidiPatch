@@ -348,7 +348,8 @@ int main(int argc, char ** argv) {
 				websocket->setSendControlListCallback([&]() {
 					std::ostringstream ss;
 					ss << "{ \"type\": \"control-list\", \"data\": [ ";
-
+					if(poly->getVoices().empty())
+						return string("");
 					auto params = poly->getVoices()[0].synth.getParameters();
 					std::vector<string> parents;
 					std::map<string, std::vector<std::pair<string, float>>> hierachie;
