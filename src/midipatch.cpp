@@ -39,6 +39,11 @@ void log_error(const string& title, const string& msg = "") {
 		websocket->sendLogRecord(title, msg, (int)midipatch::L_ERROR, false);
 }
 
+void log_warn(const string& title, const string& msg = "") {
+	LOG_ERR_MSG(title, msg);
+	if(websocket)
+		websocket->sendLogRecord(title, msg, (int)midipatch::L_WARNING, false);
+}
 void log_debug(const string& title, const string& msg = "") {
 	LOG_DEBUG_MSG(title, msg);
 	if(websocket)
@@ -123,7 +128,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 					first = false;
 				} else {
 					if (currentParams != commonParams) {
-						log_debug("Error", "Synth parameters differ, can't set parameters globally");
+						log_warn("Synth parameters differ, can't set parameters globally");
 						break;
 					}
 				}
@@ -391,7 +396,7 @@ int main(int argc, char ** argv) {
 						midiIn[i]->openPort(mi);
 						midiIn[i]->setCallback(&midiCallback);
 					} catch (std::exception& e) {
-						log_error("Error","Midi port not found!");
+						log_warn("Unable to open midi port");
 					}
 				}
 
@@ -405,7 +410,7 @@ int main(int argc, char ** argv) {
 					dac.openStream(&rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL);
 					dac.startStream();
 				} catch (std::exception& e) {
-					log_error("Error", "Unable to open audio port!");
+					log_warn("Unable to open audio port");
 				}
 
 				while (!websocket->isRestartRequested()) {
@@ -420,14 +425,14 @@ int main(int argc, char ** argv) {
 						midiIn[i]->closePort();
 						delete (midiIn[i]);
 					} catch (std::exception& e) {
-						log_error("Error", "Can't clean up MIDI port");
+						log_warn("Can't clean up MIDI port");
 					}
 				}
 				try{
 					dac.abortStream();
 					dac.closeStream();
 				} catch (std::exception& e) {
-					log_error("Error", "Can't clean up audio port");
+					log_warn("Can't clean up audio port");
 				}
 				delete (synth);
 				delete (poly);
@@ -439,7 +444,7 @@ int main(int argc, char ** argv) {
 				log_info("Restarting");
 			}
 			while (dac.isStreamOpen()) {
-				log_info("Waiting for audiostream to finish");
+				log_warn("Waiting for audiostream to finish");
 				sleep(1);
 			}
 		} catch (RtError& e) {
