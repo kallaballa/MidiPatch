@@ -1,4 +1,0 @@
----
-BasedOnStyle: LLVM
-SortIncludes: false
-Standard: Cpp03

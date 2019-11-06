@@ -66,11 +66,11 @@ info: CXXFLAGS += -g3 -O0
 info: LDFLAGS += -Wl,--export-dynamic -rdynamic
 info: dirs
 
-debug: CXXFLAGS += -g3 -O0 -rdynamic
+debug: CXXFLAGS += -g3 -O0 -rdynamic -D__MIDIPATCH_DEBUG
 debug: LDFLAGS += -Wl,--export-dynamic -rdynamic
 debug: dirs
 
-asan: CXXFLAGS += -g3 -O0 -rdynamic -fno-omit-frame-pointer -fsanitize=address
+asan: CXXFLAGS += -g3 -O0 -rdynamic -fno-omit-frame-pointer -fsanitize=address -D__MIDIPATCH_DEBUG
 asan: LDFLAGS += -Wl,--export-dynamic -fsanitize=address
 asan: LIBS+= -lbfd -ldw
 asan: dirs
