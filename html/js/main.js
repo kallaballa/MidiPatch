@@ -544,7 +544,7 @@ $(document).ready(function() {
     };
   source.connect(myScriptProcessor);
   myScriptProcessor.connect(analyser);
-  //analyser.connect(audioCtx.destination);
+//analyser.connect(audioCtx.destination);
 
   source.start();
   draw();
