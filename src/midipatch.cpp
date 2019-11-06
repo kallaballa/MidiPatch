@@ -13,6 +13,7 @@
 #include "cxxopts.hpp"
 #include "RtAudio.h"
 
+#include "logger.hpp"
 #include "tonic_lua.hpp"
 #include "RtAudio.h"
 #include "RtMidi.h"
@@ -31,10 +32,6 @@ uint8_t current_program = 127;
 size_t controlNumberOffset = 0;
 midipatch::Websocket* websocket;
 string save_file;
-
-inline void print_red(const string& s, bool bold) {
-	std::cerr << "\033[" << (bold ? "1;" : "") << "31m" << s << "\033[0m" << std::endl;
-}
 
 int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime,
 		RtAudioStreamStatus status, void *userData) {
@@ -174,6 +171,7 @@ void signalHandler(int signum) {
 }
 
 int main(int argc, char ** argv) {
+	midipatch::Logger::init(midipatch::L_DEBUG);
 	std::string appName = argv[0];
 	std::vector<int> midiIndex;
 	int audioIndex = 0;
@@ -215,31 +213,25 @@ int main(int argc, char ** argv) {
 	state.setErrorHandler([](int status, const char* msg) {
 		switch (status) {
 			case LUA_ERRSYNTAX:
-			print_red("Syntax error:", true);
-			print_red(string("    ") + msg + "\n", false);
+				LOG_ERR_MSG("Syntax error", msg);
 			break;
 			case LUA_ERRRUN:
-			print_red("Runtime error:", true);
-			print_red(string("    ") + msg + "\n", false);
+				LOG_ERR_MSG("Runtime error", msg);
 			break;
 			case LUA_ERRMEM:
-			print_red("Lua memory allocation error:", true);
-			print_red(string("    ") + msg + "\n", false);
+				LOG_ERR_MSG("Lua memory allocation error", msg);
 			break;
 			case LUA_ERRERR:
-			print_red("Error running error:", true);
-			print_red(string("    ") + msg + "\n", false);
+				LOG_ERR_MSG("Error running error", msg);
 			break;
 #if LUA_VERSION_NUM >= 502
 			case LUA_ERRGCMM:
-			print_red("GC error:", true);
-			print_red(string("    ") + msg + "\n", false);
+				LOG_ERR_MSG("GC error", msg);
 			break;
 #endif
 			default:
 #ifdef __MIDIPATCH_DEBUG
-			print_red("Lua unknown error:", true);
-			print_red(string("    ") + msg + "\n", false);
+				LOG_DEBUG_MSG("Lua unknown error:", msg);
 #endif
 			break;
 		}
@@ -371,7 +363,7 @@ int main(int argc, char ** argv) {
 						midiIn[i]->openPort(mi);
 						midiIn[i]->setCallback(&midiCallback);
 					} catch (std::exception& e) {
-						print_red("Midi port not found!", false);
+						LOG_ERR_STR("Midi port not found!");
 					}
 				}
 
@@ -381,7 +373,7 @@ int main(int argc, char ** argv) {
 					dac.openStream(&rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL);
 					dac.startStream();
 				} catch (std::exception& e) {
-					print_red("Unable to open audio port!", false);
+					LOG_ERR_STR("Unable to open audio port!");
 				}
 
 				while (!websocket->isRestartRequested()) {
@@ -396,14 +388,14 @@ int main(int argc, char ** argv) {
 						midiIn[i]->closePort();
 						delete (midiIn[i]);
 					} catch (std::exception& e) {
-						print_red("Error cleaning up MIDI port", false);
+						LOG_ERR_STR("Error cleaning up MIDI port");
 					}
 				}
 				try{
 					dac.abortStream();
 					dac.closeStream();
 				} catch (std::exception& e) {
-					print_red("Error cleaning up Audio port", false);
+					LOG_ERR_STR("Error cleaning up Audio port");
 				}
 				delete (synth);
 				delete (poly);
@@ -419,12 +411,10 @@ int main(int argc, char ** argv) {
 				sleep(1);
 			}
 		} catch (RtError& e) {
-			print_red("Exception:", true);
-			print_red(std::string("    ") + e.getMessage(), false);
+			LOG_ERR_MSG("Exception", e.getMessage());
 			exit(2);
 		} catch (std::exception& ex) {
-			print_red("Exception:", true);
-			print_red(std::string("    ") + ex.what(), false);
+			LOG_ERR_MSG("Exception", ex.what());
 			exit(2);
 		}
 	}

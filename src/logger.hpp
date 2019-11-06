@@ -30,7 +30,7 @@
 #include "plog/Log.h"
 #include "plog/Appenders/ConsoleAppender.h"
 
-namespace janosh {
+namespace midipatch {
   using std::string;
 
   enum LogLevel {
@@ -61,20 +61,20 @@ namespace janosh {
   #define LOG_DEBUG_STR(x) LOG(plog::debug) << x
   #define LOG_INFO_STR(x) LOG(plog::info) << x
   #define LOG_WARN_STR(x) LOG(plog::warning) << x
-  #define LOG_ERR_STR(x) LOG(plog::error) << x
-  #define LOG_FATAL_STR(x) LOG(plog::fatal) << x
+  #define LOG_ERR_STR(x) LOG(plog::error) << "\033[1;31m" << x << "\033[0m"
+  #define LOG_FATAL_STR(x) LOG(plog::fatal) << "\033[1;31m" << x << "\033[0m"
   #define LOG_GLOBAL_MSG(msg,x) LOG(plog::verbose) << msg << ": " << x
   #define LOG_DEBUG_MSG(msg,x) LOG(plog::debug) << msg << ": " << x
   #define LOG_INFO_MSG(msg,x) LOG(plog::info) << msg << ": " << x
   #define LOG_WARN_MSG(msg,x) LOG(plog::warning) << msg << ": " << x
-  #define LOG_ERR_MSG(msg,x) LOG(plog::error) << msg << ": " << x
-  #define LOG_FATAL_MSG(msg,x) LOG(plog::fatal) << msg << ": " << x
+  #define LOG_ERR_MSG(msg,x) LOG(plog::error) << msg << ": " << "\033[1;31m" << x << "\033[0m"
+  #define LOG_FATAL_MSG(msg,x) LOG(plog::fatal) << msg << ": " << "\033[1;31m" << x << "\033[0m"
   #define LOG_GLOBAL(x) LOG(plog::verbose) << x
   #define LOG_DEBUG(x) LOG(plog::debug) << x
   #define LOG_INFO(x) LOG(plog::info) << x
   #define LOG_WARN(x) LOG(plog::warning) << x
-  #define LOG_ERR(x) LOG(plog::error) << x
-  #define LOG_FATAL(x) LOG(plog::fatal) << x
+  #define LOG_ERR(x) LOG(plog::error) << "\033[1;31m" << x << "\033[0m"
+  #define LOG_FATAL(x) LOG(plog::fatal) << "\033[1;31m" << x << "\033[0m"
 
 #ifdef __clang__
 #pragma clang diagnostic push

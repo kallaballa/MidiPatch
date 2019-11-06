@@ -10,7 +10,6 @@ MidiPatch is a scriptable modular synthesizer. The scripting is done in [lua](ht
       -a, --audio arg      The index of the audio output device to use. (default: 0)
       -r, --rate arg       The audio output sample rate. (default: 44100)
       -b, --buffer arg     Number of frames per buffer. (default: 32)
-      -l, --lcd arg        The tty file for the LCD display.
       -o, --offset arg     The control number offset for parameter mapping
                            (default: 52)
       -v, --voices arg     The number of voices to run (default: 8)

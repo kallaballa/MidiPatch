@@ -15,8 +15,8 @@ ifdef JAVASCRIPT
 TARGET := midipatch.html
 endif
 
-SRCS  := midipatch.cpp ../third/RtMidi/RtMidi.cpp ../third/RtAudio/RtAudio.cpp Websocket.cpp
-CXXFLAGS += -I/usr/lib64/ -I../third/uSockets-0.3.2/src/ -I../third/uWebSockets-0.16.1/src -I../PatchScript/src/ -I../PatchScript/third/kaguya/include -I../PatchScript/third/lua-5.3.5/src -I../PatchScript/third/Tonic/src -I../third/cxxopts-2.2.0/include -I../third/nlohmann-json-3.7.0/ -I../third/RtMidi -I../third/RtAudio -I../third/plog/ ${CUSTOM_DEFS}
+SRCS  := midipatch.cpp ../third/RtMidi/RtMidi.cpp ../third/RtAudio/RtAudio.cpp Websocket.cpp logger.cpp
+CXXFLAGS += -I/usr/lib64/ -I../third/uSockets-0.3.2/src/ -I../third/uWebSockets-0.16.1/src -I../PatchScript/src/ -I../PatchScript/third/kaguya/include -I../PatchScript/third/lua-5.3.5/src -I../PatchScript/third/Tonic/src -I../third/cxxopts-2.2.0/include -I../third/nlohmann-json-3.7.0/ -I../third/RtMidi -I../third/RtAudio -I../third/ ${CUSTOM_DEFS}
 LIBS += -ltonic -llua -ldl -llilv-0 -luSockets -lz -lpatchscript
 LDFLAGS += -L../PatchScript/third/lua-5.3.5/src -L../PatchScript/third/Tonic/src -L../third/uSockets-0.3.2/ -L../PatchScript/src/
 ASSET_DIRS = $(shell find ../html/ -type d -not -name ".." -not -name "html")

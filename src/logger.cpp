@@ -117,7 +117,7 @@ public:
  }
 
 
-namespace janosh {
+namespace midipatch {
   Logger* Logger::instance_ = NULL;
 
   Logger::Logger(const LogLevel l) : dblog_(false), level_(l) {
