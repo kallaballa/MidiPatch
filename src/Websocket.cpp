@@ -192,7 +192,7 @@ Websocket::Websocket(size_t port, const string& logFile, const string& patchFile
 							res->write("\n");
 						}
 					} catch (std::exception& ex) {
-						std::cerr << ex.what() << std::endl;
+						log_error("Loading patch failed", ex.what());
 					}
 					res->end("");
 				}).post("/cgi-bin/storePatch.cgi", [&](auto *res, auto *req) {
@@ -211,7 +211,7 @@ Websocket::Websocket(size_t port, const string& logFile, const string& patchFile
 									res->end("");
 								});
 					} catch (std::exception& ex) {
-						std::cerr << ex.what() << std::endl;
+						log_error("Storing patch failed", ex.what());
 					}
 					res->end("");
 				}).ws<PerSocketData>("/*", {
