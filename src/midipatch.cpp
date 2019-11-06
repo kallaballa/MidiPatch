@@ -231,7 +231,7 @@ int main(int argc, char ** argv) {
 #endif
 			default:
 #ifdef __MIDIPATCH_DEBUG
-				LOG_DEBUG_MSG("Lua unknown error:", msg);
+				LOG_ERR_MSG("Lua unknown error", msg);
 #endif
 			break;
 		}
