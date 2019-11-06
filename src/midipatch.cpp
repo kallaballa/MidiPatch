@@ -68,15 +68,15 @@ int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFr
 	if (websocket->isRestartRequested())
 		return 0;
 	synth->fillBufferOfFloats((float*) outputBuffer, nBufferFrames, nChannels);
-//	if (true) {
-//		size_t lenBuf = nBufferFrames * nChannels;
-//		std::vector<float> samples(lenBuf, 0);
-//
-//		for (size_t i = 0; i < lenBuf; ++i) {
-//			samples[i] = ((float*) outputBuffer)[i];
-//		}
-//		websocket->sendAudio(samples);
-//	}
+	if (true) {
+		size_t lenBuf = nBufferFrames * nChannels;
+		std::vector<float> samples(lenBuf, 0);
+
+		for (size_t i = 0; i < lenBuf; ++i) {
+			samples[i] = ((float*) outputBuffer)[i];
+		}
+		websocket->sendAudio(samples);
+	}
 	return 0;
 }
 
