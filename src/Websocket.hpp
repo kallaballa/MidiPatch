@@ -27,7 +27,7 @@ class Websocket {
 	std::set<uWS::WebSocket<false, true>*> clients_;
 	std::vector<std::string> buffers_;
 	std::mutex mutex_;
-	bool audioStreamEnabled_ = false;
+	bool audioStreamEnabled_ = true;
 	bool restart_ = false;
 	std::function<void(string, float)> setControlCallback_;
 	std::function<void(size_t, size_t)> noteOnCallback_;
@@ -68,7 +68,7 @@ public:
 	void flush();
 	void sendNoteOn(size_t note, size_t velocity);
 	void sendNoteOff(size_t note);
-	void sendAudio(int16_t* audioBuffer, size_t len);
+	void sendAudio(const std::vector<float>& buf);
 	void updateParameter(const string& name, const float& value);
 	bool isAudioStreamEnabled() {
 		return audioStreamEnabled_;
@@ -83,7 +83,9 @@ public:
 		restart_ = false;
 	}
 	void sendConfig();
+	void sendLogRecord(const string& title, const string& msg, int severity, bool highlight, bool lock = true);
 	void sendControlList();
+	size_t hasClients();
 };
 
 } /* namespace midipatch */

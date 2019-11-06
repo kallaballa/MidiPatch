@@ -13,14 +13,13 @@
 #include "cxxopts.hpp"
 #include "RtAudio.h"
 
+#include "logger.hpp"
 #include "tonic_lua.hpp"
 #include "RtAudio.h"
 #include "RtMidi.h"
 #include "RtError.h"
 #include "PolySynth.hpp"
-#include "LCD.hpp"
 #include "Websocket.hpp"
-#include "UDP.hpp"
 
 using namespace Tonic;
 
@@ -31,50 +30,53 @@ PolySynth* poly;
 
 uint8_t current_program = 127;
 size_t controlNumberOffset = 0;
-LCD* lcd = nullptr;
-midipatch::Websocket* websocket;
+midipatch::Websocket* websocket = nullptr;
 string save_file;
 
-inline void print_red(const string& s, bool bold) {
-	std::cerr << "\033[" << (bold ? "1;" : "") << "31m" << s << "\033[0m" << std::endl;
+void log_error(const string& title, const string& msg = "") {
+	LOG_ERR_MSG(title, msg);
+	if(websocket)
+		websocket->sendLogRecord(title, msg, (int)midipatch::L_ERROR, false);
 }
 
-inline void ui_print(const uint8_t& col, const uint8_t& row, const string& s) {
-	if (lcd)
-		lcd->print(col, row, s);
-	if (websocket)
-		websocket->print(col, row, s);
+void log_warn(const string& title, const string& msg = "") {
+	LOG_ERR_MSG(title, msg);
+	if(websocket)
+		websocket->sendLogRecord(title, msg, (int)midipatch::L_WARNING, false);
+}
+void log_debug(const string& title, const string& msg = "") {
+	LOG_DEBUG_MSG(title, msg);
+	if(websocket)
+		websocket->sendLogRecord(title, msg, (int)midipatch::L_DEBUG, false);
 }
 
-inline void ui_clear() {
-	if (lcd)
-		lcd->clear();
-	if (websocket)
-		websocket->clear();
+void log_info(const string& title, const string& msg = "") {
+	LOG_INFO_MSG(title, msg);
+	if(websocket)
+		websocket->sendLogRecord(title, msg, (int)midipatch::L_INFO, false);
 }
 
-inline void ui_flush() {
-	if (websocket)
-		websocket->flush();
+void log_syntax_error(const string& title, const string& msg = "") {
+	LOG_ERR_MSG(title, msg);
+	if(websocket)
+		websocket->sendLogRecord(title, msg, (int)midipatch::L_ERROR, true);
 }
+
 
 int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime,
 		RtAudioStreamStatus status, void *userData) {
 	if (websocket->isRestartRequested())
 		return 0;
 	synth->fillBufferOfFloats((float*) outputBuffer, nBufferFrames, nChannels);
+	if (true) {
+		size_t lenBuf = nBufferFrames * nChannels;
+		std::vector<float> samples(lenBuf, 0);
 
-//	if (websocket->isAudioStreamEnabled() && udp) {
-//		size_t lenBuf = nBufferFrames * nChannels;
-//		std::vector<int16_t> samples(lenBuf, 0);
-//
-//		for (size_t i = 0; i < lenBuf; ++i) {
-//			samples[i] = ((((float*) outputBuffer)[i] * 2.0) - 1.0) * std::numeric_limits<int16_t>::max();
-//		}
-//		udp->send(samples);
-//	}
-//		if(websocket)
-//			websocket->sendAudio(samples.data(), lenBuf);
+		for (size_t i = 0; i < lenBuf; ++i) {
+			samples[i] = ((float*) outputBuffer)[i];
+		}
+		websocket->sendAudio(samples);
+	}
 	return 0;
 }
 
@@ -123,7 +125,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 					first = false;
 				} else {
 					if (currentParams != commonParams) {
-						std::cerr << "Synth parameters differ, can't set parameters globally" << std::endl;
+						log_warn("Synth parameters differ, can't set parameters globally");
 						break;
 					}
 				}
@@ -151,11 +153,6 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 					if (websocket)
 						websocket->updateParameter(name, (float) b2 / 127.0);
 				}
-
-				ui_clear();
-				ui_print(0, 0, parent);
-				ui_print(0, 1, child + ": " + std::to_string(b2 / 127.0f));
-				ui_flush();
 			}
 		}
 	} else if (msgtype == 0xC0) {
@@ -201,6 +198,7 @@ void signalHandler(int signum) {
 }
 
 int main(int argc, char ** argv) {
+	midipatch::Logger::init(midipatch::L_DEBUG);
 	std::string appName = argv[0];
 	std::vector<int> midiIndex;
 	int audioIndex = 0;
@@ -208,7 +206,6 @@ int main(int argc, char ** argv) {
 	unsigned int bufferFrames = 512;
 	string patchFile;
 	string logFile;
-	string ttyLCD;
 	string saveFile;
 	string bankFile;
 	size_t numVoices;
@@ -217,8 +214,7 @@ int main(int argc, char ** argv) {
 			("m,midi", "The indeces of the midi input ports to use.", cxxopts::value<std::vector<int>>(midiIndex)->default_value("0"))
 			("a,audio", "The index of the audio output port to use.",	cxxopts::value<int>(audioIndex)->default_value("0"))
 			("r,rate", "The audio output sample rate.",	cxxopts::value<unsigned int>(sampleRate)->default_value("44100"))
-			("b,buffer", "Number of frames per buffer.", cxxopts::value<unsigned int>(bufferFrames)->default_value("32"))
-			("l,lcd", "The tty file for the LCD display.", cxxopts::value<string>(ttyLCD))
+			("b,buffer", "Number of frames per buffer.", cxxopts::value<unsigned int>(bufferFrames)->default_value("512"))
 			("o,offset", "The control number offset for parameter mapping",	cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
 			("v,voices", "The number of voices to run",	cxxopts::value<size_t>(numVoices)->default_value("8"))
 			("s,save", "The file where current patch settings are stored", cxxopts::value<string>(saveFile)->default_value("/tmp/midipatch.save"))
@@ -232,11 +228,6 @@ int main(int argc, char ** argv) {
 		exit(4);
 	}
 
-	if (!ttyLCD.empty()) {
-		std::cerr << "Enabling LCD on " << ttyLCD << std::endl;
-		lcd = new LCD(ttyLCD.c_str());
-	}
-
 	if (!saveFile.empty()) {
 		save_file = saveFile;
 	}
@@ -244,40 +235,31 @@ int main(int argc, char ** argv) {
 	std::ofstream ofLog(logFile);
 	std::cout.rdbuf(ofLog.rdbuf());
 	std::cerr.rdbuf(ofLog.rdbuf());
-
-	ui_clear();
-	ui_print(0, 0, "Starting...");
-	ui_flush();
+	websocket = new midipatch::Websocket(8080, logFile, patchFile);
 
 	kaguya::State state;
 	state.setErrorHandler([](int status, const char* msg) {
 		switch (status) {
 			case LUA_ERRSYNTAX:
-			print_red("Syntax error:", true);
-			print_red(string("    ") + msg + "\n", false);
+				log_syntax_error("Syntax error", msg);
 			break;
 			case LUA_ERRRUN:
-			print_red("Runtime error:", true);
-			print_red(string("    ") + msg + "\n", false);
+				log_error("Runtime error", msg);
 			break;
 			case LUA_ERRMEM:
-			print_red("Lua memory allocation error:", true);
-			print_red(string("    ") + msg + "\n", false);
+				log_error("Lua memory allocation error", msg);
 			break;
 			case LUA_ERRERR:
-			print_red("Error running error:", true);
-			print_red(string("    ") + msg + "\n", false);
+				log_error("Error running error", msg);
 			break;
 #if LUA_VERSION_NUM >= 502
 			case LUA_ERRGCMM:
-			print_red("GC error:", true);
-			print_red(string("    ") + msg + "\n", false);
+				log_error("GC error", msg);
 			break;
 #endif
 			default:
 #ifdef __MIDIPATCH_DEBUG
-			print_red("Lua unknown error:", true);
-			print_red(string("    ") + msg + "\n", false);
+				log_error("Lua unknown error", msg);
 #endif
 			break;
 		}
@@ -289,10 +271,6 @@ int main(int argc, char ** argv) {
 	// You don't necessarily have to do this - it will default to 44100 if not set.
 	Tonic::setSampleRate(sampleRate);
 	std::vector<Synth*> s(numVoices, nullptr);
-	ui_clear();
-	ui_print(0, 0, string("Loading patch..."));
-	ui_flush();
-	websocket = new midipatch::Websocket(8080, logFile, patchFile);
 	std::vector<RtMidiIn*> midiIn(midiIndex.size(),nullptr);
 
 	while (true) {
@@ -303,6 +281,9 @@ int main(int argc, char ** argv) {
 
 		synth = new Synth();
 		poly = new PolySynth();
+		while (!websocket->hasClients()) {
+			sleep(1);
+		}
 		try {
 			for (size_t i = 0; i < numVoices; ++i) {
 				if (s[i] != nullptr) {
@@ -407,31 +388,32 @@ int main(int argc, char ** argv) {
 	  		for (size_t i = 0; i < midiIndex.size(); ++i) {
 					try {
 						const int& mi = midiIndex[i];
-						std::cerr << "Opening MIDI port: " << mi << std::endl;
+						log_info("Initialize MIDI", "Port: " + std::to_string(mi));
 						midiIn[i] = new RtMidiIn();
 						midiIn[i]->openPort(mi);
 						midiIn[i]->setCallback(&midiCallback);
 					} catch (std::exception& e) {
-						print_red("Midi port not found!", false);
+						log_warn("Unable to open midi port");
 					}
 				}
 
 				try {
-					std::cerr << "Opening audio port: " << rtParams.deviceId << " channels: " << rtParams.nChannels << " rate: "
-							<< sampleRate << " frames: " << bufferFrames << std::endl;
+					log_info("Initialize Audio",
+							"Port: " + std::to_string(rtParams.deviceId) +
+							" channels: "	+ std::to_string(rtParams.nChannels) +
+							" rate: " + std::to_string(sampleRate) +
+							" frames: " + std::to_string(bufferFrames));
+
 					dac.openStream(&rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL);
 					dac.startStream();
 				} catch (std::exception& e) {
-					print_red("Unable to open audio port!", false);
+					log_warn("Unable to open audio port");
 				}
-				ui_clear();
-				ui_print(0, 0, "Running");
-				ui_flush();
 
 				while (!websocket->isRestartRequested()) {
 					sleep(1);
 				}
-				std::cerr << "Restarting" << std::endl;
+				log_info("Restart request");
 				for (size_t i = 0; i < midiIn.size(); ++i) {
 					try {
 						if(!midiIn[i])
@@ -440,14 +422,14 @@ int main(int argc, char ** argv) {
 						midiIn[i]->closePort();
 						delete (midiIn[i]);
 					} catch (std::exception& e) {
-						print_red("Error cleaning up MIDI port", false);
+						log_warn("Can't clean up MIDI port");
 					}
 				}
 				try{
 					dac.abortStream();
 					dac.closeStream();
 				} catch (std::exception& e) {
-					print_red("Error cleaning up Audio port", false);
+					log_warn("Can't clean up audio port");
 				}
 				delete (synth);
 				delete (poly);
@@ -456,19 +438,17 @@ int main(int argc, char ** argv) {
 				while (!websocket->isRestartRequested()) {
 					sleep(1);
 				}
-				std::cerr << "Restarting" << std::endl;
+				log_info("Restarting");
 			}
 			while (dac.isStreamOpen()) {
-				std::cerr << "Stream still open" << std::endl;
+				log_warn("Waiting for audiostream to finish");
 				sleep(1);
 			}
 		} catch (RtError& e) {
-			print_red("Exception:", true);
-			print_red(std::string("    ") + e.getMessage(), false);
+			log_error("Exception", e.getMessage());
 			exit(2);
 		} catch (std::exception& ex) {
-			print_red("Exception:", true);
-			print_red(std::string("    ") + ex.what(), false);
+			log_error("Exception", ex.what());
 			exit(2);
 		}
 	}
