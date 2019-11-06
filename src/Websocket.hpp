@@ -83,7 +83,9 @@ public:
 		restart_ = false;
 	}
 	void sendConfig();
+	void sendLogRecord(const string& title, const string& msg, int severity, bool highlight, bool lock = true);
 	void sendControlList();
+	size_t hasClients();
 };
 
 } /* namespace midipatch */

@@ -6,7 +6,10 @@
 #include "nlohmann/json.hpp"
 #include <iostream>
 #include <fstream>
+#include "logger.hpp"
 
+
+using std::string;
 extern char _binary_index_min_pack_start;
 extern char _binary_index_min_pack_end;
 
@@ -179,21 +182,7 @@ Websocket::Websocket(size_t port, const string& logFile, const string& patchFile
 						ss << *p++;
 					}
 					res->end(ss.str());
-				}).get("/cgi-bin/log.cgi", [&](auto *res, auto *req) {
-					try {
-						res->writeHeader("Content-Type", "text/plain");
-						std::ifstream ifs(logFile);
-						char buffer[1024];
-						while(ifs.getline(buffer, 1024)) {
-							res->write(buffer);
-							res->write("\n");
-						}
-					} catch (std::exception& ex) {
-						std::cerr << ex.what() << std::endl;
-					}
-					res->end("");
 				}).get("/cgi-bin/loadPatch.cgi", [&](auto *res, auto *req) {
-
 					try {
 						res->writeHeader("Content-Type", "text/plain");
 						std::ifstream ifs(patchFile);
@@ -247,6 +236,7 @@ Websocket::Websocket(size_t port, const string& logFile, const string& patchFile
 								client->send(list, uWS::TEXT);
 							}
 						}
+						sendLogRecord("Connected", "", L_INFO, false, false);
 					},
 					.message = [&](auto *ws, std::string_view message, uWS::OpCode opCode) {
 						json msg = json::parse(std::string(message));
@@ -391,6 +381,23 @@ void Websocket::sendConfig() {
 		}
 	}
 }
+
+void Websocket::sendLogRecord(const string& title, const string& msg, int severity, bool highlight, bool lock) {
+	std::ostringstream ss;
+	ss << "{ \"type\": \"update-log\", \"title\": \"" << escape_json(title) << "\", \"msg\": \"" << escape_json(msg) << "\", \"severity\": " << severity << ", \"highlight\": " << highlight << "}";
+
+	if (lock) {
+		std::scoped_lock lock(mutex_);
+		for (auto& client : clients_) {
+			client->send(ss.str(), uWS::TEXT);
+		}
+	} else {
+		for (auto& client : clients_) {
+			client->send(ss.str(), uWS::TEXT);
+		}
+	}
+}
+
 void Websocket::sendControlList() {
 	std::scoped_lock lock(mutex_);
 	if(sendControlListCallback_) {
@@ -399,5 +406,9 @@ void Websocket::sendControlList() {
 			client->send(list, uWS::TEXT);
 		}
 	}
+}
+size_t Websocket::hasClients() {
+	std::scoped_lock lock(mutex_);
+	return !clients_.empty();
 }
 } /* namespace midipatch */
