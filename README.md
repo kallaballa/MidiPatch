@@ -6,7 +6,7 @@ MidiPatch is a scriptable modular synthesizer. The scripting is done in [lua](ht
       src/midipatch [OPTION...]
 
       -h, --help           Print help messages
-      -m, --midi arg       The index of the midi input device to use. (default: 0)
+      -m, --midi arg       The indeces of the midi input ports to use. (default: 0)
       -a, --audio arg      The index of the audio output device to use. (default: 0)
       -r, --rate arg       The audio output sample rate. (default: 44100)
       -b, --buffer arg     Number of frames per buffer. (default: 32)

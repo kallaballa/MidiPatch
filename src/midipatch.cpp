@@ -202,7 +202,7 @@ void signalHandler(int signum) {
 
 int main(int argc, char ** argv) {
 	std::string appName = argv[0];
-	int midiIndex = 0;
+	std::vector<int> midiIndex;
 	int audioIndex = 0;
 	unsigned int sampleRate = 48000;
 	unsigned int bufferFrames = 512;
@@ -213,18 +213,17 @@ int main(int argc, char ** argv) {
 	string bankFile;
 	size_t numVoices;
 	cxxopts::Options options(appName, "A scriptable, modular and real-time MIDI synthesizer");
-	options.add_options()("h,help", "Print help messages")("m,midi", "The index of the midi input device to use.",
-			cxxopts::value<int>(midiIndex)->default_value("0"))("a,audio", "The index of the audio output device to use.",
-			cxxopts::value<int>(audioIndex)->default_value("0"))("r,rate", "The audio output sample rate.",
-			cxxopts::value<unsigned int>(sampleRate)->default_value("44100"))("b,buffer", "Number of frames per buffer.",
-			cxxopts::value<unsigned int>(bufferFrames)->default_value("32"))("l,lcd", "The tty file for the LCD display.",
-			cxxopts::value<string>(ttyLCD))("o,offset", "The control number offset for parameter mapping",
-			cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))("v,voices", "The number of voices to run",
-			cxxopts::value<size_t>(numVoices)->default_value("8"))("s,save",
-			"The file where current patch settings are stored",
-			cxxopts::value<string>(saveFile)->default_value("/tmp/midipatch.save"))("p,patchFile",
-			"The lua patchFile to use for the voices", cxxopts::value<string>(patchFile))("f,logFile", "The file to log to",
-			cxxopts::value<string>(logFile)->default_value("/tmp/midipatch.log"));
+	options.add_options()("h,help", "Print help messages")
+			("m,midi", "The indeces of the midi input ports to use.", cxxopts::value<std::vector<int>>(midiIndex)->default_value("0"))
+			("a,audio", "The index of the audio output port to use.",	cxxopts::value<int>(audioIndex)->default_value("0"))
+			("r,rate", "The audio output sample rate.",	cxxopts::value<unsigned int>(sampleRate)->default_value("44100"))
+			("b,buffer", "Number of frames per buffer.", cxxopts::value<unsigned int>(bufferFrames)->default_value("32"))
+			("l,lcd", "The tty file for the LCD display.", cxxopts::value<string>(ttyLCD))
+			("o,offset", "The control number offset for parameter mapping",	cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
+			("v,voices", "The number of voices to run",	cxxopts::value<size_t>(numVoices)->default_value("8"))
+			("s,save", "The file where current patch settings are stored", cxxopts::value<string>(saveFile)->default_value("/tmp/midipatch.save"))
+			("p,patchFile",	"The lua patchFile to use for the voices", cxxopts::value<string>(patchFile))
+			("f,logFile", "The file to log to",	cxxopts::value<string>(logFile)->default_value("/tmp/midipatch.log"));
 
 	auto result = options.parse(argc, argv);
 
@@ -294,7 +293,7 @@ int main(int argc, char ** argv) {
 	ui_print(0, 0, string("Loading patch..."));
 	ui_flush();
 	websocket = new midipatch::Websocket(8080, logFile, patchFile);
-	RtMidiIn* midiIn;
+	std::vector<RtMidiIn*> midiIn(midiIndex.size(),nullptr);
 
 	while (true) {
 		RtAudio dac;
@@ -304,7 +303,6 @@ int main(int argc, char ** argv) {
 
 		synth = new Synth();
 		poly = new PolySynth();
-		midiIn = new RtMidiIn();
 		try {
 			for (size_t i = 0; i < numVoices; ++i) {
 				if (s[i] != nullptr) {
@@ -406,22 +404,21 @@ int main(int argc, char ** argv) {
 				websocket->sendControlList();
 				websocket->reset();
 
-				if (midiIn->getPortCount() == 0) {
-					std::cerr << "No MIDI ports available!\n";
-					cin.get();
-					exit(0);
-				}
-				std::cerr << "Opening MIDI port: " << midiIndex << std::endl;
-				try {
-					midiIn->openPort(midiIndex);
-					midiIn->setCallback(&midiCallback);
-				} catch (std::exception& e) {
-					print_red("Midi port not found!", false);
+	  		for (size_t i = 0; i < midiIndex.size(); ++i) {
+					try {
+						const int& mi = midiIndex[i];
+						std::cerr << "Opening MIDI port: " << mi << std::endl;
+						midiIn[i] = new RtMidiIn();
+						midiIn[i]->openPort(mi);
+						midiIn[i]->setCallback(&midiCallback);
+					} catch (std::exception& e) {
+						print_red("Midi port not found!", false);
+					}
 				}
 
-				std::cerr << "Opening audio port: " << rtParams.deviceId << " channels: " << rtParams.nChannels << " rate: "
-						<< sampleRate << " frames: " << bufferFrames << std::endl;
 				try {
+					std::cerr << "Opening audio port: " << rtParams.deviceId << " channels: " << rtParams.nChannels << " rate: "
+							<< sampleRate << " frames: " << bufferFrames << std::endl;
 					dac.openStream(&rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL);
 					dac.startStream();
 				} catch (std::exception& e) {
@@ -435,13 +432,25 @@ int main(int argc, char ** argv) {
 					sleep(1);
 				}
 				std::cerr << "Restarting" << std::endl;
-				midiIn->cancelCallback();
-				midiIn->closePort();
-				dac.abortStream();
-				dac.closeStream();
+				for (size_t i = 0; i < midiIn.size(); ++i) {
+					try {
+						if(!midiIn[i])
+							continue;
+						midiIn[i]->cancelCallback();
+						midiIn[i]->closePort();
+						delete (midiIn[i]);
+					} catch (std::exception& e) {
+						print_red("Error cleaning up MIDI port", false);
+					}
+				}
+				try{
+					dac.abortStream();
+					dac.closeStream();
+				} catch (std::exception& e) {
+					print_red("Error cleaning up Audio port", false);
+				}
 				delete (synth);
 				delete (poly);
-				delete (midiIn);
 			} else {
 				websocket->reset();
 				while (!websocket->isRestartRequested()) {
