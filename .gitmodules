@@ -1,3 +1,4 @@
 [submodule "PatchScript"]
 	path = PatchScript
-	url = git@github.com:kallaballa/PatchScript.git
+	url = https://github.com/kallaballa/PatchScript.git
+
