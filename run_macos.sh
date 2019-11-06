@@ -1,3 +1,8 @@
 #!/bin/bash
 
-DYLD_LIBRARY_PATH=third/Tonic/src/:third/RtAudio:third/RtMidi: src/midipatch -a 1 -m 1 --rate 44100 lua/sin.lua lua/sin.lua lua/sin.lua lua/sin.lua lua/sin.lua lua/sin.lua
+export DYLD_LIBRARY_PATH=third/RtAudio:third/RtMidi:PatchScript/third/Tonic/src:PatchScript/src/
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd "$DIR"
+src/midipatch $@ &>/tmp/midipatch-boot.log
+
+

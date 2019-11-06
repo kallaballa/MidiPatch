@@ -2,11 +2,13 @@ UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S), Darwin)
  CUSTOM_DEFS = -D__MACOSX_CORE__
+ LDFLAGS_EXTRA = -arch x86_64
 endif
 
 ifeq ($(UNAME_S), Linux)
  CUSTOM_DEFS = -D__LINUX_ALSA__
  LIBS+= -lasound
+ LDFLAGS_EXTRA = -b binary
 endif
 
 TARGET  := midipatch
@@ -43,7 +45,7 @@ ${TARGET}: ../html/index.o ${OBJS}
 	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS} 
 
 ../html/index.o: ../html/index.min.pack
-	cd ../html; ld -r -b binary -o index.o index.min.pack
+	cd ../html; ld -r -o index.o index.min.pack ${LDFLAGS_EXTRA}
 
 ../html/index.min.pack: $(ASSET_DIRS) $(ASSET_FILES)
 	cd ../html; inliner -m index.html > index.min.pack
