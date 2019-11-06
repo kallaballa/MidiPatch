@@ -45,7 +45,7 @@ ${TARGET}: ../html/index.o ${OBJS}
 	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS} 
 
 ../html/index.o: ../html/index.min.pack
-	cd ../html; ld -r -o index.o index.min.pack ${LDFLAGS_EXTRA}
+	cd ../html; ld -r ${LDFLAGS_EXTRA} -o index.o index.min.pack
 
 ../html/index.min.pack: $(ASSET_DIRS) $(ASSET_FILES)
 	cd ../html; inliner -m index.html > index.min.pack
