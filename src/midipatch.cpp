@@ -181,7 +181,6 @@ int main(int argc, char ** argv) {
 	unsigned int bufferFrames = 512;
 	string patchFile;
 	string logFile;
-	string ttyLCD;
 	string saveFile;
 	string bankFile;
 	size_t numVoices;
@@ -191,7 +190,6 @@ int main(int argc, char ** argv) {
 			("a,audio", "The index of the audio output port to use.",	cxxopts::value<int>(audioIndex)->default_value("0"))
 			("r,rate", "The audio output sample rate.",	cxxopts::value<unsigned int>(sampleRate)->default_value("44100"))
 			("b,buffer", "Number of frames per buffer.", cxxopts::value<unsigned int>(bufferFrames)->default_value("32"))
-			("l,lcd", "The tty file for the LCD display.", cxxopts::value<string>(ttyLCD))
 			("o,offset", "The control number offset for parameter mapping",	cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
 			("v,voices", "The number of voices to run",	cxxopts::value<size_t>(numVoices)->default_value("8"))
 			("s,save", "The file where current patch settings are stored", cxxopts::value<string>(saveFile)->default_value("/tmp/midipatch.save"))
