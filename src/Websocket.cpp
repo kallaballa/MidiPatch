@@ -335,13 +335,13 @@ void Websocket::updateParameter(const string& name, const float& value) {
 	}
 }
 
-void Websocket::sendAudio(int16_t* audioBuffer, size_t len) {
+void Websocket::sendAudio(const std::vector<float>& buf) {
 	std::scoped_lock lock(mutex_);
-	string data = base64_encode((const unsigned char*) audioBuffer, sizeof(int16_t) * len);
-	std::ostringstream ss;
-	ss << "{ \"type\": \"audio-buffer\", \"data\": \"" << data << "\"}";
+	json j;
+	j["type"] = "audio-buffer";
+	j["data"] = buf;
 	for (auto& client : clients_) {
-		client->send(ss.str(), uWS::TEXT);
+		client->send(j.dump(), uWS::TEXT);
 	}
 }
 

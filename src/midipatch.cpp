@@ -68,18 +68,15 @@ int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFr
 	if (websocket->isRestartRequested())
 		return 0;
 	synth->fillBufferOfFloats((float*) outputBuffer, nBufferFrames, nChannels);
+	if (true) {
+		size_t lenBuf = nBufferFrames * nChannels;
+		std::vector<float> samples(lenBuf, 0);
 
-//	if (websocket->isAudioStreamEnabled() && udp) {
-//		size_t lenBuf = nBufferFrames * nChannels;
-//		std::vector<int16_t> samples(lenBuf, 0);
-//
-//		for (size_t i = 0; i < lenBuf; ++i) {
-//			samples[i] = ((((float*) outputBuffer)[i] * 2.0) - 1.0) * std::numeric_limits<int16_t>::max();
-//		}
-//		udp->send(samples);
-//	}
-//		if(websocket)
-//			websocket->sendAudio(samples.data(), lenBuf);
+		for (size_t i = 0; i < lenBuf; ++i) {
+			samples[i] = ((float*) outputBuffer)[i];
+		}
+		websocket->sendAudio(samples);
+	}
 	return 0;
 }
 
@@ -217,7 +214,7 @@ int main(int argc, char ** argv) {
 			("m,midi", "The indeces of the midi input ports to use.", cxxopts::value<std::vector<int>>(midiIndex)->default_value("0"))
 			("a,audio", "The index of the audio output port to use.",	cxxopts::value<int>(audioIndex)->default_value("0"))
 			("r,rate", "The audio output sample rate.",	cxxopts::value<unsigned int>(sampleRate)->default_value("44100"))
-			("b,buffer", "Number of frames per buffer.", cxxopts::value<unsigned int>(bufferFrames)->default_value("32"))
+			("b,buffer", "Number of frames per buffer.", cxxopts::value<unsigned int>(bufferFrames)->default_value("512"))
 			("o,offset", "The control number offset for parameter mapping",	cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
 			("v,voices", "The number of voices to run",	cxxopts::value<size_t>(numVoices)->default_value("8"))
 			("s,save", "The file where current patch settings are stored", cxxopts::value<string>(saveFile)->default_value("/tmp/midipatch.save"))
