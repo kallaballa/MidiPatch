@@ -15,15 +15,15 @@ ifdef JAVASCRIPT
 TARGET := midipatch.html
 endif
 
-SRCS  := midipatch.cpp tonic_lua0.cpp tonic_lua1.cpp tonic_lua2.cpp PolySynth.cpp ../third/RtMidi/RtMidi.cpp ../third/RtAudio/RtAudio.cpp lvplugin.cpp LCD.cpp Websocket.cpp UDP.cpp
-CXXFLAGS += -I/usr/lib64/ -I../third/uSockets-0.3.2/src/ -I../third/uWebSockets-0.16.1/src -I../third/kaguya/include -I../third/lua-5.3.5/src -I../third/Tonic/src -I../third/cxxopts-2.2.0/include -I../third/nlohmann-json-3.7.0/ -I../third/RtMidi -I../third/RtAudio ${CUSTOM_DEFS}
-LIBS += -ltonic -llua -ldl -llilv-0 -luSockets -lz
-LDFLAGS += -L../third/lua-5.3.5/src -L../third/Tonic/src -L../third/uSockets-0.3.2/
+SRCS  := midipatch.cpp ../third/RtMidi/RtMidi.cpp ../third/RtAudio/RtAudio.cpp Websocket.cpp UDP.cpp LCD.cpp
+CXXFLAGS += -I/usr/lib64/ -I../third/uSockets-0.3.2/src/ -I../third/uWebSockets-0.16.1/src -I../PatchScript/src/ -I../PatchScript/third/kaguya/include -I../PatchScript/third/lua-5.3.5/src -I../PatchScript/third/Tonic/src -I../third/cxxopts-2.2.0/include -I../third/nlohmann-json-3.7.0/ -I../third/RtMidi -I../third/RtAudio ${CUSTOM_DEFS}
+LIBS += -ltonic -llua -ldl -llilv-0 -luSockets -lz -lpatchscript
+LDFLAGS += -L../PatchScript/third/lua-5.3.5/src -L../PatchScript/third/Tonic/src -L../third/uSockets-0.3.2/ -L../PatchScript/src/
 ASSET_DIRS = $(shell find ../html/ -type d -not -name ".." -not -name "html")
 ASSET_FILES = $(shell find ../html/ -type f -not -name index.o -not -name index.min.pack)
 
 #precompiled headers
-HEADERS := tonic_lua.hpp 
+HEADERS :=
 
 GCH     := ${HEADERS:.hpp=.gch}
 OBJS    := ${SRCS:.cpp=.o}

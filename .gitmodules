@@ -1,0 +1,3 @@
+[submodule "PatchScript"]
+	path = PatchScript
+	url = git@github.com:kallaballa/PatchScript.git

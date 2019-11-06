@@ -1,8 +1,10 @@
-cd third/Tonic/
+#!/bin/bash
+
+set -e
+set -x 
+cd PatchScript
+./clean_third.sh
 make clean
-cd ../lua-5.3.5/
+cd ../third/uSockets-0.3.2
 make clean
-cd ../RtMidi
-make clean
-cd ../RtAudio
-make clean
+
