@@ -18,9 +18,7 @@
 #include "RtMidi.h"
 #include "RtError.h"
 #include "PolySynth.hpp"
-#include "LCD.hpp"
 #include "Websocket.hpp"
-#include "UDP.hpp"
 
 using namespace Tonic;
 
@@ -31,31 +29,11 @@ PolySynth* poly;
 
 uint8_t current_program = 127;
 size_t controlNumberOffset = 0;
-LCD* lcd = nullptr;
 midipatch::Websocket* websocket;
 string save_file;
 
 inline void print_red(const string& s, bool bold) {
 	std::cerr << "\033[" << (bold ? "1;" : "") << "31m" << s << "\033[0m" << std::endl;
-}
-
-inline void ui_print(const uint8_t& col, const uint8_t& row, const string& s) {
-	if (lcd)
-		lcd->print(col, row, s);
-	if (websocket)
-		websocket->print(col, row, s);
-}
-
-inline void ui_clear() {
-	if (lcd)
-		lcd->clear();
-	if (websocket)
-		websocket->clear();
-}
-
-inline void ui_flush() {
-	if (websocket)
-		websocket->flush();
 }
 
 int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime,
@@ -151,11 +129,6 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 					if (websocket)
 						websocket->updateParameter(name, (float) b2 / 127.0);
 				}
-
-				ui_clear();
-				ui_print(0, 0, parent);
-				ui_print(0, 1, child + ": " + std::to_string(b2 / 127.0f));
-				ui_flush();
 			}
 		}
 	} else if (msgtype == 0xC0) {
@@ -232,11 +205,6 @@ int main(int argc, char ** argv) {
 		exit(4);
 	}
 
-	if (!ttyLCD.empty()) {
-		std::cerr << "Enabling LCD on " << ttyLCD << std::endl;
-		lcd = new LCD(ttyLCD.c_str());
-	}
-
 	if (!saveFile.empty()) {
 		save_file = saveFile;
 	}
@@ -244,10 +212,6 @@ int main(int argc, char ** argv) {
 	std::ofstream ofLog(logFile);
 	std::cout.rdbuf(ofLog.rdbuf());
 	std::cerr.rdbuf(ofLog.rdbuf());
-
-	ui_clear();
-	ui_print(0, 0, "Starting...");
-	ui_flush();
 
 	kaguya::State state;
 	state.setErrorHandler([](int status, const char* msg) {
@@ -289,9 +253,6 @@ int main(int argc, char ** argv) {
 	// You don't necessarily have to do this - it will default to 44100 if not set.
 	Tonic::setSampleRate(sampleRate);
 	std::vector<Synth*> s(numVoices, nullptr);
-	ui_clear();
-	ui_print(0, 0, string("Loading patch..."));
-	ui_flush();
 	websocket = new midipatch::Websocket(8080, logFile, patchFile);
 	std::vector<RtMidiIn*> midiIn(midiIndex.size(),nullptr);
 
@@ -424,9 +385,6 @@ int main(int argc, char ** argv) {
 				} catch (std::exception& e) {
 					print_red("Unable to open audio port!", false);
 				}
-				ui_clear();
-				ui_print(0, 0, "Running");
-				ui_flush();
 
 				while (!websocket->isRestartRequested()) {
 					sleep(1);
