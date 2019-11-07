@@ -177,8 +177,8 @@ function connect() {
             var channel0 = rawAudio.getChannelData(0);
             var channel1 = rawAudio.getChannelData(1);
              for (var i = 0; i < 512; i++) {
-              channel0[i] = obj.data[i * 2];
-              channel1[i] = obj.data[i * 2 + 1];
+              channel0[i] = (obj.data[i * 2] / 127.0) - 1.0;
+              channel1[i] = (obj.data[i * 2 + 1] / 127.0) - 1.0;
              }
         } else if (obj.type == "update-control") {
             $(obj.data.parent + "_" + obj.data.child).val(obj.data.value);
