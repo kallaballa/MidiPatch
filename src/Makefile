@@ -6,7 +6,11 @@ ifeq ($(UNAME_S), Darwin)
 endif
 
 ifeq ($(UNAME_S), Linux)
- CUSTOM_DEFS = -D__LINUX_ALSA__
+ ifeq (${PULSE}, 1)
+   CUSTOM_DEFS = -D__LINUX_PULSE__
+ else
+   CUSTOM_DEFS = -D__LINUX_ALSA__
+ endif
  LIBS+= -lasound
  PACK_CMD=${LD} -r -b binary -o index.o index.min.pack
 endif
