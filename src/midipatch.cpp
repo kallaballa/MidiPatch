@@ -429,6 +429,7 @@ int main(int argc, char ** argv) {
 				} catch (std::exception& e) {
 					log_warn("Can't clean up audio port");
 				}
+				save_parameters();
 				delete (synth);
 				delete (poly);
 			} else {
@@ -442,7 +443,6 @@ int main(int argc, char ** argv) {
 				log_warn("Waiting for audiostream to finish");
 				sleep(1);
 			}
-			save_parameters();
 		} catch (RtError& e) {
 			log_error("Exception", e.getMessage());
 			exit(2);
