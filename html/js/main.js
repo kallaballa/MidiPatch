@@ -1,3 +1,15 @@
+var stop = false;
+var frameCount = 0;
+var $results = $("#results");
+var fps, fpsInterval, startTime, now, then, elapsed;
+
+function startDrawing(fps) {
+    fpsInterval = 1000 / fps;
+    then = Date.now();
+    startTime = then;
+    draw();
+}
+
 var codeMirror;
 var textarea = document.getElementById("editor");
 var myLayout;
@@ -183,7 +195,7 @@ source = audioCtx.createBufferSource();
       }
     scopeCtx = document.getElementById('scope').getContext('2d');
     spectCtx = document.getElementById('spectrum').getContext('2d');
-  draw();
+    startDrawing(5);
     };
   source.connect(myScriptProcessor);
   myScriptProcessor.connect(analyser);
@@ -420,10 +432,16 @@ function makeLayout() {
 }
 
 function draw() {
-  drawSpectrum(analyser, spectCtx);
-  drawScope(analyser, scopeCtx);
-
   requestAnimationFrame(draw);
+
+  now = Date.now();
+  elapsed = now - then;
+
+  if (elapsed > fpsInterval) {
+    then = now - (elapsed % fpsInterval);
+    drawSpectrum(analyser, spectCtx);
+    drawScope(analyser, scopeCtx);
+  }
 }
 
 function drawSpectrum(analyser, ctx) {
