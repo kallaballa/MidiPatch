@@ -4,11 +4,11 @@ var myLayout;
 var socket;
 var lastControlListData;
 var patchFile;
-var audioCtx = new AudioContext();
-var myScriptProcessor = audioCtx.createScriptProcessor(512, 2, 2);
-var rawAudio = audioCtx.createBuffer(2, 512, audioCtx.sampleRate);
-var analyser = audioCtx.createAnalyser();
-var source = audioCtx.createBufferSource();
+var audioCtx;
+var myScriptProcessor;
+var rawAudio;
+var analyser;
+var source;
 var scopeCtx;
 var spectCtx;
 var logLevels = [ "Fatal", "Error", "Warning", "Info", "Debug", "Global" ];
@@ -160,7 +160,37 @@ function str2ab(str) {
 
 function connect() {
     socket = new ReconnectingWebSocket("ws://" + window.location.hostname + ":8080");
-    socket.onopen = function(e) {};
+    socket.onopen = function(e) {
+audioCtx = new AudioContext();
+myScriptProcessor = audioCtx.createScriptProcessor(512, 2, 2);
+rawAudio = audioCtx.createBuffer(2, 512, audioCtx.sampleRate);
+analyser = audioCtx.createAnalyser();
+source = audioCtx.createBufferSource();
+
+    source.buffer = rawAudio;
+    analyser.fftSize = 1024;
+
+    myScriptProcessor.onaudioprocess = function(audioProcessingEvent) {
+      var inputBuffer = rawAudio;
+      var outputBuffer = audioProcessingEvent.outputBuffer;
+
+      for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
+        var inputData = inputBuffer.getChannelData(channel);
+        var outputData = outputBuffer.getChannelData(channel);
+        for (var sample = 0; sample < inputBuffer.length; sample++) {
+          outputData[sample] = inputData[sample];
+        }
+      }
+    scopeCtx = document.getElementById('scope').getContext('2d');
+    spectCtx = document.getElementById('spectrum').getContext('2d');
+  draw();
+    };
+  source.connect(myScriptProcessor);
+  myScriptProcessor.connect(analyser);
+//analyser.connect(audioCtx.destination);
+
+  source.start();
+    };
 
     socket.onmessage = function(event) {
         var obj;
@@ -177,8 +207,8 @@ function connect() {
             var channel0 = rawAudio.getChannelData(0);
             var channel1 = rawAudio.getChannelData(1);
              for (var i = 0; i < 512; i++) {
-              channel0[i] = (obj.data[i * 2] / 127.0) - 1.0;
-              channel1[i] = (obj.data[i * 2 + 1] / 127.0) - 1.0;
+              channel0[i] = obj.data[i * 2];
+              channel1[i] = obj.data[i * 2 + 1];
              }
         } else if (obj.type == "update-control") {
             $(obj.data.parent + "_" + obj.data.child).val(obj.data.value);
@@ -525,27 +555,4 @@ $(document).ready(function() {
     });
 
 
-    source.buffer = rawAudio;
-    analyser.fftSize = 1024;
-    scopeCtx = document.getElementById('scope').getContext('2d');
-    spectCtx = document.getElementById('spectrum').getContext('2d');
-
-    myScriptProcessor.onaudioprocess = function(audioProcessingEvent) {   
-      var inputBuffer = rawAudio;
-      var outputBuffer = audioProcessingEvent.outputBuffer;
-
-      for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
-        var inputData = inputBuffer.getChannelData(channel);
-        var outputData = outputBuffer.getChannelData(channel);
-        for (var sample = 0; sample < inputBuffer.length; sample++) {
-          outputData[sample] = inputData[sample];
-        }
-      }
-    };
-  source.connect(myScriptProcessor);
-  myScriptProcessor.connect(analyser);
-//analyser.connect(audioCtx.destination);
-
-  source.start();
-  draw();
 });
