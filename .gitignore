@@ -10,8 +10,6 @@ third/*/*/*/*.o
 third/*/*/*/*.dep
 third/*/*/*/*.a
 third/*/*/*/*.so
-third/lua-5.3.5/src/lua
-third/lua-5.3.5/src/luac
 src/*.o
 src/*.gch
 src/*.dep
