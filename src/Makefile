@@ -8,10 +8,11 @@ endif
 ifeq ($(UNAME_S), Linux)
  ifeq (${PULSE}, 1)
    CUSTOM_DEFS = -D__LINUX_PULSE__
+   LIBS+= -lpulse -lpulse-simple
  else
    CUSTOM_DEFS = -D__LINUX_ALSA__
+   LIBS+= -lasound
  endif
- LIBS+= -lasound
  PACK_CMD=${LD} -r -b binary -o index.o index.min.pack
 endif
 
