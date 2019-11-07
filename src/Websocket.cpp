@@ -338,12 +338,12 @@ void Websocket::updateParameter(const string& name, const float& value) {
 void Websocket::sendAudio(const std::vector<float>& buf) {
 	std::scoped_lock lock(mutex_);
 	json j;
-	std::vector<uint8_t> data(buf.size());
+	string data(buf.size(),0);
 	for(size_t i = 0; i < data.size(); ++i) {
 		data[i] = ((buf[i] + 1.0) / 2.0) * 255.0;
 	}
 	j["type"] = "audio-buffer";
-	j["data"] = data;
+	j["data"] = base64_encode((const unsigned char*)data.c_str(), data.size());
 	for (auto& client : clients_) {
 		client->send(j.dump(), uWS::TEXT);
 	}
