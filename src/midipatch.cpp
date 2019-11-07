@@ -442,6 +442,7 @@ int main(int argc, char ** argv) {
 				log_warn("Waiting for audiostream to finish");
 				sleep(1);
 			}
+			save_parameters();
 		} catch (RtError& e) {
 			log_error("Exception", e.getMessage());
 			exit(2);
