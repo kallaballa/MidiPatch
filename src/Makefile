@@ -53,7 +53,7 @@ ${TARGET}: ../html/index.o ${OBJS}
 	cd ../html; ${PACK_CMD}
 
 ../html/index.min.pack: $(ASSET_DIRS) $(ASSET_FILES)
-	cd ../html; inliner -m index.html > index.min.pack
+	cd ../html; inliner -n -m index.html > index.min.pack
 
 ${OBJS}: %.o: %.cpp %.dep ${GCH}
 	${CXX} ${CXXFLAGS} -o $@ -c $< 
