@@ -195,7 +195,7 @@ source = audioCtx.createBufferSource();
       }
     scopeCtx = document.getElementById('scope').getContext('2d');
     spectCtx = document.getElementById('spectrum').getContext('2d');
-    startDrawing(30);
+    startDrawing(100);
     };
   source.connect(myScriptProcessor);
   myScriptProcessor.connect(analyser);
