@@ -8,7 +8,7 @@ endif
 ifeq ($(UNAME_S), Linux)
  CUSTOM_DEFS = -D__LINUX_ALSA__
  LIBS+= -lasound
- PACK_CMD=ld -r -o index.o index.min.pack -b binary
+ PACK_CMD=ld -r -b binary -o index.o index.min.pack
 endif
 
 TARGET  := midipatch
