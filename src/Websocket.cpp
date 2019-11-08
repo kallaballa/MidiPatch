@@ -207,7 +207,10 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 									if(delim != string::npos && str.size() > delim) {
 										str = str.substr(delim + 1);
 									}
+									std::cerr << "before:" << str << std::endl;
+									std::cerr << "after:" << url_decode(str) << std::endl;
 									(*copy) << url_decode(str);
+
 									if(isLast)
 									res->end("");
 								});
