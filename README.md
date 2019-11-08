@@ -62,7 +62,7 @@ The following code creates a MIDI patch with 3 oscillators, a low pass filter an
 
 At the moment only Linux and Mac OS X are supported. It has been shown to work on OpenSuse 15.0, Ubuntu Xenial and Mac OS X.
 
-# Setting up dependencies and building on a fresh Ubunto Xenial server install:
+# Instructions for Ubunto Xenial install (tested on a fresh server image):
 
     sudo apt-get update
     sudo apt-get install software-properties-common
@@ -77,7 +77,7 @@ At the moment only Linux and Mac OS X are supported. It has been shown to work o
     ./build_third.sh
     make CXX=g++-7 CC=gcc-7
 
-# Building for other linux audio backends then ALSA
+# Building with other Linux audio backends then ALSA
 
 If you want use pulseaudio or jack you can do that by prepending a variable to the make command
 
