@@ -60,20 +60,38 @@ The following code creates a MIDI patch with 3 oscillators, low pass filter and 
 
 # Build
 
-At the moment only linux is supported but it shouldn't be hard to port it to other platforms.
+At the moment only linux and Mac OS X are supported. It has been shown to work on OpenSuse 15.0, Ubuntu Xenial and Mac OS X.
 
-First install inliner:
+# Setting up dependencies and building on a fresh Ubunto Xenial server install:
 
+    sudo apt-get update
+    sudo apt-get install software-properties-common
+    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+    sudo apt-get update
+    sudo apt-get install git-core build-essential g++-7 zlib1g-dev libasound2-dev liblilv-dev npm libboost-dev
     sudo npm install -g inliner
-
-Dependencies: -lasound -llua -ldl -llilv-0 
-
-- libdl
-- libasound (ALSA)
-- liblilv-0
-
-After you installed the dependencies all you have to do is type
-
+    sudo ln -s /usr/bin/nodejs /usr/bin/node
+    git clone https://github.com/kallaballa/MidiPatch.git
+    cd MidiPatch
+    git submodule update --init --recursive
     ./build_third.sh
-    make
+    make CXX=g++-7 CC=gcc-7
 
+# Building for other linux audio backends then ALSA
+
+If you want use pulseaudio or jack you can do that by prepending a variable to the make command
+
+## Building with pulse support:
+
+    PULSE=1 make CXX=g++-7 CC=gcc-7
+
+## Building with jack support:
+
+    JACK=1 make CXX=g++-7 CC=gcc-7
+
+# Cross-compiling
+The makefile supports the sysroot flag. 
+
+## Example
+
+    SYSROOT=/arm-linux-sysroot/ make CXX=arm-suse-linux-gnueabi-g++-7 LD=arm-suse-linux-gnueabi-ld
