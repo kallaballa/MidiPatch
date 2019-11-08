@@ -1,4 +1,4 @@
-MidiPatch is a scriptable modular synthesizer. The scripting is done in [lua](https://www.lua.org) and it basically exposes [Tonic](https://github.com/TonicAudio/Tonic) as literal as possible to the scripts. At the moment that is used in a simple midi synthesizer implementation, but with a little effort it can be used in a lot of scenarios (like a standalone syntesizer based on patches or in combination with a sequencer).
+MidiPatch is a scriptable modular MIDI-synthesizer. The scripting is done in [lua](https://www.lua.org) and it basically exposes [Tonic](https://github.com/TonicAudio/Tonic) as literal as possible to the scripts. Additionally to the MIDI interface, there is a web interface with live editor, a visual rack generated from the code, an oscilloscope and more. The web app is compiled into and directly served by MidiPatch. To connect to it visit http://127.0.0.1:8080/index.html
 
 # Usage
 
@@ -18,33 +18,43 @@ MidiPatch is a scriptable modular synthesizer. The scripting is done in [lua](ht
       -p, --patchFile arg  The lua patchFile to use for the voices
       -f, --logFile arg    The file to log to (default: /tmp/midipatch.log)
 
-For example to create a midi synthesizer with 3 voices, connecting to the second midi port (port index starts at 0), which automatically maps patch parameters to control numbers, starting at the control number offset in ascending order:
+For example to create a midi synthesizer with 3 voices, running the patch "bank.lua", connecting to the second midi port (port index starts at 0) and the first audio port, which automatically maps patch parameters to control numbers, starting at the control number offset (52) in ascending order:
 
-    src/midipatch -m 0 -a 0 -o 52 -v 8 -p bank.lua -f log
+    src/midipatch -m 1 -a 0 -o 52 -v 3 -p bank.lua
  
-Note, that you can use a different patch per voice.
-
 # Example patch
 
-The following code creates a MIDI patch with a square wave tone and an ADSR envelope. Every parameter added with "addParameter" will be audomatically exposed to the midi interface except those starting with '_' (those are private). It  closely resembles the Tonic C++ API.
+The following code creates a MIDI patch with 3 oscillators, low pass filter and an ADSR envelope. Every parameter added with "addParameter" will be audomatically exposed to the midi interface except those starting with '_' (those are private). It  closely resembles the Tonic C++ API.
 
     local noteNum = synth:addParameter("_polyNote", 0.0);
     local gate = synth:addParameter("_polyGate", 0.0);
     local noteVelocity = synth:addParameter("_polyVelocity", 0.0);
     local voiceNumber = synth:addParameter("_polyVoiceNumber", 0.0);
+    local gain = synth:addParameter("Global.Gain", 1.0);
+    local sine = synth:addParameter("Global.Sine", 1.0);
+    local square = synth:addParameter("Global.Square", 1.0);
+    local triangle = synth:addParameter("Global.Triangle", 1.0);
+    local cutoffFreq = synth:addParameter("Low Pass.Frequency", 1.0);
+    local cutoffQ = synth:addParameter("Low Pass.Resonance", 1.0);
     
     local voiceFreq = ControlMidiToFreq():input(noteNum)
-    local tone = SquareWave():freq(voiceFreq)
-    local fv = FixedValue(0.02)
+    local tone0 = SineWave():freq(voiceFreq)
+    local tone1 = SquareWave():freq(voiceFreq)
+    local tone2 = TriangleWave():freq(voiceFreq)
+    local mix = ((tone0 * sine) + (tone1 * square) + (tone2 * triangle )) / 3.0 * gain;
+    
+    local lpf = LPF24():cutoff(FixedValue(5000) * cutoffFreq):Q(FixedValue(20) * cutoffQ)
+    
     local env = ADSR()
-        :attack(synth:addParameter("attack",0.04))
-        :decay(synth:addParameter("decay", 0.1 ))
-        :sustain(synth:addParameter("sustain",0.8))
-        :release(synth:addParameter("release",0.6))
-        :doesSustain(1)
-        :trigger(gate);
+    :attack(synth:addParameter("Envelope.Attack",0.1))
+    :decay(synth:addParameter("Envelope.Decay", 0 ))
+    :sustain(synth:addParameter("Envelope.Sustain",1))
+    :release(synth:addParameter("Envelope.Release",0.1))
+    :doesSustain(1)
+    :trigger(gate)
+    
+    synth:setOutputGen((lpf:input(mix) * env) * (FixedValue(0.02) + noteVelocity * 0.005));
 
-    synth:setOutputGen((tone * env) * (fv + noteVelocity * 0.005));
 
 # Build
 
