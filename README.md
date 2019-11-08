@@ -68,7 +68,7 @@ At the moment only Linux and Mac OS X are supported. It has been shown to work o
     sudo apt-get install software-properties-common
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test
     sudo apt-get update
-    sudo apt-get install git-core build-essential g++-7 zlib1g-dev libasound2-dev liblilv-dev npm libboost-dev
+    sudo apt-get install git-core build-essential g++-7 zlib1g-dev libasound2-dev liblilv-dev npm
     sudo npm install -g inliner
     sudo ln -s /usr/bin/nodejs /usr/bin/node
     git clone https://github.com/kallaballa/MidiPatch.git
@@ -76,6 +76,29 @@ At the moment only Linux and Mac OS X are supported. It has been shown to work o
     git submodule update --init --recursive
     ./build_third.sh
     make CXX=g++-7 CC=gcc-7
+
+# Instructions for Mac OS X Mojave
+
+    # install/upgrade clang, we need C++17 support
+    xcode-select --install 
+    
+    # only required if you don't have brew
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" < /dev/null 2> /dev/null
+    
+    # install dependencies
+    brew install lilv
+    brew install npm
+    brew install nasm
+    
+    # install inliner
+    npm install -g inliner
+    
+    # clone and build
+    git clone https://github.com/kallaballa/MidiPatch.git
+    cd MidiPatch
+    git submodule update --init --recursive
+    ./build_third.sh
+    make CXX=clang++ CC=clang
 
 # Building with other Linux audio backends then ALSA
 
