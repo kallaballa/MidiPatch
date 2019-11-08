@@ -26,7 +26,7 @@ For example to create a midi synthesizer with 3 voices, running the patch "bank.
  
 # Example patch
 
-The following code creates a MIDI patch with 3 oscillators, low pass filter and an ADSR envelope. Every parameter added with "addParameter" will be audomatically exposed to the midi interface except those starting with '_' (those are private). It  closely resembles the Tonic C++ API.
+The following code creates a MIDI patch with 3 oscillators, a low pass filter and an ADSR envelope. Every parameter added with "addParameter" will be audomatically exposed to the midi interface except those starting with '_' (those are private). It  closely resembles the Tonic C++ API.
 
     local noteNum = synth:addParameter("_polyNote", 0.0);
     local gate = synth:addParameter("_polyGate", 0.0);
@@ -60,7 +60,7 @@ The following code creates a MIDI patch with 3 oscillators, low pass filter and 
 
 # Build
 
-At the moment only linux and Mac OS X are supported. It has been shown to work on OpenSuse 15.0, Ubuntu Xenial and Mac OS X.
+At the moment only Linux and Mac OS X are supported. It has been shown to work on OpenSuse 15.0, Ubuntu Xenial and Mac OS X.
 
 # Setting up dependencies and building on a fresh Ubunto Xenial server install:
 
