@@ -205,14 +205,14 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 									string str(data);
 									auto delim = str.find("code=");
 									if(delim != string::npos && delim == 0) {
-										str = str.substr(delim + 1);
+										str = str.substr(delim + 5);
 									}
 
 									(*copy) << str;
 
 									if(isLast) {
 										std::ofstream ofs(patchFile);
-										ofs << copy->str();
+										ofs << url_decode(copy->str());
 										res->end("");
 									}
 								});
