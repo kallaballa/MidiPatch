@@ -202,6 +202,7 @@ int main(int argc, char ** argv) {
 	int audioIndex = 0;
 	unsigned int sampleRate = 48000;
 	unsigned int bufferFrames = 512;
+	size_t port = 8080;
 	string patchFile;
 	string logFile;
 	string saveFile;
@@ -213,6 +214,7 @@ int main(int argc, char ** argv) {
 			("a,audio", "The index of the audio output port to use.",	cxxopts::value<int>(audioIndex)->default_value("0"))
 			("r,rate", "The audio output sample rate.",	cxxopts::value<unsigned int>(sampleRate)->default_value("48000"))
 			("b,buffer", "Number of frames per buffer.", cxxopts::value<unsigned int>(bufferFrames)->default_value("512"))
+			("w,websocket", "The port number of the websocket server.",	cxxopts::value<size_t>(port)->default_value("8080"))
 			("o,offset", "The control number offset for parameter mapping",	cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
 			("v,voices", "The number of voices to run",	cxxopts::value<size_t>(numVoices)->default_value("8"))
 			("s,save", "The file where current patch settings are stored", cxxopts::value<string>(saveFile)->default_value("/tmp/midipatch.save"))
@@ -233,7 +235,7 @@ int main(int argc, char ** argv) {
 	std::ofstream ofLog(logFile);
 	std::cout.rdbuf(ofLog.rdbuf());
 	std::cerr.rdbuf(ofLog.rdbuf());
-	websocket = new midipatch::Websocket(8080, logFile, patchFile);
+	websocket = new midipatch::Websocket(port, logFile, patchFile);
 
 	kaguya::State state;
 	state.setErrorHandler([](int status, const char* msg) {
