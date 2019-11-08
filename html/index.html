@@ -21,7 +21,15 @@ if (!document.registerElement) {
 <div id="confirmoverwrite" title="Replace editor content?">
   <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Do you really want to replace the editors content?</p>
 </div>
-    
+<div id="askcontentdiffer" title="Server patch and local patch differ">
+  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>The patch stored in the server and your local patch stored in the browser diff.</p>
+</div>
+<div id="confirmconnectionlost" title="Connection to MidiPatch List">
+  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Connection to the MidiPatch server lost</p>
+</div>
+<div id="confirmconcurrentmod" title="More than one user connected">
+  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Concurrent modification of MidiPatch not supported yet.</p>
+</div>
 <script src="js/jquery-3.4.1.min.js" type="text/javascript" charset="utf-8"></script>
 <script src="js/jquery-ui/jquery-ui.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" src="js/goldenlayout.min.js"></script>

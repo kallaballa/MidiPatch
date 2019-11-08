@@ -226,6 +226,12 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 					.open = [&](auto *ws, auto *req) {
 						std::scoped_lock lock(mutex_);
 						clients_.insert(ws);
+						if(clients_.size() > 1) {
+							string userJoined = "{ \"type\": \"user-joined\" } ";
+							for (auto& client : clients_) {
+								client->send(userJoined, uWS::TEXT);
+							}
+						}
 						if(sendConfigCallback_) {
 							string config = sendConfigCallback_();
 							for (auto& client : clients_) {

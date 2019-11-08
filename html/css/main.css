@@ -9,6 +9,18 @@ body {
 #confirmoverwrite {
   display: none;
 }
+
+#askcontentdiffer {
+  display: none;
+}
+
+#confirmconnectionlost {
+  display: none;
+}
+
+#confirmconcurrentmod {
+  display: none;
+}
 .lm_content {
 overflow-x:auto;
 overflow-y:auto;
