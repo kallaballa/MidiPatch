@@ -199,20 +199,22 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 				}).post("/cgi-bin/storePatch.cgi", [&](auto *res, auto *req) {
 					try {
 						res->writeHeader("Content-Type", "text/plain");
-						std::shared_ptr<ofstream> ofs(new std::ofstream(patchFile));
+						std::shared_ptr<std::ostringstream> ss(new std::ostringstream());
 						res->onData([=](std::string_view data, bool isLast) {
-									std::shared_ptr<ofstream> copy = ofs;
+									auto copy = ss;
 									string str(data);
 									auto delim = str.find("code=");
 									if(delim != string::npos && delim == 0) {
 										str = str.substr(delim + 1);
 									}
-									std::cerr << "before:" << str << std::endl;
-									std::cerr << "after:" << url_decode(str) << std::endl;
-									(*copy) << url_decode(str);
 
-									if(isLast)
-									res->end("");
+									(*copy) << str;
+
+									if(isLast) {
+										std::ofstream ofs(patchFile);
+										ofs << copy->str();
+										res->end("");
+									}
 								});
 					} catch (std::exception& ex) {
 						LOG_ERR_MSG("Storing patch failed", ex.what());
