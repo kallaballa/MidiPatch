@@ -235,7 +235,7 @@ int main(int argc, char ** argv) {
 	std::ofstream ofLog(logFile);
 	std::cout.rdbuf(ofLog.rdbuf());
 	std::cerr.rdbuf(ofLog.rdbuf());
-	websocket = new midipatch::Websocket(port, logFile, patchFile);
+	websocket = new midipatch::Websocket(port, patchFile);
 
 	kaguya::State state;
 	state.setErrorHandler([](int status, const char* msg) {
@@ -299,7 +299,10 @@ int main(int argc, char ** argv) {
 			websocket->setSendConfigCallback([&]() {
 				std::ostringstream ss;
 				ss << "{ \"type\": \"config\", \"data\": { ";
-				ss << "\"patchFile\": \"" << patchFile << "\"";
+				ss << "\"patchFile\": \"" << patchFile << "\",";
+				ss << "\"sampleRate\": " << sampleRate << ",";
+				ss << "\"bufferFrames\": " << bufferFrames << ",";
+				ss << "\"channels\": " << nChannels << "";
 				ss << "}}";
 				return ss.str();
 			});

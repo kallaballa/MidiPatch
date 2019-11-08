@@ -37,7 +37,7 @@ class Websocket {
 	std::function<string()> sendConfigCallback_;
 
 public:
-	Websocket(size_t port, const string& logFile, const string& bankFile);
+	Websocket(size_t port, const string& bankFile);
 	virtual ~Websocket();
 	void setSendControlListCallback(std::function<string()> callback) {
 		sendControlListCallback_ = callback;

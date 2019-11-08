@@ -165,7 +165,7 @@ std::string base64_decode(std::string const& encoded_string) {
 
 
 
-Websocket::Websocket(size_t port, const string& logFile, const string& patchFile) :
+Websocket::Websocket(size_t port, const string& patchFile) :
 		buffers_(4) {
 	struct PerSocketData {
 

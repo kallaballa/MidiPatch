@@ -173,35 +173,6 @@ function str2ab(str) {
 function connect() {
     socket = new ReconnectingWebSocket("ws://" + window.location.hostname + ":8080");
     socket.onopen = function(e) {
-audioCtx = new AudioContext();
-myScriptProcessor = audioCtx.createScriptProcessor(512, 2, 2);
-rawAudio = audioCtx.createBuffer(2, 512, audioCtx.sampleRate);
-analyser = audioCtx.createAnalyser();
-source = audioCtx.createBufferSource();
-
-    source.buffer = rawAudio;
-    analyser.fftSize = 1024;
-
-    myScriptProcessor.onaudioprocess = function(audioProcessingEvent) {
-      var inputBuffer = rawAudio;
-      var outputBuffer = audioProcessingEvent.outputBuffer;
-
-      for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
-        var inputData = inputBuffer.getChannelData(channel);
-        var outputData = outputBuffer.getChannelData(channel);
-        for (var sample = 0; sample < inputBuffer.length; sample++) {
-          outputData[sample] = inputData[sample];
-        }
-      }
-    scopeCtx = document.getElementById('scope').getContext('2d');
-    spectCtx = document.getElementById('spectrum').getContext('2d');
-    startDrawing(100);
-    };
-  source.connect(myScriptProcessor);
-  myScriptProcessor.connect(analyser);
-//analyser.connect(audioCtx.destination);
-
-  source.start();
     };
 
     socket.onmessage = function(event) {
@@ -214,6 +185,38 @@ source = audioCtx.createBufferSource();
         }
         if(obj.type == "config") {
           patchFile = obj.data.patchFile;     
+          var bufferFrames = obj.data.bufferFrames;
+          var channels = obj.data.channels;
+          var sampleRate = obj.data.sampleRate;
+          audioCtx = new AudioContext();
+          myScriptProcessor = audioCtx.createScriptProcessor(bufferFrames, channels, channels);
+          rawAudio = audioCtx.createBuffer(channels, bufferFrames, audioCtx.sampleRate);
+          analyser = audioCtx.createAnalyser();
+          source = audioCtx.createBufferSource();
+
+          source.buffer = rawAudio;
+          analyser.fftSize = bufferFrames * channels;
+
+          myScriptProcessor.onaudioprocess = function(audioProcessingEvent) {
+            var inputBuffer = rawAudio;
+            var outputBuffer = audioProcessingEvent.outputBuffer;
+
+            for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
+              var inputData = inputBuffer.getChannelData(channel);
+              var outputData = outputBuffer.getChannelData(channel);
+              for (var sample = 0; sample < inputBuffer.length; sample++) {
+                outputData[sample] = inputData[sample];
+              }
+            }
+          };
+          source.connect(myScriptProcessor);
+          myScriptProcessor.connect(analyser);
+          //analyser.connect(audioCtx.destination);
+          source.start();
+      
+          scopeCtx = document.getElementById('scope').getContext('2d');
+          spectCtx = document.getElementById('spectrum').getContext('2d');
+          startDrawing(30);
         } else if(obj.type == "audio-buffer") {
             // This gives us the actual array that contains the data
             var data = atob(obj.data);
