@@ -24,7 +24,6 @@
 #include <initializer_list>
 #include <assert.h>
 #include <sstream>
-#include <boost/lexical_cast.hpp>
 #include <sstream>
 #include <mutex>
 #include "plog/Log.h"
