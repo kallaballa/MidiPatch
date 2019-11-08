@@ -203,8 +203,8 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 						res->onData([=](std::string_view data, bool isLast) {
 									std::shared_ptr<ofstream> copy = ofs;
 									string str(data);
-									auto delim = str.find('=');
-									if(delim != string::npos && str.size() > delim) {
+									auto delim = str.find("code=");
+									if(delim != string::npos && delim == 0) {
 										str = str.substr(delim + 1);
 									}
 									std::cerr << "before:" << str << std::endl;
