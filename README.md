@@ -1,5 +1,7 @@
 MidiPatch is a scriptable modular MIDI-synthesizer. The scripting is done in [lua](https://www.lua.org) and it basically exposes [Tonic](https://github.com/TonicAudio/Tonic) as literal as possible to the scripts. Additionally to the MIDI interface, there is a web interface with live editor, a visual rack generated from the code, an oscilloscope and more. The web app is compiled into and directly served by MidiPatch. To connect to it visit http://127.0.0.1:8080/index.html
 
+![Screenshot of the web interface](https://github.com/kallaballa/MidiPatch/raw/master/doc/screen.png "Screenshot of the web interface")
+
 # Usage
 
     Usage:
