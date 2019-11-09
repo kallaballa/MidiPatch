@@ -9,6 +9,9 @@ ifeq ($(UNAME_S), Linux)
  ifeq (${PULSE}, 1)
    CUSTOM_DEFS = -D__LINUX_PULSE__
    LIBS+= -lpulse -lpulse-simple
+ else ifeq (${JACK}, 1)
+   CUSTOM_DEFS = -D__UNIX_JACK__
+   LIBS+= -ljack
  else
    CUSTOM_DEFS = -D__LINUX_ALSA__
    LIBS+= -lasound
