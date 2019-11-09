@@ -326,15 +326,15 @@ int main(int argc, char ** argv) {
 					}
 				});
 				websocket->setNoteOnCallback([&](size_t note, size_t velo) {
-//					poly->noteOn(note, velo);
+					poly->noteOn(note, velo);
 				});
 
 				websocket->setNoteOffCallback([&](size_t note) {
-//					poly->noteOff(note);
+					poly->noteOff(note);
 				});
 
 				websocket->setClearAllNotesCallback([&]() {
-//					poly->clearAllNotes();
+					poly->clearAllNotes();
 				});
 				websocket->setSendControlListCallback([&]() {
 					std::ostringstream ss;
