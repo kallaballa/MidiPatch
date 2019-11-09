@@ -270,19 +270,26 @@ function connect() {
           return;
         }
         if(obj.type == "config") {
+          if(audioCtx)
+            return;          
           patchFile = obj.data.patchFile;     
           var bufferFrames = obj.data.bufferFrames;
           var channels = obj.data.channels;
           var sampleRate = obj.data.sampleRate;
-          audioCtx = new AudioContext();
+
+          audioCtx = new AudioContext({
+            sampleRate: sampleRate
+          });
+          if(audioCtx.sampleRate != sampleRate) {
+            alert("Sample rate mismatch!");
+          }
           myScriptProcessor = audioCtx.createScriptProcessor(bufferFrames, channels, channels);
           rawAudio = audioCtx.createBuffer(channels, bufferFrames, audioCtx.sampleRate);
           analyser = audioCtx.createAnalyser();
           source = audioCtx.createBufferSource();
 
-          source.buffer = rawAudio;
           analyser.fftSize = bufferFrames * channels;
-
+          source.buffer = rawAudio;
           myScriptProcessor.onaudioprocess = function(audioProcessingEvent) {
             var inputBuffer = rawAudio;
             var outputBuffer = audioProcessingEvent.outputBuffer;
