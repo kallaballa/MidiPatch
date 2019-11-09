@@ -66,13 +66,18 @@ At the moment only Linux and Mac OS X are supported. It has been shown to work o
 # Instructions for Ubunto Xenial install (tested on a fresh server image):
 
 ```shell
+# add toolchain repo
 sudo apt-get update
 sudo apt-get install software-properties-common
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test
 sudo apt-get update
+
+# install dependencies
 sudo apt-get install git-core build-essential g++-7 zlib1g-dev libasound2-dev liblilv-dev npm
 sudo npm install -g inliner
 sudo ln -s /usr/bin/nodejs /usr/bin/node
+
+# clone and build
 git clone https://github.com/kallaballa/MidiPatch.git
 cd MidiPatch
 git submodule update --init --recursive
