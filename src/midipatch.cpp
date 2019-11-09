@@ -21,6 +21,7 @@
 #include "PolySynth.hpp"
 #include "Websocket.hpp"
 
+std::mutex midiMutex;
 using namespace Tonic;
 
 const unsigned int nChannels = 2;
@@ -79,6 +80,7 @@ int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFr
 }
 
 void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) {
+	std::scoped_lock lock(midiMutex);
 	if (websocket->isRestartRequested())
 		return;
 
@@ -90,15 +92,15 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 		b2 = (*msg)[2];
 
 	if (msgtype == 0x80 || (msgtype == 0x90 && b2 == 0)) {
-//		std::cout << "MIDI Note OFF  C: " << chan << " N: " << b1 << std::endl;
-		websocket->sendNoteOff(b1);
+		std::cout << "MIDI Note OFF  C: " << chan << " N: " << b1 << std::endl;
 		poly->noteOff(b1);
+		websocket->sendNoteOff(b1);
 	} else if (msgtype == 0x90) {
-//		std::cout << "MIDI Note ON   C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
+		std::cout << "MIDI Note ON   C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
 		poly->noteOn(b1, b2);
 		websocket->sendNoteOn(b1, b2);
 	} else if (msgtype == 0xB0) {
-//		std::cout << "MIDI CC ON     C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
+		std::cout << "MIDI CC ON     C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
 		std::vector<string> commonParams;
 
 		//try to set a common parameter for all synths. NOTE: only works if all synthesizers have the same public parameters
@@ -154,7 +156,7 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 			}
 		}
 	} else if (msgtype == 0xC0) {
-//		std::cout << "MIDI Program change  C: " << chan << " P: " << b1 << std::endl;
+		std::cout << "MIDI Program change  C: " << chan << " P: " << b1 << std::endl;
 		current_program = b1;
 	}
 
