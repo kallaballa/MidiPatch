@@ -1,19 +1,22 @@
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
 <head>
+<title>MidiPatch</title>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script type="text/javascript">
+<script>
 if (!document.registerElement) {
   document.writeln(decodeURI('%3Cscript%20src=%22https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.7.12/webcomponents.min.js%22%20type=%22text/javascript%22%3E%3C/script%3E'));
 }
 </script>
 
-<link rel="stylesheet" href="css/jquery-ui/jquery-ui.css">
-<link rel="stylesheet" href="js/codemirror/lib/codemirror.css">
-<link rel="stylesheet" href="js/codemirror/theme/midnight.css">
-<link rel="stylesheet" href="css/js-piano.css">
-<link type="text/css" rel="stylesheet" href="css/goldenlayout-base.css" />
-<link type="text/css" rel="stylesheet" href="css/goldenlayout-dark-theme.css" />
-<link rel="stylesheet" type="text/css" href="css/main.css">
+<link rel="stylesheet" href="css/jquery-ui/jquery-ui.css"/>
+<link rel="stylesheet" href="js/codemirror/lib/codemirror.css"/>
+<link rel="stylesheet" href="js/codemirror/theme/midnight.css"/>
+<link rel="stylesheet" href="css/js-piano.css"/>
+<link rel="stylesheet" href="css/goldenlayout-base.css" />
+<link rel="stylesheet" href="css/goldenlayout-dark-theme.css" />
+<link rel="stylesheet" href="css/main.css"/>
 
 </head>
 <body>
@@ -23,25 +26,24 @@ if (!document.registerElement) {
 <div id="askcontentdiffer" title="Server patch and local patch differ">
   <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>The patch stored in the server and your local patch stored in the browser diff.</p>
 </div>
-<div id="confirmconnectionlost" title="Connection to MidiPatch lost">
-  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Connection to the MidiPatch server lost</p>
-</div>
 <div id="confirmconcurrentmod" title="More than one user connected">
   <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Concurrent modification of MidiPatch not supported yet.</p>
 </div>
-<script src="js/jquery-3.4.1.min.js" type="text/javascript" charset="utf-8"></script>
-<script src="js/jquery-ui/jquery-ui.js" type="text/javascript" charset="utf-8"></script>
-<script type="text/javascript" src="js/goldenlayout.min.js"></script>
+
+<script src="js/AudioContextMonkeyPatch.js"></script>
+<script src="js/jquery-3.4.1.min.js"></script>
+<script src="js/jquery-ui/jquery-ui.js"></script>
+<script src="js/goldenlayout.min.js"></script>
 <script src="js/codemirror/lib/codemirror.js"></script>
 <script src="js/reconnecting-websocket.min.js"></script>
 <script src="js/codemirror/mode/lua/lua.js"></script>
 <script src="js/codemirror/keymap/sublime.js"></script>
 <script src="js/codemirror/keymap/vim.js"></script>
 <script src="js/codemirror/keymap/emacs.js"></script>
-<script type="text/javascript" src="js/jquery.knob.min.js"></script>
-<script src="js/notify.js" type="text/javascript" charset="utf-8"></script>
-<script src="js/keyboard.min.js" type="text/javascript" charset="utf-8"></script>
-<script src="js/main.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/jquery.knob.min.js"></script>
+<script src="js/notify.js"></script>
+<script src="js/keyboard.min.js"></script>
+<script src="js/main.js"></script>
 
 </body>
 </html>

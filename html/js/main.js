@@ -46,23 +46,6 @@ function confirmOverwriteDialog(content) {
           });
 }
 
-function confirmConnectionLostDialog() {
-          $( function() {
-          $( "#confirmconnectionlost" ).dialog({
-            resizable: false,
-            height: "auto",
-            width: 400,
-            modal: true,
-            buttons: {
-              "Reconnect": function() {
-                connect();
-                $( this ).dialog( "close" );
-              }
-            }
-          });
-          });
-}
-
 function confirmConcurrentMod() {
           $( function() {
           $( "#confirmconcurrentmod" ).dialog({
