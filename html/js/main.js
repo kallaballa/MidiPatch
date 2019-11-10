@@ -257,8 +257,9 @@ function str2ab(str) {
 }
 
 function connect() {
-    socket = new WebSocket("ws://" + window.location.hostname + ":8080");
+    socket = new ReconnectingWebSocket("ws://" + window.location.hostname + ":8080");
     socket.onopen = function(e) {
+      $("#connectionstatus span").html("Connected");
     };
 
     socket.onmessage = function(event) {
@@ -400,11 +401,11 @@ function connect() {
     };
 
     socket.onclose = function(event) {
-      confirmConnectionLostDialog();
+      $("#connectionstatus span").html("Disconnected");
     };
 
     socket.onerror = function(error) {
-      confirmConnectionLostDialog();
+      $("#connectionstatus span").html("Disconnected");
     };
 }
 
@@ -457,7 +458,7 @@ function makeLayout() {
     }
 
     myLayout.registerComponent('Toolbar', function(container, componentState) {
-        container.getElement().html('<div id="toolbar"><div class="button" id="restart">Restart</div><div class="button" id="loadpatch">Load Patch</div><div class="button" id="storepatch">Store Patch</div><div class="button" id="resetlayout">Reset Layout</div><section id="editorselectsection"><label id="editorselectlbl" for="editorselect">Mode:</label><select id="editorselect"><option value="sublime">Sublime</option><option value="vim">Vim</option><option value="emacs">Emacs</option></select></section><input type="checkbox" id="restartonsave" value="Restart on save" checked/><label for="restartonsave" id="restartonsavelbl">Restart on store</label></div>');
+        container.getElement().html('<div id="toolbar"><div class="button" id="restart">Restart</div><div class="button" id="loadpatch">Load Patch</div><div class="button" id="storepatch">Store Patch</div><div class="button" id="resetlayout">Reset Layout</div><section id="editorselectsection"><label id="editorselectlbl" for="editorselect">Mode:</label><select id="editorselect"><option value="sublime">Sublime</option><option value="vim">Vim</option><option value="emacs">Emacs</option></select></section><input type="checkbox" id="restartonsave" value="Restart on save" checked/><label for="restartonsave" id="restartonsavelbl">Restart on store</label><section id="connectionstatus">Status:<span>Disconnected</span></div></div>');
     });
 
     myLayout.registerComponent('Analyser', function(container, componentState) {
