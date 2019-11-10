@@ -62,7 +62,7 @@ void log_syntax_error(const string& title, const string& msg = "") {
 
 int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime,
 		RtAudioStreamStatus status, void *userData) {
-	if (websocket->isRestartRequested())
+	if (websocket && websocket->isRestartRequested())
 		return 0;
 	pscript->fill((float*) outputBuffer, nBufferFrames, nChannels);
 	size_t lenBuf = nBufferFrames * nChannels;
@@ -71,13 +71,14 @@ int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFr
 	for (size_t i = 0; i < lenBuf; ++i) {
 		samples[i] = ((float*) outputBuffer)[i];
 	}
-	websocket->sendAudio(samples);
+	if(websocket)
+		websocket->sendAudio(samples);
 	return 0;
 }
 
 void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) {
 	std::scoped_lock lock(midiMutex);
-	if (websocket->isRestartRequested())
+	if (websocket && websocket->isRestartRequested())
 		return;
 
 	int chan = (*msg)[0] & 0xf;
@@ -90,11 +91,13 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 	if (msgtype == 0x80 || (msgtype == 0x90 && b2 == 0)) {
 		std::cout << "MIDI Note OFF  C: " << chan << " N: " << b1 << std::endl;
 		pscript->getPolySynth()->noteOff(b1);
-		websocket->sendNoteOff(b1);
+		if(websocket)
+			websocket->sendNoteOff(b1);
 	} else if (msgtype == 0x90) {
 		std::cout << "MIDI Note ON   C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
 		pscript->getPolySynth()->noteOn(b1, b2);
-		websocket->sendNoteOn(b1, b2);
+		if(websocket)
+			websocket->sendNoteOn(b1, b2);
 	} else if (msgtype == 0xB0) {
 		std::cout << "MIDI CC ON     C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
 		std::vector<string> commonParams;
@@ -212,7 +215,7 @@ int main(int argc, char ** argv) {
 			("a,audio", "The index of the audio output port to use.",	cxxopts::value<int>(audioIndex)->default_value("0"))
 			("r,rate", "The audio output sample rate.",	cxxopts::value<unsigned int>(sampleRate)->default_value("48000"))
 			("b,buffer", "Number of frames per buffer.", cxxopts::value<unsigned int>(bufferFrames)->default_value("512"))
-			("w,websocket", "The port number of the websocket server.",	cxxopts::value<size_t>(port)->default_value("8080"))
+			("w,websocket", "The port number of the websocket server.",	cxxopts::value<size_t>(port)->default_value("0"))
 			("o,offset", "The control number offset for parameter mapping",	cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
 			("v,voices", "The number of voices to run",	cxxopts::value<size_t>(numVoices)->default_value("8"))
 			("s,save", "The file where current patch settings are stored", cxxopts::value<string>(saveFile)->default_value("/tmp/midipatch.save"))
@@ -234,7 +237,8 @@ int main(int argc, char ** argv) {
 	std::cout.rdbuf(ofLog.rdbuf());
 	std::cerr.rdbuf(ofLog.rdbuf());
 	pscript = new patchscript::PatchScript(sampleRate);
-	websocket = new midipatch::Websocket(port, patchFile);
+	if(port > 0)
+		websocket = new midipatch::Websocket(port, patchFile);
 
 	pscript->setErrorHandler([](int status, const char* msg) {
 		switch (status) {
@@ -273,99 +277,101 @@ int main(int argc, char ** argv) {
 		rtParams.deviceId = audioIndex;
 		rtParams.nChannels = nChannels;
 
-		while (!websocket->hasClients()) {
+		while (websocket && !websocket->hasClients()) {
 			sleep(1);
 		}
 		try {
 			bool initSuccess = pscript->init(patchFile, numVoices);
-			websocket->setSendConfigCallback([&]() {
-				std::ostringstream ss;
-				ss << "{ \"type\": \"config\", \"data\": { ";
-				ss << "\"patchFile\": \"" << patchFile << "\",";
-				ss << "\"sampleRate\": " << sampleRate << ",";
-				ss << "\"bufferFrames\": " << bufferFrames << ",";
-				ss << "\"channels\": " << nChannels << "";
-				ss << "}}";
-				return ss.str();
-			});
-			websocket->sendConfig();
-
+			if(websocket) {
+				websocket->setSendConfigCallback([&]() {
+					std::ostringstream ss;
+					ss << "{ \"type\": \"config\", \"data\": { ";
+					ss << "\"patchFile\": \"" << patchFile << "\",";
+					ss << "\"sampleRate\": " << sampleRate << ",";
+					ss << "\"bufferFrames\": " << bufferFrames << ",";
+					ss << "\"channels\": " << nChannels << "";
+					ss << "}}";
+					return ss.str();
+				});
+				websocket->sendConfig();
+			}
 			if (initSuccess) {
 				load_parameters();
 				signal(SIGINT, signalHandler);
 				signal(SIGTERM, signalHandler);
 				signal(SIGKILL, signalHandler);
 
-				websocket->setSetControlCallback([&](string n, float v) {
-					for(auto& voice : pscript->getPolySynth()->getVoices()) {
-						voice.synth.setParameter(n, v);
-					}
-				});
-				websocket->setNoteOnCallback([&](size_t note, size_t velo) {
-					pscript->getPolySynth()->noteOn(note, velo);
-				});
-
-				websocket->setNoteOffCallback([&](size_t note) {
-					pscript->getPolySynth()->noteOff(note);
-				});
-
-				websocket->setClearAllNotesCallback([&]() {
-					pscript->getPolySynth()->clearAllNotes();
-				});
-				websocket->setSendControlListCallback([&]() {
-					std::ostringstream ss;
-					ss << "{ \"type\": \"control-list\", \"data\": [ ";
-					if(pscript->getPolySynth()->getVoices().empty())
-					return string("");
-					auto params = pscript->getPolySynth()->getVoices()[0].synth.getParameters();
-					std::vector<string> parents;
-					std::map<string, std::vector<std::pair<string, float>>> hierachie;
-					for (size_t i = 0; i < params.size(); ++i) {
-						const string& name = params[i].getName();
-						if (name.empty() || name.at(0) == '_')
-						continue;
-						string parent;
-						string child;
-						auto pos = name.find(".");
-						if (pos != string::npos && pos < name.size() - 1) {
-							parent = name.substr(0, pos);
-							child = name.substr(pos + 1);
-						} else if (!name.empty()) {
-							parent = "Global";
-							child = name;
+				if (websocket) {
+					websocket->setSetControlCallback([&](string n, float v) {
+						for(auto& voice : pscript->getPolySynth()->getVoices()) {
+							voice.synth.setParameter(n, v);
 						}
-						if (std::find(parents.begin(), parents.end(), parent) == parents.end()) {
-							parents.push_back(parent);
-						}
-						hierachie[parent].push_back( {child, params[i].getValue()});
-					}
+					});
+					websocket->setNoteOnCallback([&](size_t note, size_t velo) {
+						pscript->getPolySynth()->noteOn(note, velo);
+					});
 
-					size_t i = 0;
-					for (const auto& parent : parents) {
-						const string& module = parent;
-						const std::vector<std::pair<string, float>>& children = hierachie[parent];
-						ss << "{ \"name\": \"" << escape_json(module) << "\", \"controls\": [";
-						size_t j = 0;
-						for (const auto& child : children) {
-							ss << "{ \"name\" :\"" << escape_json(child.first) << "\", \"value\": \"" << child.second << "\" }";
-							if (j < children.size() - 1)
+					websocket->setNoteOffCallback([&](size_t note) {
+						pscript->getPolySynth()->noteOff(note);
+					});
+
+					websocket->setClearAllNotesCallback([&]() {
+						pscript->getPolySynth()->clearAllNotes();
+					});
+					websocket->setSendControlListCallback([&]() {
+						std::ostringstream ss;
+						ss << "{ \"type\": \"control-list\", \"data\": [ ";
+						if(pscript->getPolySynth()->getVoices().empty())
+						return string("");
+						auto params = pscript->getPolySynth()->getVoices()[0].synth.getParameters();
+						std::vector<string> parents;
+						std::map<string, std::vector<std::pair<string, float>>> hierachie;
+						for (size_t i = 0; i < params.size(); ++i) {
+							const string& name = params[i].getName();
+							if (name.empty() || name.at(0) == '_')
+							continue;
+							string parent;
+							string child;
+							auto pos = name.find(".");
+							if (pos != string::npos && pos < name.size() - 1) {
+								parent = name.substr(0, pos);
+								child = name.substr(pos + 1);
+							} else if (!name.empty()) {
+								parent = "Global";
+								child = name;
+							}
+							if (std::find(parents.begin(), parents.end(), parent) == parents.end()) {
+								parents.push_back(parent);
+							}
+							hierachie[parent].push_back( {child, params[i].getValue()});
+						}
+
+						size_t i = 0;
+						for (const auto& parent : parents) {
+							const string& module = parent;
+							const std::vector<std::pair<string, float>>& children = hierachie[parent];
+							ss << "{ \"name\": \"" << escape_json(module) << "\", \"controls\": [";
+							size_t j = 0;
+							for (const auto& child : children) {
+								ss << "{ \"name\" :\"" << escape_json(child.first) << "\", \"value\": \"" << child.second << "\" }";
+								if (j < children.size() - 1)
+								ss << ',';
+
+								++j;
+							}
+							ss << "]}";
+							if (i < hierachie.size() - 1)
 							ss << ',';
-
-							++j;
+							++i;
 						}
 						ss << "]}";
-						if (i < hierachie.size() - 1)
-						ss << ',';
-						++i;
-					}
-					ss << "]}";
-					return ss.str();
-				});
+						return ss.str();
+					});
 
-				websocket->sendConfig();
-				websocket->sendControlList();
-				websocket->reset();
-
+					websocket->sendConfig();
+					websocket->sendControlList();
+					websocket->reset();
+				}
 	  		for (size_t i = 0; i < midiIndex.size(); ++i) {
 					try {
 						const int& mi = midiIndex[i];
@@ -391,7 +397,7 @@ int main(int argc, char ** argv) {
 					log_warn("Unable to open audio port");
 				}
 
-				while (!websocket->isRestartRequested()) {
+				while (!websocket || !websocket->isRestartRequested()) {
 					sleep(1);
 				}
 				log_info("Restart request");
@@ -415,8 +421,9 @@ int main(int argc, char ** argv) {
 				save_parameters();
 				pscript->destroy();
 			} else {
-				websocket->reset();
-				while (!websocket->isRestartRequested()) {
+				if(websocket)
+					websocket->reset();
+				while (!websocket || !websocket->isRestartRequested()) {
 					sleep(1);
 				}
 				log_info("Restarting");
