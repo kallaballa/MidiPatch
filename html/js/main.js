@@ -240,7 +240,9 @@ function str2ab(str) {
 }
 
 function connect() {
+    $("#connectionstatus span").html("Connecting");
     socket = new ReconnectingWebSocket("ws://" + window.location.hostname + ":8080");
+
     socket.onopen = function(e) {
       $("#connectionstatus span").html("Connected");
     };
