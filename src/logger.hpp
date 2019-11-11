@@ -44,12 +44,12 @@ namespace midipatch {
   class Logger {
   private:
     bool dblog_;
-    Logger(const LogLevel l);
+    Logger(const LogLevel l, const string& logFile);
     static Logger* instance_;
   public:
     LogLevel level_;
 
-    static void init(const LogLevel l);
+    static void init(const LogLevel l, const string& logFile);
     static Logger& getInstance();
     static LogLevel getLevel();
     static void registerThread(const string& name);

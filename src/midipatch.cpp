@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <mutex>
+#include <experimental/filesystem>
 
 #include "cxxopts.hpp"
 #include "RtAudio.h"
@@ -15,11 +16,17 @@
 #include "RtError.h"
 #include "lua.h"
 
+#include "defines.hpp"
 #include "logger.hpp"
 #include "Websocket.hpp"
 #include "PatchScript.hpp"
 
 using namespace Tonic;
+namespace fs = std::experimental::filesystem;
+
+enum ExitCodes {
+	PATCH_SCRIPT_ERROR = 1, OPTIONS_ERROR = 2, UNKNOWN_ERROR = 3
+};
 
 const unsigned int nChannels = 2;
 uint8_t current_program = 127;
@@ -32,33 +39,32 @@ midipatch::Websocket* websocket = nullptr;
 
 void log_error(const string& title, const string& msg = "") {
 	LOG_ERR_MSG(title, msg);
-	if(websocket)
-		websocket->sendLogRecord(title, msg, (int)midipatch::L_ERROR, false);
+	if (websocket)
+		websocket->sendLogRecord(title, msg, (int) midipatch::L_ERROR, false);
 }
 
 void log_warn(const string& title, const string& msg = "") {
 	LOG_ERR_MSG(title, msg);
-	if(websocket)
-		websocket->sendLogRecord(title, msg, (int)midipatch::L_WARNING, false);
+	if (websocket)
+		websocket->sendLogRecord(title, msg, (int) midipatch::L_WARNING, false);
 }
 void log_debug(const string& title, const string& msg = "") {
 	LOG_DEBUG_MSG(title, msg);
-	if(websocket)
-		websocket->sendLogRecord(title, msg, (int)midipatch::L_DEBUG, false);
+	if (websocket)
+		websocket->sendLogRecord(title, msg, (int) midipatch::L_DEBUG, false);
 }
 
 void log_info(const string& title, const string& msg = "") {
 	LOG_INFO_MSG(title, msg);
-	if(websocket)
-		websocket->sendLogRecord(title, msg, (int)midipatch::L_INFO, false);
+	if (websocket)
+		websocket->sendLogRecord(title, msg, (int) midipatch::L_INFO, false);
 }
 
 void log_syntax_error(const string& title, const string& msg = "") {
 	LOG_ERR_MSG(title, msg);
-	if(websocket)
-		websocket->sendLogRecord(title, msg, (int)midipatch::L_ERROR, true);
+	if (websocket)
+		websocket->sendLogRecord(title, msg, (int) midipatch::L_ERROR, true);
 }
-
 
 int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime,
 		RtAudioStreamStatus status, void *userData) {
@@ -71,7 +77,7 @@ int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFr
 	for (size_t i = 0; i < lenBuf; ++i) {
 		samples[i] = ((float*) outputBuffer)[i];
 	}
-	if(websocket)
+	if (websocket)
 		websocket->sendAudio(samples);
 	return 0;
 }
@@ -91,12 +97,12 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 	if (msgtype == 0x80 || (msgtype == 0x90 && b2 == 0)) {
 		std::cout << "MIDI Note OFF  C: " << chan << " N: " << b1 << std::endl;
 		pscript->getPolySynth()->noteOff(b1);
-		if(websocket)
+		if (websocket)
 			websocket->sendNoteOff(b1);
 	} else if (msgtype == 0x90) {
 		std::cout << "MIDI Note ON   C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
 		pscript->getPolySynth()->noteOn(b1, b2);
-		if(websocket)
+		if (websocket)
 			websocket->sendNoteOn(b1, b2);
 	} else if (msgtype == 0xB0) {
 		std::cout << "MIDI CC ON     C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
@@ -197,7 +203,6 @@ void signalHandler(int signum) {
 }
 
 int main(int argc, char ** argv) {
-	midipatch::Logger::init(midipatch::L_DEBUG);
 	std::string appName = argv[0];
 	std::vector<int> midiIndex;
 	int audioIndex = 0;
@@ -209,67 +214,79 @@ int main(int argc, char ** argv) {
 	string saveFile;
 	string bankFile;
 	size_t numVoices;
+	const char* home = std::getenv(DEFAULT_ENV_VARIABLE);
+	if(!home) {
+		log_error(string("Can't find environment variable: ") + DEFAULT_ENV_VARIABLE);
+		exit(PATCH_SCRIPT_ERROR);
+	}
+
 	cxxopts::Options options(appName, "A scriptable, modular and real-time MIDI synthesizer");
 	options.add_options()("h,help", "Print help messages")
-			("m,midi", "The indeces of the midi input ports to use.", cxxopts::value<std::vector<int>>(midiIndex)->default_value("0"))
-			("a,audio", "The index of the audio output port to use.",	cxxopts::value<int>(audioIndex)->default_value("0"))
-			("r,rate", "The audio output sample rate.",	cxxopts::value<unsigned int>(sampleRate)->default_value("48000"))
-			("b,buffer", "Number of frames per buffer.", cxxopts::value<unsigned int>(bufferFrames)->default_value("512"))
-			("w,websocket", "The port number of the websocket server.",	cxxopts::value<size_t>(port)->default_value("0"))
-			("o,offset", "The control number offset for parameter mapping",	cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
-			("v,voices", "The number of voices to run",	cxxopts::value<size_t>(numVoices)->default_value("8"))
-			("s,save", "The file where current patch settings are stored", cxxopts::value<string>(saveFile)->default_value("/tmp/midipatch.save"))
-			("p,patchFile",	"The lua patchFile to use for the voices", cxxopts::value<string>(patchFile))
-			("f,logFile", "The file to log to",	cxxopts::value<string>(logFile)->default_value("/tmp/midipatch.log"));
+			("m,midi", "The indeces of the midi input ports to use.",
+				cxxopts::value<std::vector<int>>(midiIndex)->default_value("0"))
+			("a,audio",	"The index of the audio output port to use.",
+					cxxopts::value<int>(audioIndex)->default_value("0"))
+			("r,rate", "The audio output sample rate.",
+					cxxopts::value<unsigned int>(sampleRate)->default_value("48000"))
+			("b,buffer", "Number of frames per buffer.",
+					cxxopts::value<unsigned int>(bufferFrames)->default_value("512"))
+			("w,websocket", "The port number of the websocket server.",
+					cxxopts::value<size_t>(port)->default_value("0"))
+			("o,offset", "The control number offset for parameter mapping",
+				cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
+			("v,voices", "The number of voices to run",
+					cxxopts::value<size_t>(numVoices)->default_value("8"))
+			("s,save",	"The file where current patch settings are stored",
+					cxxopts::value<string>(saveFile)->default_value(string(home) + "/" + DEFAULT_DATA_DIR + "/midipatch.sav"))
+			("p,patchFile",	"The lua patchFile to use for the voices",
+					cxxopts::value<string>(patchFile)->default_value(string(home) + "/" + DEFAULT_DATA_DIR + "/midipatch.pat"))
+			("f,logFile", "The file to log to",
+					cxxopts::value<string>(logFile)->default_value(string(home) + "/" + DEFAULT_LOG_DIR + "/midipatch.log"));
 
 	auto result = options.parse(argc, argv);
 
 	if (result["help"].count()) {
 		std::cerr << options.help() << std::endl;
-		exit(4);
+		exit(OPTIONS_ERROR);
 	}
+	midipatch::Logger::init(midipatch::L_DEBUG, logFile);
 
 	if (!saveFile.empty()) {
 		save_file = saveFile;
 	}
-	std::cerr.flush();
-	std::ofstream ofLog(logFile);
-	std::cout.rdbuf(ofLog.rdbuf());
-	std::cerr.rdbuf(ofLog.rdbuf());
+
 	pscript = new patchscript::PatchScript(sampleRate);
-	if(port > 0)
+	if (port > 0)
 		websocket = new midipatch::Websocket(port, patchFile);
 
 	pscript->setErrorHandler([](int status, const char* msg) {
 		switch (status) {
 			case LUA_ERRSYNTAX:
-				log_syntax_error("Syntax error", msg);
+			log_syntax_error("Syntax error", msg);
 			break;
 			case LUA_ERRRUN:
-				log_error("Runtime error", msg);
+			log_error("Runtime error", msg);
 			break;
 			case LUA_ERRMEM:
-				log_error("Lua memory allocation error", msg);
+			log_error("Lua memory allocation error", msg);
 			break;
 			case LUA_ERRERR:
-				log_error("Error running error", msg);
+			log_error("Error running error", msg);
 			break;
 #if LUA_VERSION_NUM >= 502
 			case LUA_ERRGCMM:
-				log_error("GC error", msg);
+			log_error("GC error", msg);
 			break;
 #endif
 			default:
 #ifdef __MIDIPATCH_DEBUG
-				log_error("Lua unknown error", msg);
+			log_error("Lua unknown error", msg);
 #endif
 			break;
 		}
 	});
 
-
-	// You don't necessarily have to do this - it will default to 44100 if not set.
-	std::vector<RtMidiIn*> midiIn(midiIndex.size(),nullptr);
+	std::vector<RtMidiIn*> midiIn(midiIndex.size(), nullptr);
 
 	while (true) {
 		RtAudio dac;
@@ -281,8 +298,13 @@ int main(int argc, char ** argv) {
 			sleep(1);
 		}
 		try {
-			bool initSuccess = pscript->init(patchFile, numVoices);
-			if(websocket) {
+			auto initSuccess = pscript->init(patchFile, numVoices);
+			if (!initSuccess.first) {
+				log_error(initSuccess.second);
+				exit(PATCH_SCRIPT_ERROR);
+			}
+
+			if (websocket) {
 				websocket->setSendConfigCallback([&]() {
 					std::ostringstream ss;
 					ss << "{ \"type\": \"config\", \"data\": { ";
@@ -295,7 +317,7 @@ int main(int argc, char ** argv) {
 				});
 				websocket->sendConfig();
 			}
-			if (initSuccess) {
+			if(!pscript->getPolySynth()->getVoices().empty()) {
 				load_parameters();
 				signal(SIGINT, signalHandler);
 				signal(SIGTERM, signalHandler);
@@ -372,7 +394,7 @@ int main(int argc, char ** argv) {
 					websocket->sendControlList();
 					websocket->reset();
 				}
-	  		for (size_t i = 0; i < midiIndex.size(); ++i) {
+				for (size_t i = 0; i < midiIndex.size(); ++i) {
 					try {
 						const int& mi = midiIndex[i];
 						log_info("Initialize MIDI", "Port: " + std::to_string(mi));
@@ -386,10 +408,8 @@ int main(int argc, char ** argv) {
 
 				try {
 					log_info("Initialize Audio",
-							"Port: " + std::to_string(rtParams.deviceId) +
-							" channels: "	+ std::to_string(rtParams.nChannels) +
-							" rate: " + std::to_string(sampleRate) +
-							" frames: " + std::to_string(bufferFrames));
+							"Port: " + std::to_string(rtParams.deviceId) + " channels: " + std::to_string(rtParams.nChannels)
+									+ " rate: " + std::to_string(sampleRate) + " frames: " + std::to_string(bufferFrames));
 
 					dac.openStream(&rtParams, NULL, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &renderCallback, NULL, NULL);
 					dac.startStream();
@@ -403,7 +423,7 @@ int main(int argc, char ** argv) {
 				log_info("Restart request");
 				for (size_t i = 0; i < midiIn.size(); ++i) {
 					try {
-						if(!midiIn[i])
+						if (!midiIn[i])
 							continue;
 						midiIn[i]->cancelCallback();
 						midiIn[i]->closePort();
@@ -412,7 +432,7 @@ int main(int argc, char ** argv) {
 						log_warn("Can't clean up MIDI port");
 					}
 				}
-				try{
+				try {
 					dac.abortStream();
 					dac.closeStream();
 				} catch (std::exception& e) {
@@ -420,24 +440,25 @@ int main(int argc, char ** argv) {
 				}
 				save_parameters();
 				pscript->destroy();
+
+				while (dac.isStreamOpen()) {
+					log_warn("Waiting for audiostream to finish");
+					sleep(1);
+				}
 			} else {
-				if(websocket)
+				if (websocket)
 					websocket->reset();
 				while (!websocket || !websocket->isRestartRequested()) {
 					sleep(1);
 				}
 				log_info("Restarting");
 			}
-			while (dac.isStreamOpen()) {
-				log_warn("Waiting for audiostream to finish");
-				sleep(1);
-			}
 		} catch (RtError& e) {
 			log_error("Exception", e.getMessage());
-			exit(2);
+			exit(UNKNOWN_ERROR);
 		} catch (std::exception& ex) {
 			log_error("Exception", ex.what());
-			exit(2);
+			exit(UNKNOWN_ERROR);
 		}
 	}
 

@@ -22,6 +22,7 @@ ifeq ($(UNAME_S), Linux)
    LIBS+= -lasound
  endif
  PACK_CMD=${LD} -r -b binary -o index.o index.min.pack
+ LIBS+= -lstdc++fs
 endif
 
 TARGET  := midipatch

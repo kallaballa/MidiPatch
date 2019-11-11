@@ -120,32 +120,33 @@ public:
 namespace midipatch {
   Logger* Logger::instance_ = NULL;
 
-  Logger::Logger(const LogLevel l) : dblog_(false), level_(l) {
-    plog::ConsoleAppender<plog::MidiPatchFormatter>* consoleAppender = new plog::ConsoleAppender<plog::MidiPatchFormatter>();
+  Logger::Logger(const LogLevel l, const string& logFile) : dblog_(false), level_(l) {
+  	static plog::RollingFileAppender<plog::TxtFormatter> fileAppender(logFile.c_str(), 8092, 10);
+  	static plog::ConsoleAppender<plog::MidiPatchFormatter> consoleAppender;
     switch (l) {
     case L_DEBUG:
-      plog::init(plog::debug, consoleAppender);
+      plog::init(plog::debug, &fileAppender).addAppender(&consoleAppender);
       break;
     case L_INFO:
-      plog::init(plog::info, consoleAppender);
+      plog::init(plog::info, &fileAppender).addAppender(&consoleAppender);
       break;
     case L_WARNING:
-      plog::init(plog::warning, consoleAppender);
+      plog::init(plog::warning, &fileAppender).addAppender(&consoleAppender);
       break;
     case L_ERROR:
-      plog::init(plog::error, consoleAppender);
+      plog::init(plog::error, &fileAppender).addAppender(&consoleAppender);
       break;
     case L_FATAL:
-      plog::init(plog::fatal, consoleAppender);
+      plog::init(plog::fatal, &fileAppender).addAppender(&consoleAppender);
       break;
     case L_GLOBAL:
-      plog::init(plog::verbose, consoleAppender);
+      plog::init(plog::verbose, &fileAppender).addAppender(&consoleAppender);
       break;
     }
   }
 
-  void Logger::init(const LogLevel l) {
-    Logger::instance_ = new Logger(l);
+  void Logger::init(const LogLevel l, const string& logFile) {
+    Logger::instance_ = new Logger(l, logFile);
   }
 
   Logger& Logger::getInstance() {
