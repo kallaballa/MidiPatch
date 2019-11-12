@@ -18,8 +18,8 @@ ifeq ($(UNAME_S), Darwin)
  LD=clang++
  CFLAGS += -mmacosx-version-min=1
  LDFLAGS += -L/opt/local/lib # MacPorts Boost doesn't come with pkgconfig
- CXXFLAGS += -stdlib=libc++  -mmacosx-version-min=10.15 -lstdc++fs
- LDFLAGS += -stdlib=libc++ -lstdc++fs -framework CoreAudio -framework AudioToolbox -framework CoreMIDI -framework CoreData -framework CoreFoundation -framework Accelerate -undefined dynamic_lookup
+ CXXFLAGS += -stdlib=libc++  -mmacosx-version-min=10.15 
+ LDFLAGS += -stdlib=libc++ -framework CoreAudio -framework AudioToolbox -framework CoreMIDI -framework CoreData -framework CoreFoundation -framework Accelerate -undefined dynamic_lookup
 endif
 
 ifeq ($(MACHINE), x86_64)
