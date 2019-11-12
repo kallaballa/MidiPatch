@@ -6,6 +6,14 @@ body {
   font-family: monospace;
 }
 
+#savetolibrary {
+  display: none;
+}
+
+#savetolibrary label {
+  color: black;
+}
+
 #confirmoverwrite {
   display: none;
 }
