@@ -99,6 +99,7 @@ brew install lilv
 brew install npm
 brew install nasm
 brew install libgit2
+brew install sqlite3
 
 # install inliner
 npm install -g inliner
