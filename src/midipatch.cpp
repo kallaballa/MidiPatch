@@ -16,10 +16,11 @@
 #include "RtError.h"
 #include "lua.h"
 
-#include "defines.hpp"
 #include "logger.hpp"
 #include "Websocket.hpp"
 #include "PatchScript.hpp"
+
+#define MIDIPATCH_VERSION "0.0.1"
 
 using namespace Tonic;
 namespace fs = std::experimental::filesystem;
@@ -308,6 +309,7 @@ int main(int argc, char ** argv) {
 				websocket->setSendConfigCallback([&]() {
 					std::ostringstream ss;
 					ss << "{ \"type\": \"config\", \"data\": { ";
+					ss << "\"version\": \"" << MIDIPATCH_VERSION << "\",";
 					ss << "\"patchFile\": \"" << patchFile << "\",";
 					ss << "\"sampleRate\": " << sampleRate << ",";
 					ss << "\"bufferFrames\": " << bufferFrames << ",";
@@ -390,8 +392,35 @@ int main(int argc, char ** argv) {
 						return ss.str();
 					});
 
+					websocket->setSendPatchListCallback([&]() {
+						std::vector<patchscript::PatchObject> list;
+						pscript->listPatches(list);
+						std::ostringstream ss;
+						ss << "{ \"type\": \"patch-list\", \"list\": [";
+						for(size_t i = 0; i < list.size(); ++i) {
+							const auto& po = list[i];
+							ss << "{ \"name\": \"" << escape_json(po.name_)
+									<< "\", \"revision\": \"" << po.revision_
+									<< "\", \"runtimeName\": \"" << escape_json(po.runtimeName_)
+									<< "\", \"runtimeVersion\": \"" << escape_json(po.runtimeVersion_)
+									<< "\", \"description\": \"" << escape_json(po.description_)
+									<< "\", \"code\": \"" << escape_json(po.code_)
+									<< "\", \"date\": " << po.date_ << "}";
+							if(i < list.size() - 1)
+								ss << ",";
+						}
+						ss << "]}";
+						return ss.str();
+					});
+
+					websocket->setUpdatePatchCallback([&](const patchscript::PatchObject& po) {
+						pscript->storePatch(po);
+						websocket->sendPatchList();
+					});
+
 					websocket->sendConfig();
 					websocket->sendControlList();
+					websocket->sendPatchList();
 					websocket->reset();
 				}
 				for (size_t i = 0; i < midiIndex.size(); ++i) {

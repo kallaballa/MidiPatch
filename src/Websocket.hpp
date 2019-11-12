@@ -17,6 +17,7 @@
 #include <mutex>
 #include "App.h"
 #include "PolySynth.hpp"
+#include "SqlStore.hpp"
 
 std::string escape_json(const std::string &s);
 
@@ -35,12 +36,23 @@ class Websocket {
 	std::function<void()> clearAllNotesCallback_;
 	std::function<string()> sendControlListCallback_;
 	std::function<string()> sendConfigCallback_;
+	std::function<string()> sendPatchListCallback_;
+	std::function<void(const patchscript::PatchObject&)> updatePatchCallback_;
 
 public:
 	Websocket(size_t port, const string& bankFile);
 	virtual ~Websocket();
+
 	void setSendControlListCallback(std::function<string()> callback) {
 		sendControlListCallback_ = callback;
+	}
+
+	void setSendPatchListCallback(std::function<string()> callback) {
+		sendPatchListCallback_ = callback;
+	}
+
+	void setUpdatePatchCallback(std::function<void(const patchscript::PatchObject&)> callback) {
+		updatePatchCallback_ = callback;
 	}
 
 	void setSetControlCallback(std::function<void(string, float)> callback) {
@@ -85,6 +97,7 @@ public:
 	void sendConfig();
 	void sendLogRecord(const string& title, const string& msg, int severity, bool highlight, bool lock = true);
 	void sendControlList();
+	void sendPatchList();
 	size_t hasClients();
 };
 

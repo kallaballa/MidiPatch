@@ -249,6 +249,13 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 								client->send(list, uWS::TEXT);
 							}
 						}
+
+						if(sendPatchListCallback_) {
+							string list = sendPatchListCallback_();
+							for (auto& client : clients_) {
+								client->send(list, uWS::TEXT);
+							}
+						}
 						sendLogRecord("Connected", "", L_INFO, false, false);
 					},
 					.message = [&](auto *ws, std::string_view message, uWS::OpCode opCode) {
@@ -275,6 +282,16 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 							audioStreamEnabled_ = msg["data"].get<bool>();
 						} else if(type == "restart") {
 							restart_ = true;
+						} else if(type == "update-patch") {
+							patchscript::PatchObject po;
+							po.name_ = msg["name"];
+							po.runtimeName_ = msg["runtimeName"];
+							po.runtimeVersion_ = msg["runtimeVersion"];
+							po.description_ = msg["description"];
+							po.date_ = msg["date"];
+							po.code_ = msg["code"];
+							if(updatePatchCallback_)
+								updatePatchCallback_(po);
 						}
 					},
 					.drain = [](auto *ws) {
@@ -419,6 +436,16 @@ void Websocket::sendControlList() {
 	std::scoped_lock lock(mutex_);
 	if(sendControlListCallback_) {
 		string list = sendControlListCallback_();
+		for (auto& client : clients_) {
+			client->send(list, uWS::TEXT);
+		}
+	}
+}
+
+void Websocket::sendPatchList() {
+	std::scoped_lock lock(mutex_);
+	if(sendPatchListCallback_) {
+		string list = sendPatchListCallback_();
 		for (auto& client : clients_) {
 			client->send(list, uWS::TEXT);
 		}
