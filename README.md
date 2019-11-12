@@ -73,7 +73,7 @@ sudo add-apt-repository ppa:ubuntu-toolchain-r/test
 sudo apt-get update
 
 # install dependencies
-sudo apt-get install git-core build-essential g++-7 zlib1g-dev libasound2-dev liblilv-dev npm libgit2-dev
+sudo apt-get install git-core build-essential g++-7 zlib1g-dev libasound2-dev liblilv-dev npm libgit2-dev libsqlite3-dev
 sudo npm install -g inliner
 sudo ln -s /usr/bin/nodejs /usr/bin/node
 
