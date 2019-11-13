@@ -659,7 +659,10 @@ function drawScope(analyser, ctx) {
 
 $(document).ready(function() {
     makeLayout();
-//    window.setInterval(refreshLog, 1000);
+
+    //scroll C5 into view
+    $(".key").get(72).scrollIntoView();
+
     $("#restart").click(function() {
         restart();
     });

@@ -6,6 +6,9 @@ body {
   font-family: monospace;
 }
 
+#librarytable {
+  height: 100%;
+}
 #savetolibrary {
   display: none;
 }
