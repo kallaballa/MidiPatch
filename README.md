@@ -81,8 +81,8 @@ sudo ln -s /usr/bin/nodejs /usr/bin/node
 git clone https://github.com/kallaballa/MidiPatch.git
 cd MidiPatch
 git submodule update --init --recursive
-CXX=g++-7 CC=gcc-7 ./build_third.sh -j2
-make CXX=g++-7 CC=gcc-7
+./build_third.sh -j2
+make -j2
 ```
 
 # Instructions for Mac OS X Mojave
