@@ -6,7 +6,6 @@ endif
 
 CXX      := g++-7
 CXXFLAGS := -pthread -fno-strict-aliasing -std=c++17 -pedantic -Wall
-LDFLAGS  := -L/opt/local/lib
 LIBS     := -lpthread -lm 
 .PHONY: all release debian-release info debug clean debian-clean distclean asan
 DESTDIR := /
@@ -20,10 +19,8 @@ endif
 ifeq ($(UNAME_S), Darwin)
   CXX=clang++
   LD=clang++
-  CFLAGS += -mmacosx-version-min=1
-  LDFLAGS += -L/opt/local/lib # MacPorts Boost doesn't come with pkgconfig
-  CXXFLAGS += -stdlib=libc++  -mmacosx-version-min=10.15 
-  LDFLAGS += -stdlib=libc++ -framework CoreAudio -framework AudioToolbox -framework CoreMIDI -framework CoreData -framework CoreFoundation -framework Accelerate -undefined dynamic_lookup
+  CXXFLAGS += -stdlib=libc++
+  LDFLAGS += -stdlib=libc++ -framework CoreAudio -framework AudioToolbox -framework CoreMIDI -framework CoreData -framework CoreFoundation -framework Accelerate
 endif
 
 ifeq ($(MACHINE), x86_64)
@@ -55,11 +52,6 @@ CXXFLAGS += -m32
 LDFLAGS += -L/usr/lib -static-libgcc -m32 -Wl,-Bstatic
 endif 
 
-ifeq ($(UNAME_S), Darwin)
- LDFLAGS += -L/opt/X11/lib/
-endif
-
-all: release
 
 ifneq ($(UNAME_S), Darwin)
 release: LDFLAGS += -s
