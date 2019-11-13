@@ -6,10 +6,6 @@ body {
   font-family: monospace;
 }
 
-#librarytable th {
-  color: white;
-}
-
 #savetolibrary {
   display: none;
 }

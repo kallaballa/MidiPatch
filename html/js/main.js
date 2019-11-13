@@ -532,7 +532,7 @@ function makeLayout() {
     });
 
     myLayout.registerComponent('Library', function(container, componentState) {
-        container.getElement().html('<div><table id="librarytable"><thead><tr><th>Name</th><th>Revision</th><th>Description</th><th>Date</th><th></th></tr></thead><tbody></tbody><tfoot><tr><th>Name</th><th>Revision</th><th>Description</th><th>Date</th><th></th></tr></tfoot></table></div>');
+        container.getElement().html('<div><table id="librarytable"><thead><tr><th>Name</th><th>Revision</th><th>Description</th><th>Date</th><th></th></tr></thead><tbody></tbody></table></div>');
     });
 
    myLayout.registerComponent('Editor', function(container, componentState) {
