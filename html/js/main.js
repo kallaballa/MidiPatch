@@ -329,10 +329,10 @@ function connect() {
           tbody.find("tr").remove();
           for(var i = patchList.length - 1; i >= 0; --i) {
             if(patchList[i].name != lastName)
-              tbody.append("<tr><td class=\"libname\">" + patchList[i].name + "</td><td class=\"librevision\">" + patchList[i].revision + "</td><td class=\"libdescription\">" + patchList[i].description + "</td><td>" + new Date(patchList[i].date * 1000).toLocaleString() + "</td><td><div class=\"button loadfromlib\">Load</div><div class=\"button saveaslib\">Save as</div></td></tr>");
+              tbody.append("<tr><td class=\"libname\">" + patchList[i].name + "</td><td class=\"librevision\">" + patchList[i].revision + "</td><td class=\"libdescription\">" + patchList[i].description + "</td><td>" + new Date(patchList[i].date * 1000).toLocaleString() + "</td><td><div class=\"button importfromlib\">Import</div><div class=\"button exporttolib\">Export</div></td></tr>");
             lastName = patchList[i].name;
           }
-          $('#librarytable .saveaslib').each(function() {
+          $('#librarytable .exporttolib').each(function() {
             $(this).click(function() {
               var name = $(this).parent().parent().find(".libname").html();
               var desc = $(this).parent().parent().find(".libdescription").html();
@@ -340,7 +340,7 @@ function connect() {
              })
           });
 
-          $('#librarytable .loadfromlib').each(function() { 
+          $('#librarytable .importfromlib').each(function() { 
             $(this).click(function() {
               var name = $(this).parent().parent().find(".libname").html();
               var desc = $(this).parent().parent().find(".libdescription").html();
@@ -522,7 +522,7 @@ function makeLayout() {
     }
 
     myLayout.registerComponent('Toolbar', function(container, componentState) {
-        container.getElement().html('<div id="toolbar"><div class="button" id="restart">Restart</div><div class="button" id="loadpatch">Download</div><div class="button" id="storepatch">Upload</div><div class="button" id="savetolibrarybtn">Save to Library</div><div class="button" id="resetlayout">Reset Layout</div><section id="editorselectsection"><label id="editorselectlbl" for="editorselect">Mode:</label><select id="editorselect"><option value="sublime">Sublime</option><option value="vim">Vim</option><option value="emacs">Emacs</option></select></section><input type="checkbox" id="restartonsave" value="Restart on save" checked/><label for="restartonsave" id="restartonsavelbl">Restart on store</label><section id="connectionstatus">Status:<span>Disconnected</span></div></div>');
+        container.getElement().html('<div id="toolbar"><div class="button" id="restart">Restart</div><div class="button" id="loadpatch">Download</div><div class="button" id="storepatch">Upload</div><div class="button" id="savetolibrarybtn">Export to library</div><div class="button" id="resetlayout">Reset Layout</div><section id="editorselectsection"><label id="editorselectlbl" for="editorselect">Mode:</label><select id="editorselect"><option value="sublime">Sublime</option><option value="vim">Vim</option><option value="emacs">Emacs</option></select></section><input type="checkbox" id="restartonsave" value="Restart on save" checked/><label for="restartonsave" id="restartonsavelbl">Restart on store</label><section id="connectionstatus">Status:<span>Disconnected</span></div></div>');
     });
 
     myLayout.registerComponent('Analyser', function(container, componentState) {
