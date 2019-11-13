@@ -345,7 +345,7 @@ function connect() {
           tbody.find("tr").remove();
           for(var i = patchList.length - 1; i >= 0; --i) {
             if(patchList[i].name != lastName)
-              tbody.append("<tr><td class=\"libname\">" + patchList[i].name + "</td><td>" + patchList[i].revision + "</td><td class=\"libdescription\">" + patchList[i].description + "</td><td>" + patchList[i].date + "</td><td><div class=\"button loadfromlib\">Load</div><div class=\"button saveaslib\">Save as</div></td></tr>");
+              tbody.append("<tr><td class=\"libname\">" + patchList[i].name + "</td><td>" + patchList[i].revision + "</td><td class=\"libdescription\">" + patchList[i].description + "</td><td>" + new Date(patchList[i].date * 1000).toLocaleString() + "</td><td><div class=\"button loadfromlib\">Load</div><div class=\"button saveaslib\">Save as</div></td></tr>");
             lastName = patchList[i].name;
           }
           $('#librarytable .saveaslib').each(function() {
@@ -532,7 +532,7 @@ function makeLayout() {
     });
 
     myLayout.registerComponent('Library', function(container, componentState) {
-        container.getElement().html('<table id="librarytable"><thead><tr><th>Name</th><th>Revision</th><th>Description</th><th>Date</th><th></th></tr></thead><tbody></tbody><tfoot><tr><th>Name</th><th>Revision</th><th>Description</th><th>Date</th><th></th></tr></tfoot></table>');
+        container.getElement().html('<div><table id="librarytable"><thead><tr><th>Name</th><th>Revision</th><th>Description</th><th>Date</th><th></th></tr></thead><tbody></tbody><tfoot><tr><th>Name</th><th>Revision</th><th>Description</th><th>Date</th><th></th></tr></tfoot></table></div>');
     });
 
    myLayout.registerComponent('Editor', function(container, componentState) {
