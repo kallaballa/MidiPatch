@@ -81,7 +81,7 @@ sudo ln -s /usr/bin/nodejs /usr/bin/node
 git clone https://github.com/kallaballa/MidiPatch.git
 cd MidiPatch
 git submodule update --init --recursive
-./build_third.sh
+CXX=g++-7 CC=gcc-7 ./build_third.sh -j2
 make CXX=g++-7 CC=gcc-7
 ```
 
