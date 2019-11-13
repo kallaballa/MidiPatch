@@ -173,32 +173,12 @@ function storePatch() {
 }
 
 
-function saveToFile() {
-    var file = $("#fileselect input").val();
-    var code = codeMirror.getValue();
-    $.post('/cgi-bin/savefile.cgi', {
-            code: code,
-            file: file
-        },
-        function(data, status, jqXHR) {
-            $.notify("Saved to file: " + file, "success");
-            if ($("#restartonsave").prop('checked')) {
-                restart();
-            }
-        }
-    )
-}
-
-function loadFromFile() {
-    var file = $("#fileselect input").val();
-    $.get('/cgi-bin/loadfile.cgi', {
-            file: file
-        },
-        function(data, status, jqXHR) {
-            codeMirror.setValueAsk(data);
-            $.notify("Loaded from file: " + file, "success");
-        }
-    )
+function getControlParameters() {
+  var cp = {};
+  $("#rackdiv input").each(function() {
+    cp[$(this).attr("id")] = $(this).val();
+  })
+  return cp;
 }
 
 function setControl(name, value) {
@@ -218,7 +198,11 @@ function saveToLibrary(name, description) {
         "runtimeVersion": version,
         "description": description,
         "date": Date.now() / 1000,
-        "code": codeMirror.getValue()
+        "code": codeMirror.getValue(),
+        "layout": JSON.stringify(myLayout.toConfig()),
+        "parameters": JSON.stringify(getControlParameters()),
+        "keyboardBindings": null,
+        "midiBindings": null
     };
     socket.send(JSON.stringify(obj));
 }
@@ -345,7 +329,7 @@ function connect() {
           tbody.find("tr").remove();
           for(var i = patchList.length - 1; i >= 0; --i) {
             if(patchList[i].name != lastName)
-              tbody.append("<tr><td class=\"libname\">" + patchList[i].name + "</td><td>" + patchList[i].revision + "</td><td class=\"libdescription\">" + patchList[i].description + "</td><td>" + new Date(patchList[i].date * 1000).toLocaleString() + "</td><td><div class=\"button loadfromlib\">Load</div><div class=\"button saveaslib\">Save as</div></td></tr>");
+              tbody.append("<tr><td class=\"libname\">" + patchList[i].name + "</td><td class=\"librevision\">" + patchList[i].revision + "</td><td class=\"libdescription\">" + patchList[i].description + "</td><td>" + new Date(patchList[i].date * 1000).toLocaleString() + "</td><td><div class=\"button loadfromlib\">Load</div><div class=\"button saveaslib\">Save as</div></td></tr>");
             lastName = patchList[i].name;
           }
           $('#librarytable .saveaslib').each(function() {
@@ -360,14 +344,27 @@ function connect() {
             $(this).click(function() {
               var name = $(this).parent().parent().find(".libname").html();
               var desc = $(this).parent().parent().find(".libdescription").html();
+              var revision = $(this).parent().parent().find(".librevision").html();
+i
               if(name)
                 $("#patchname").val(name);
               if(desc)
                 $("#patchdescription").val(desc);
   
               for(var i = 0; i < patchList.length; ++i) {
-                if(patchList[i].name == name && patchList[i].description == desc)
-                  codeMirror.setValueAsk(patchList[i].code);
+                if(patchList[i].name == name && patchList[i].revision == revision) {
+                  codeMirror.setValue(patchList[i].code);
+                  storePatch();
+                  var parObj = JSON.parse(patchList[i].parameters);
+                  Object.keys(parObj).forEach(function(key) {
+                    $(("#" + key).replace(".", "_")).val(parObj[key]);
+                     setControl(key, parObj[key]);
+                  });
+
+                  localStorage.setItem("savedLayoutState",  patchList[i].layout);
+                  
+                  window.location.reload(); 
+                }
               }
             });
           });
@@ -424,7 +421,8 @@ function connect() {
           else
             $(".key").eq(obj.note % 12).css("background-color","");
 
-        } else if (obj.type == "display") {} else if (obj.type == "control-list") {
+        } else if (obj.type == "display") {
+        } else if (obj.type == "control-list") {
             if (lastControlListData == event.data) {
                 return;
             }

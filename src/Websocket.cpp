@@ -231,6 +231,10 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 					.open = [&](auto *ws, auto *req) {
 						std::scoped_lock lock(mutex_);
 						clients_.insert(ws);
+
+						if(restart_)
+							return;
+
 						if(clients_.size() > 1) {
 							string userJoined = "{ \"type\": \"user-joined\" } ";
 							for (auto& client : clients_) {
@@ -259,6 +263,8 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 						sendLogRecord("Connected", "", L_INFO, false, false);
 					},
 					.message = [&](auto *ws, std::string_view message, uWS::OpCode opCode) {
+						if(restart_)
+							return;
 						json msg = json::parse(std::string(message));
 						std::string type = msg["type"];
 						if(type == "set-control") {
@@ -290,6 +296,15 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 							po.description_ = msg["description"];
 							po.date_ = msg["date"];
 							po.code_ = msg["code"];
+							if(!msg["layout"].is_null())
+								po.layout_ = msg["layout"];
+							if(!msg["parameters"].is_null())
+								po.parameters_ = msg["parameters"];
+							if(!msg["keyboardBindings"].is_null())
+								po.keyboardBindings_ = msg["keyboardBindings"];
+							if(!msg["midiBindings"].is_null())
+								po.midiBindings_ = msg["midiBindings"];
+
 							if(updatePatchCallback_)
 								updatePatchCallback_(po);
 						}

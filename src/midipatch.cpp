@@ -294,6 +294,7 @@ int main(int argc, char ** argv) {
 		rtParams.nChannels = nChannels;
 
 		while (websocket && !websocket->hasClients()) {
+			log_info("Waiting for clients");
 			sleep(1);
 		}
 		try {
@@ -403,7 +404,12 @@ int main(int argc, char ** argv) {
 									<< "\", \"runtimeVersion\": \"" << escape_json(po.runtimeVersion_)
 									<< "\", \"description\": \"" << escape_json(po.description_)
 									<< "\", \"code\": \"" << escape_json(po.code_)
-									<< "\", \"date\": " << po.date_ << "}";
+									<< "\", \"date\": " << po.date_
+									<< ", \"layout\": \"" << escape_json(po.layout_)
+									<< "\", \"parameters\": \"" << escape_json(po.parameters_)
+									<< "\", \"keyboardBindings\": \"" << escape_json(po.keyboardBindings_)
+									<< "\", \"midiBindings\": \"" << escape_json(po.midiBindings_)
+									<< "\"}";
 							if(i < list.size() - 1)
 								ss << ",";
 						}
@@ -416,10 +422,11 @@ int main(int argc, char ** argv) {
 						websocket->sendPatchList();
 					});
 
+				std::cerr << "RESET" << std::endl;
+					websocket->reset();
 					websocket->sendConfig();
 					websocket->sendControlList();
 					websocket->sendPatchList();
-					websocket->reset();
 				}
 				for (size_t i = 0; i < midiIndex.size(); ++i) {
 					try {
@@ -448,6 +455,8 @@ int main(int argc, char ** argv) {
 					sleep(1);
 				}
 				log_info("Restart request");
+				log_info("Cleanup MIDI");
+
 				for (size_t i = 0; i < midiIn.size(); ++i) {
 					try {
 						if (!midiIn[i])
@@ -459,12 +468,14 @@ int main(int argc, char ** argv) {
 						log_warn("Can't clean up MIDI port");
 					}
 				}
+				log_info("Cleanup Audio");
 				try {
 					dac.abortStream();
 					dac.closeStream();
 				} catch (std::exception& e) {
 					log_warn("Can't clean up audio port");
 				}
+
 				save_parameters();
 				pscript->destroy();
 
@@ -472,6 +483,7 @@ int main(int argc, char ** argv) {
 					log_warn("Waiting for audiostream to finish");
 					sleep(1);
 				}
+				log_info("Restarting");
 			} else {
 				if (websocket)
 					websocket->reset();
