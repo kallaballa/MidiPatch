@@ -4,21 +4,21 @@ MidiPatch is a scriptable modular MIDI-synthesizer. The scripting is done in [lu
 
 # Usage
 
+    A scriptable, modular and real-time MIDI synthesizer
     Usage:
       src/midipatch [OPTION...]
-
+    
       -h, --help           Print help messages
       -m, --midi arg       The indeces of the midi input ports to use. (default: 0)
-      -a, --audio arg      The index of the audio output device to use. (default: 0)
-      -r, --rate arg       The audio output sample rate. (default: 44100)
-      -b, --buffer arg     Number of frames per buffer. (default: 32)
-      -o, --offset arg     The control number offset for parameter mapping
-                           (default: 52)
+      -a, --audio arg      The index of the audio output port to use. (default: 0)
+      -r, --rate arg       The audio output sample rate. (default: 48000)
+      -b, --buffer arg     Number of frames per buffer. (default: 512)
+      -w, --websocket arg  The port number of the websocket server. (default: 0)
+      -o, --offset arg     The control number offset for parameter mapping (default: 52)
       -v, --voices arg     The number of voices to run (default: 8)
-      -s, --save arg       The file where current patch settings are stored
-                           (default: /tmp/midipatch.save)
-      -p, --patchFile arg  The lua patchFile to use for the voices
-      -f, --logFile arg    The file to log to (default: /tmp/midipatch.log)
+      -s, --save arg       The file where current patch settings are stored (default: ~/.patchscript/data/midipatch.sav)
+      -p, --patchFile arg  The lua patchFile to use for the voices (default:~/.patchscript/data/midipatch.pat)
+      -f, --logFile arg    The file to log to (default: ~/.patchscript/logs//midipatch.log)
 
 For example to create a midi synthesizer with 3 voices, running the patch "bank.lua", connecting to the second midi port (port index starts at 0) and the first audio port, which automatically maps patch parameters to control numbers, starting at the control number offset (52) in ascending order:
 ```shell
@@ -81,8 +81,8 @@ sudo ln -s /usr/bin/nodejs /usr/bin/node
 git clone https://github.com/kallaballa/MidiPatch.git
 cd MidiPatch
 git submodule update --init --recursive
-./build_third.sh
-make CXX=g++-7 CC=gcc-7
+./build_third.sh -j2
+make -j2
 ```
 
 # Instructions for Mac OS X Mojave
@@ -108,7 +108,7 @@ git clone https://github.com/kallaballa/MidiPatch.git
 cd MidiPatch
 git submodule update --init --recursive
 ./build_third.sh
-make CXX=clang++ CC=clang
+make
 ```
 
 # Building with other Linux audio backends then ALSA
@@ -117,11 +117,11 @@ If you want use pulseaudio or jack you can do that by prepending a variable to t
 
 ## Building with pulse support:
 ```shell
-PULSE=1 make CXX=g++-7 CC=gcc-7
+PULSE=1 make
 ```
 ## Building with jack support:
 ```shell
-JACK=1 make CXX=g++-7 CC=gcc-7
+JACK=1 make
 ```
 # Cross-compiling
 The makefile supports the sysroot flag. 
