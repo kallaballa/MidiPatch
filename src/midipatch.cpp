@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <mutex>
-#include <experimental/filesystem>
 
 #include "cxxopts.hpp"
 #include "RtAudio.h"
@@ -23,7 +22,6 @@
 #define MIDIPATCH_VERSION "0.0.1"
 
 using namespace Tonic;
-namespace fs = std::experimental::filesystem;
 
 enum ExitCodes {
 	PATCH_SCRIPT_ERROR = 1, OPTIONS_ERROR = 2, UNKNOWN_ERROR = 3
