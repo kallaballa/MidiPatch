@@ -293,8 +293,8 @@ int main(int argc, char ** argv) {
 		rtParams.deviceId = audioIndex;
 		rtParams.nChannels = nChannels;
 
+		log_info("Waiting for clients");
 		while (websocket && !websocket->hasClients()) {
-			log_info("Waiting for clients");
 			sleep(1);
 		}
 		try {
