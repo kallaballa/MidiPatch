@@ -37,30 +37,47 @@ patchscript::PatchScript* pscript = nullptr;
 midipatch::Websocket* websocket = nullptr;
 
 void log_error(const string& title, const string& msg = "") {
-	LOG_ERR_MSG(title, msg);
+	if(msg.empty())
+		LOG_ERR_STR(title);
+	else
+		LOG_ERR_MSG(title, msg);
 	if (websocket)
 		websocket->sendLogRecord(title, msg, (int) midipatch::L_ERROR, false);
 }
 
 void log_warn(const string& title, const string& msg = "") {
-	LOG_ERR_MSG(title, msg);
+	if(msg.empty())
+		LOG_WARN_STR(title);
+	else
+		LOG_WARN_MSG(title, msg);
 	if (websocket)
 		websocket->sendLogRecord(title, msg, (int) midipatch::L_WARNING, false);
 }
 void log_debug(const string& title, const string& msg = "") {
-	LOG_DEBUG_MSG(title, msg);
+	if(msg.empty())
+		LOG_DEBUG_STR(title);
+	else
+		LOG_DEBUG_MSG(title, msg);
 	if (websocket)
 		websocket->sendLogRecord(title, msg, (int) midipatch::L_DEBUG, false);
 }
 
 void log_info(const string& title, const string& msg = "") {
-	LOG_INFO_MSG(title, msg);
+	if(msg.empty())
+		LOG_INFO_STR(title);
+	else
+		LOG_INFO_MSG(title, msg);
+
 	if (websocket)
 		websocket->sendLogRecord(title, msg, (int) midipatch::L_INFO, false);
 }
 
 void log_syntax_error(const string& title, const string& msg = "") {
-	LOG_ERR_MSG(title, msg);
+	if(msg.empty())
+		LOG_ERR_STR(title);
+	else
+		LOG_ERR_MSG(title, msg);
+
 	if (websocket)
 		websocket->sendLogRecord(title, msg, (int) midipatch::L_ERROR, true);
 }
