@@ -583,6 +583,8 @@ function makeLayout() {
     });
 
     myLayout.init();
+        myLayout.updateSize($(window).width(), $(window).height() - 10);
+
     $(window).resize(function() {
         myLayout.updateSize($(window).width(), $(window).height() - 10);
     });
