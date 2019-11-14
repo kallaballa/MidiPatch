@@ -1,5 +1,7 @@
 UNAME_S := $(shell uname -s)
 
+INLINEROPTS = -m -n
+
 ifeq ($(UNAME_S), Darwin)
  CUSTOM_DEFS = -Wno-register
  AUDIO_BACKEND=-D__MACOSX_CORE__
@@ -48,6 +50,7 @@ DEPS    := ${SRCS:.cpp=.dep}
 .PHONY: all release debug clean distclean
 
 all: release
+release: INLINEROPTS = -m 
 release: ${TARGET}
 debug: ${TARGET}
 info: ${TARGET}
@@ -68,7 +71,7 @@ ${TARGET}: ../html/index.o ../third/RtMidi/RtMidi.o ../third/RtAudio/RtAudio.o $
 	cd ../html; ${PACK_CMD}
 
 ../html/index.min.pack: $(ASSET_DIRS) $(ASSET_FILES)
-	cd ../html; inliner -n -m index.html > index.min.pack
+	cd ../html; inliner ${INLINEROPTS} index.html > index.min.pack
 
 ${OBJS}: %.o: %.cpp %.dep ${GCH}
 	${CXX} ${CXXFLAGS} -o $@ -c $< 
