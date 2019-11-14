@@ -114,6 +114,7 @@ function exportToLibraryDialog(name, desc) {
 }
 
 function importFromLibraryDialog(name, revision) {
+          alert(revision);
          var code;
          var parameters;
          var layout;
@@ -125,7 +126,7 @@ function importFromLibraryDialog(name, revision) {
                     break;
                   }
                 }
-             
+         alert(code);    
           if(!code || code.length == 0)
               $("#importcode" ).attr("disabled", true);
           else
@@ -457,7 +458,7 @@ function connect() {
             if(patchList[i].name != lastName) {
               var revStr = '<select class="revisionselect">';
               for(var j = 0; j < patchList[i].revision; ++j) {
-                  revStr += "<option>" + (patchList[i].revision - j) + "</option>"
+                  revStr += "<option value=\"" + (patchList[i].revision - j) + "\">" + (patchList[i].revision - j) + "</option>"
               }
               revStr += '</select>'
 
@@ -485,7 +486,7 @@ function connect() {
           $('#librarytable .importfromlib').each(function() { 
             $(this).click(function() {
               var name = $(this).parent().parent().find(".libname").html();
-              var revision = $(this).parent().parent().find(".librevision").html();
+              var revision = $(this).parent().parent().find(".revisionselect").val();
               importFromLibraryDialog(name,revision);
             });
           });
@@ -509,7 +510,9 @@ function connect() {
               channel1[i] = (data.charCodeAt(i * 2 + 1) / 127.0) -1.0;
              }
         } else if (obj.type == "update-control") {
-            $(obj.data.parent + "_" + obj.data.child).val(obj.data.value);
+            console.log(obj.data.parent + "_" + obj.data.child);
+            $("#" + obj.data.parent + "_" + obj.data.child).val(obj.data.value);
+            $("#" + obj.data.parent + "_" + obj.data.child).trigger("change");
         } else if (obj.type == "update-log") {
             var current_datetime = new Date();
             var formatted_date = current_datetime.getFullYear() + "-" + appendLeadingZeroes(current_datetime.getMonth() + 1) + "-" + appendLeadingZeroes(current_datetime.getDate()) + " " + appendLeadingZeroes(current_datetime.getHours()) + ":" + appendLeadingZeroes(current_datetime.getMinutes()) + ":" + appendLeadingZeroes(current_datetime.getSeconds());
