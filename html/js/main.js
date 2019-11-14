@@ -114,7 +114,6 @@ function exportToLibraryDialog(name, desc) {
 }
 
 function importFromLibraryDialog(name, revision) {
-          alert(revision);
          var code;
          var parameters;
          var layout;
@@ -126,7 +125,6 @@ function importFromLibraryDialog(name, revision) {
                     break;
                   }
                 }
-         alert(code);    
           if(!code || code.length == 0)
               $("#importcode" ).attr("disabled", true);
           else
