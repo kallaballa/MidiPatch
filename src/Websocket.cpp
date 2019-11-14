@@ -223,7 +223,7 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 					res->end("");
 				}).ws<PerSocketData>("/*", {
 					/* Settings */
-					.compression = uWS::SHARED_COMPRESSOR,
+					.compression = uWS::DEDICATED_COMPRESSOR,
 					.maxPayloadLength = 16 * 1024,
 					.idleTimeout = 10,
 					.maxBackpressure = 1 * 1024 * 1204,
