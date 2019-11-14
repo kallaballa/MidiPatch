@@ -6,16 +6,43 @@ body {
   font-family: monospace;
 }
 
-#librarytable {
+#librarytable_wrapper {
   height: 100%;
+  font-size: 0.8em;
+  color:#111111;
 }
-#savetolibrary {
+
+#librarytable tr td:first-child {
+  font-weight: bold;
+}
+
+#librarytable tr:nth-child(even) {
+  background-color: #979191;
+}
+
+
+#librarytable tr td {
+  padding: 3px;
+}
+
+
+#librarytable tr td:last-child button {
+  padding: 3px;
+  
+}
+
+#exporttolibrary {
   display: none;
 }
 
-#savetolibrary label {
-  color: black;
+#importfromlibrary {
+  display: none;
 }
+
+#deletefromlibrary {
+  display: none;
+}
+
 
 #confirmoverwrite {
   display: none;
@@ -127,19 +154,6 @@ overflow-y:auto;
   vertical-align: middle;
 }
 
-#holdmode {
-  vertical-align: middle;
-}
-
-#holdmodesection {
-  display: inline;
-  margin-right: 3px;
-}
-label {
-  display: inline;
-  color: white;
-  font-size: 1em;
-}
 
 #loadfile {
   margin-left: 0px;
@@ -163,30 +177,17 @@ label {
 
 #editorselectsection {
   display: inline;
-  border: 1px solid white;
-  padding: 3px;
-}
-
-#editorselect {
-  font-size: 0.8em;
-  border: 0;
-  color: white;
-  background-color: #404040;
-}
-
-.button {
-  cursor: default;
-  display: inline;
-  color: white;
-  background-color: black;
-  border: 1px solid white;
-  width: 100px;
-  padding: 3px;
 }
 
 #piano {
   margin-top: 3px;
 }
+
+label {
+  color:white;
+  padding: 6px;
+}
+
 @media only screen and (max-width: 1000px) {
 .CodeMirror {
   width: 512vw;

@@ -45,4 +45,14 @@
   transform:scale(1.1);
 }
 
+#holdmode {
+  vertical-align: middle;
+}
 
+#holdmodesection {
+  position:fixed;
+}
+
+#spacer {
+  height: 26px;
+}

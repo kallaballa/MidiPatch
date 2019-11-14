@@ -251,7 +251,7 @@
 	right: 0;
 }
 .ui-button {
-	padding: .4em 1em;
+	padding: .2em 0.5em;
 	display: inline-block;
 	position: relative;
 	line-height: normal;
@@ -885,7 +885,7 @@ body .ui-tooltip {
 ----------------------------------*/
 .ui-widget {
 	font-family: Segoe UI,Arial,sans-serif;
-	font-size: 1.1em;
+	font-size: 0.8em;
 }
 .ui-widget .ui-widget {
 	font-size: 1em;

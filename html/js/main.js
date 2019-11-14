@@ -64,22 +64,16 @@ function confirmConcurrentMod() {
           });
 }
 
-function saveToLibraryDialog(name, desc) {
-          if(name)
-            $("#patchname").val(name);
-          if(desc)
-            $("#patchdescription").val(desc);
+function deleteFromLibraryDialog(name, revision) {
           $( function() {
-          $( "#savetolibrary" ).dialog({
+          $( "#deletefromlibrary" ).dialog({
             resizable: false,
             height: "auto",
             width: 400,
             modal: true,
             buttons: {
-              "Save": function() {
-                var name = $("#patchname" ).val();
-                var desc = $("#patchdescription").val();
-                saveToLibrary(name,desc);
+              "Delete": function() {
+                deleteFromLibrary(name, revision);
                 $( this ).dialog( "close" );
               },
               "Cancel": function() {
@@ -89,6 +83,87 @@ function saveToLibraryDialog(name, desc) {
           });
           });
 }
+
+function exportToLibraryDialog(name, desc) {
+          if(name)
+            $("#sessionname").val(name);
+          if(desc)
+            $("#sessiondescription").val(desc);
+          $( function() {
+          $( "#exporttolibrary" ).dialog({
+            resizable: false,
+            height: "auto",
+            width: 400,
+            modal: true,
+            buttons: {
+              "Save": function() {
+                var name = $("#sessionname" ).val();
+                var desc = $("#sessiondescription").val();
+                var expCode = $("#exportcode" ).is(':checked');
+                var expParameters = $("#exportparameters").is(':checked');
+                var expLayout = $("#exportlayout").is(':checked');
+                exportToLibrary(name,desc, expCode, expParameters, expLayout);
+                $( this ).dialog( "close" );
+              },
+              "Cancel": function() {
+                $( this ).dialog( "close" );
+              }
+            }
+          });
+          });
+}
+
+function importFromLibraryDialog(name, revision) {
+         var code;
+         var parameters;
+         var layout;
+              for(var i = 0; i < patchList.length; ++i) {
+                if(patchList[i].name == name && patchList[i].revision == revision) {
+                    code = patchList[i].code;
+                    parameters = patchList[i].parameters;
+                    layout = patchList[i].layout;
+                    break;
+                  }
+                }
+             
+          if(!code || code.length == 0)
+              $("#importcode" ).attr("disabled", true);
+          else
+              $("#importcode" ).removeAttr("disabled");
+
+          if(!parameters || parameters.length == 0)
+              $("#importparameters" ).attr("disabled", true);
+          else
+              $("#importparameters" ).removeAttr("disabled");
+
+          if(!layout || layout.length == 0)
+              $("#importlayout" ).attr("disabled", true);
+          else
+              $("#importlayout" ).removeAttr("disabled");
+
+          $( function() {
+          $( "#importfromlibrary" ).dialog({
+            resizable: false,
+            height: "auto",
+            width: 400,
+            modal: true,
+            buttons: {
+              "Save": function() {
+                var impCode = $("#importcode" ).is(':checked');
+                var impParameters = $("#importparameters").is(':checked');
+                var impLayout = $("#importlayout").is(':checked');
+
+                importFromLibrary(name, revision, impCode, impParameters, impLayout);
+                $( this ).dialog( "close" );
+              },
+              "Cancel": function() {
+                $( this ).dialog( "close" );
+              }
+            }
+          });
+          });
+}
+
 function askContentDifferDialog(content) {
           $( function() {
           $( "#askcontentdiffer" ).dialog({
@@ -190,7 +265,17 @@ function setControl(name, value) {
     socket.send(JSON.stringify(obj));
 }
 
-function saveToLibrary(name, description) {
+function exportToLibrary(name, description, expCode, expParameters, expLayout) {
+    var code = "";
+    var parameters = "";
+    var layout = "";
+    alert(expCode);
+    if(expCode)
+      code = codeMirror.getValue();
+    if(expParameters)
+      parameters = JSON.stringify(getControlParameters());
+    if(expLayout)
+      layout = JSON.stringify(myLayout.toConfig());
     var obj = {
         "type": "update-patch",
         "name": name,
@@ -198,13 +283,55 @@ function saveToLibrary(name, description) {
         "runtimeVersion": version,
         "description": description,
         "date": Date.now() / 1000,
-        "code": codeMirror.getValue(),
-        "layout": JSON.stringify(myLayout.toConfig()),
-        "parameters": JSON.stringify(getControlParameters()),
+        "code": code,
+        "layout": layout,
+        "parameters": parameters,
         "keyboardBindings": null,
         "midiBindings": null
     };
     socket.send(JSON.stringify(obj));
+}
+
+function deleteFromLibrary(name, revision) {
+    var obj = {
+        "type": "delete-patch",
+        "name": name,
+        "revision": parseInt(revision,10),
+        "runtimeName": "",
+        "runtimeVersion": "",
+        "description": "",
+        "date": -1,
+        "code": "",
+        "layout": "",
+        "parameters": "",
+        "keyboardBindings": null,
+        "midiBindings": null
+    };
+    socket.send(JSON.stringify(obj));
+}
+
+function importFromLibrary(name, revision, impCode, impParameters, impLayout) {
+              for(var i = 0; i < patchList.length; ++i) {
+                if(patchList[i].name == name && patchList[i].revision == revision) {
+                  if(impCode) {
+                    codeMirror.setValue(patchList[i].code);
+                    storePatch();
+                  }
+
+                  if(impParameters) {
+                    var parObj = JSON.parse(patchList[i].parameters);
+                    Object.keys(parObj).forEach(function(key) {
+                      $(("#" + key).replace(".", "_")).val(parObj[key]);
+                       setControl(key, parObj[key]);
+                    });
+                  }
+
+                  if(impLayout) {
+                    localStorage.setItem("savedLayoutState",  patchList[i].layout);
+                    window.location.reload();
+                  }
+                }
+              }
 }
 
 function noteOn(key, velocity) {
@@ -329,45 +456,33 @@ function connect() {
           tbody.find("tr").remove();
           for(var i = patchList.length - 1; i >= 0; --i) {
             if(patchList[i].name != lastName)
-              tbody.append("<tr><td class=\"libname\">" + patchList[i].name + "</td><td class=\"librevision\">" + patchList[i].revision + "</td><td class=\"libdescription\">" + patchList[i].description + "</td><td>" + new Date(patchList[i].date * 1000).toLocaleString() + "</td><td><div class=\"button importfromlib\">Import</div><div class=\"button exporttolib\">Export</div></td></tr>");
+              tbody.append("<tr><td class=\"libname\">" + patchList[i].name + "</td><td class=\"librevision\">" + patchList[i].revision + "</td><td class=\"libdescription\">" + patchList[i].description + "</td><td>" + new Date(patchList[i].date * 1000).toLocaleString() + "</td><td><button class=\"ui-button ui-corner-all ui-widget  importfromlib\">Import</button><button class=\"ui-button ui-corner-all ui-widget exporttolib\">Export</button><button class=\"ui-button ui-corner-all ui-widget deletefromlib\">Delete</button></td></tr>");
             lastName = patchList[i].name;
           }
           $('#librarytable .exporttolib').each(function() {
             $(this).click(function() {
               var name = $(this).parent().parent().find(".libname").html();
               var desc = $(this).parent().parent().find(".libdescription").html();
-              saveToLibraryDialog(name,desc);
+              exportToLibraryDialog(name,desc);
              })
           });
-
+          
           $('#librarytable .importfromlib').each(function() { 
             $(this).click(function() {
               var name = $(this).parent().parent().find(".libname").html();
-              var desc = $(this).parent().parent().find(".libdescription").html();
               var revision = $(this).parent().parent().find(".librevision").html();
-i
-              if(name)
-                $("#patchname").val(name);
-              if(desc)
-                $("#patchdescription").val(desc);
-  
-              for(var i = 0; i < patchList.length; ++i) {
-                if(patchList[i].name == name && patchList[i].revision == revision) {
-                  codeMirror.setValue(patchList[i].code);
-                  storePatch();
-                  var parObj = JSON.parse(patchList[i].parameters);
-                  Object.keys(parObj).forEach(function(key) {
-                    $(("#" + key).replace(".", "_")).val(parObj[key]);
-                     setControl(key, parObj[key]);
-                  });
-
-                  localStorage.setItem("savedLayoutState",  patchList[i].layout);
-                  
-                  window.location.reload(); 
-                }
-              }
+              importFromLibraryDialog(name,revision);
             });
           });
+
+          $('#librarytable .deletefromlib').each(function() {
+            $(this).click(function() {
+              var name = $(this).parent().parent().find(".libname").html();
+              var revision = $(this).parent().parent().find(".librevision").html();
+              deleteFromLibraryDialog(name,revision);
+            });
+          });
+
 
           $('#librarytable').DataTable();
         } else if(obj.type == "audio-buffer") {
@@ -528,7 +643,7 @@ function makeLayout() {
     }
 
     myLayout.registerComponent('Toolbar', function(container, componentState) {
-        container.getElement().html('<div id="toolbar"><div class="button" id="restart">Restart</div><div class="button" id="loadpatch">Download</div><div class="button" id="storepatch">Upload</div><div class="button" id="savetolibrarybtn">Export to library</div><div class="button" id="resetlayout">Reset Layout</div><section id="editorselectsection"><label id="editorselectlbl" for="editorselect">Mode:</label><select id="editorselect"><option value="sublime">Sublime</option><option value="vim">Vim</option><option value="emacs">Emacs</option></select></section><input type="checkbox" id="restartonsave" value="Restart on save" checked/><label for="restartonsave" id="restartonsavelbl">Restart on store</label><section id="connectionstatus">Status:<span>Disconnected</span></div></div>');
+        container.getElement().html('<div id="toolbar"><button class="ui-button ui-corner-all ui-widget" id="restart">Restart</button><button class="ui-button ui-corner-all ui-widget" id="loadpatch">Download</button><button class="ui-button ui-corner-all ui-widget" id="storepatch">Upload</button><button class="ui-button ui-corner-all ui-widget" id="exporttolibrarybtn">Export to library</button><button class="ui-button ui-corner-all ui-widget" id="resetlayout">Reset Layout</button><input type="checkbox" id="restartonsave" value="Restart on save" checked/><label for="restartonsave" id="restartonsavelbl">Restart on store</label><section id="connectionstatus">Status:<span>Disconnected</span></div></div>');
     });
 
     myLayout.registerComponent('Analyser', function(container, componentState) {
@@ -540,7 +655,7 @@ function makeLayout() {
     });
 
    myLayout.registerComponent('Editor', function(container, componentState) {
-        container.getElement().html("<section id=\"editorpane\"><textarea id=\"editor\"></textarea></section>");
+        container.getElement().html('<section id="editorselectsection"><label class="ui-corner-all ui-widget" id="editorselectlbl" for="editorselect">Mode:</label><select id="editorselect"><option value="sublime">Sublime</option><option value="vim">Vim</option><option value="emacs">Emacs</option></select></section><section id="editorpane"><textarea id="editor"></textarea></section>');
 
         window.setTimeout(function() {
         codeMirror = CodeMirror.fromTextArea(document.getElementById("editor"), {
@@ -576,7 +691,7 @@ function makeLayout() {
     });
 
     myLayout.registerComponent('Keyboard', function(container, componentState) {
-        container.getElement().html('<section id="piano"> <section id="holdmodesection"> <div class="button" id="clearallnotes"> Clear all notes</div> <section id="holdmodesection"> <input type="checkbox" id="holdmode" value="Hold"/> <label for="holdmode" id="holdmodelbl"> Hold</label> </section> <div class="keys"> <div data-key="0" class="key border-right">C-1</div> <div data-key="1" class="key black">Cs</div> <div data-key="2" class="key border-right">D</div> <div data-key="3" class="key black">Ds</div> <div data-key="4" class="key border-right">E</div> <div data-key="5" class="key border-right">F</div> <div data-key="6" class="key black">Fs</div> <div data-key="7" class="key border-right">G</div> <div data-key="8" class="key black">Gs</div> <div data-key="9" class="key border-right">A</div> <div data-key="10" class="key black">As</div> <div data-key="11" class="key border-right">B</div> <div data-key="12" class="key border-right">C0</div> <div data-key="13" class="key black">Cs</div> <div data-key="14" class="key border-right">D</div> <div data-key="15" class="key black">Ds</div> <div data-key="16" class="key border-right">E</div> <div data-key="17" class="key border-right">F</div> <div data-key="18" class="key black">Fs</div> <div data-key="19" class="key border-right">G</div> <div data-key="20" class="key black">Gs</div> <div data-key="21" class="key border-right">A</div> <div data-key="22" class="key black">As</div> <div data-key="23" class="key border-right">B</div> <div data-key="24" class="key border-right">C1</div> <div data-key="25" class="key black">Cs</div> <div data-key="26" class="key border-right">D</div> <div data-key="27" class="key black">Ds</div> <div data-key="28" class="key border-right">E</div> <div data-key="29" class="key border-right">F</div> <div data-key="30" class="key black">Fs</div> <div data-key="31" class="key border-right">G</div> <div data-key="32" class="key black">Gs</div> <div data-key="33" class="key border-right">A</div> <div data-key="34" class="key black">As</div> <div data-key="35" class="key border-right">B</div> <div data-key="36" class="key border-right">C2</div> <div data-key="37" class="key black">Cs</div> <div data-key="38" class="key border-right">D</div> <div data-key="39" class="key black">Ds</div> <div data-key="40" class="key border-right">E</div> <div data-key="41" class="key border-right">F</div> <div data-key="42" class="key black">Fs</div> <div data-key="43" class="key border-right">G</div> <div data-key="44" class="key black">Gs</div> <div data-key="45" class="key border-right">A</div> <div data-key="46" class="key black">As</div> <div data-key="47" class="key border-right">B</div> <div data-key="48" class="key border-right">C3</div> <div data-key="49" class="key black">Cs</div> <div data-key="50" class="key border-right">D</div> <div data-key="51" class="key black">Ds</div> <div data-key="52" class="key border-right">E</div> <div data-key="53" class="key border-right">F</div> <div data-key="54" class="key black">Fs</div> <div data-key="55" class="key border-right">G</div> <div data-key="56" class="key black">Gs</div> <div data-key="57" class="key border-right">A</div> <div data-key="58" class="key black">As</div> <div data-key="59" class="key border-right">B</div> <div data-key="60" class="key border-right">C4</div> <div data-key="61" class="key black">Cs</div> <div data-key="62" class="key border-right">D</div> <div data-key="63" class="key black">Ds</div> <div data-key="64" class="key border-right">E</div> <div data-key="65" class="key border-right">F</div> <div data-key="66" class="key black">Fs</div> <div data-key="67" class="key border-right">G</div> <div data-key="68" class="key black">Gs</div> <div data-key="69" class="key border-right">A</div> <div data-key="70" class="key black">As</div> <div data-key="71" class="key border-right">B</div> <div data-key="72" class="key border-right">C5</div> <div data-key="73" class="key black">Cs</div> <div data-key="74" class="key border-right">D</div> <div data-key="75" class="key black">Ds</div> <div data-key="76" class="key border-right">E</div> <div data-key="77" class="key border-right">F</div> <div data-key="78" class="key black">Fs</div> <div data-key="79" class="key border-right">G</div> <div data-key="80" class="key black">Gs</div> <div data-key="81" class="key border-right">A</div> <div data-key="82" class="key black">As</div> <div data-key="83" class="key border-right">B</div> <div data-key="84" class="key border-right">C6</div> <div data-key="85" class="key black">Cs</div> <div data-key="86" class="key border-right">D</div> <div data-key="87" class="key black">Ds</div> <div data-key="88" class="key border-right">E</div> <div data-key="89" class="key border-right">F</div> <div data-key="90" class="key black">Fs</div> <div data-key="91" class="key border-right">G</div> <div data-key="92" class="key black">Gs</div> <div data-key="93" class="key border-right">A</div> <div data-key="94" class="key black">As</div> <div data-key="95" class="key border-right">B</div> <div data-key="96" class="key border-right">C7</div> <div data-key="97" class="key black">Cs</div> <div data-key="98" class="key border-right">D</div> <div data-key="99" class="key black">Ds</div> <div data-key="100" class="key border-right">E</div> <div data-key="101" class="key border-right">F</div> <div data-key="102" class="key black">Fs</div> <div data-key="103" class="key border-right">G</div> <div data-key="104" class="key black">Gs</div> <div data-key="105" class="key border-right">A</div> <div data-key="106" class="key black">As</div> <div data-key="107" class="key border-right">B</div> <div data-key="108" class="key border-right">C8</div> <div data-key="109" class="key black">Cs</div> <div data-key="110" class="key border-right">D</div> <div data-key="111" class="key black">Ds</div> <div data-key="112" class="key border-right">E</div> <div data-key="113" class="key border-right">F</div> <div data-key="114" class="key black">Fs</div> <div data-key="115" class="key border-right">G</div> <div data-key="116" class="key black">Gs</div> <div data-key="117" class="key border-right">A</div> <div data-key="118" class="key black">As</div> <div data-key="119" class="key border-right">B</div> <div data-key="120" class="key border-right">C9</div> <div data-key="121" class="key black">Cs</div> <div data-key="122" class="key border-right">D</div> <div data-key="123" class="key black">Ds</div> <div data-key="124" class="key border-right">E</div> <div data-key="125" class="key border-right">F</div> <div data-key="126" class="key black">Fs</div> <div data-key="127" class="key border-right">G</div> </div> </section>');
+        container.getElement().html('<section id="piano"> <section id="holdmodesection"> <button class="ui-button ui-corner-all ui-widget" id="clearallnotes"> Clear all notes</button><input type="checkbox" id="holdmode" value="Hold"/> <label for="holdmode" id="holdmodelbl"> Hold</label> </section><section id="spacer">spacer</section><div class="keys"> <div data-key="0" class="key border-right">C-1</div> <div data-key="1" class="key black">Cs</div> <div data-key="2" class="key border-right">D</div> <div data-key="3" class="key black">Ds</div> <div data-key="4" class="key border-right">E</div> <div data-key="5" class="key border-right">F</div> <div data-key="6" class="key black">Fs</div> <div data-key="7" class="key border-right">G</div> <div data-key="8" class="key black">Gs</div> <div data-key="9" class="key border-right">A</div> <div data-key="10" class="key black">As</div> <div data-key="11" class="key border-right">B</div> <div data-key="12" class="key border-right">C0</div> <div data-key="13" class="key black">Cs</div> <div data-key="14" class="key border-right">D</div> <div data-key="15" class="key black">Ds</div> <div data-key="16" class="key border-right">E</div> <div data-key="17" class="key border-right">F</div> <div data-key="18" class="key black">Fs</div> <div data-key="19" class="key border-right">G</div> <div data-key="20" class="key black">Gs</div> <div data-key="21" class="key border-right">A</div> <div data-key="22" class="key black">As</div> <div data-key="23" class="key border-right">B</div> <div data-key="24" class="key border-right">C1</div> <div data-key="25" class="key black">Cs</div> <div data-key="26" class="key border-right">D</div> <div data-key="27" class="key black">Ds</div> <div data-key="28" class="key border-right">E</div> <div data-key="29" class="key border-right">F</div> <div data-key="30" class="key black">Fs</div> <div data-key="31" class="key border-right">G</div> <div data-key="32" class="key black">Gs</div> <div data-key="33" class="key border-right">A</div> <div data-key="34" class="key black">As</div> <div data-key="35" class="key border-right">B</div> <div data-key="36" class="key border-right">C2</div> <div data-key="37" class="key black">Cs</div> <div data-key="38" class="key border-right">D</div> <div data-key="39" class="key black">Ds</div> <div data-key="40" class="key border-right">E</div> <div data-key="41" class="key border-right">F</div> <div data-key="42" class="key black">Fs</div> <div data-key="43" class="key border-right">G</div> <div data-key="44" class="key black">Gs</div> <div data-key="45" class="key border-right">A</div> <div data-key="46" class="key black">As</div> <div data-key="47" class="key border-right">B</div> <div data-key="48" class="key border-right">C3</div> <div data-key="49" class="key black">Cs</div> <div data-key="50" class="key border-right">D</div> <div data-key="51" class="key black">Ds</div> <div data-key="52" class="key border-right">E</div> <div data-key="53" class="key border-right">F</div> <div data-key="54" class="key black">Fs</div> <div data-key="55" class="key border-right">G</div> <div data-key="56" class="key black">Gs</div> <div data-key="57" class="key border-right">A</div> <div data-key="58" class="key black">As</div> <div data-key="59" class="key border-right">B</div> <div data-key="60" class="key border-right">C4</div> <div data-key="61" class="key black">Cs</div> <div data-key="62" class="key border-right">D</div> <div data-key="63" class="key black">Ds</div> <div data-key="64" class="key border-right">E</div> <div data-key="65" class="key border-right">F</div> <div data-key="66" class="key black">Fs</div> <div data-key="67" class="key border-right">G</div> <div data-key="68" class="key black">Gs</div> <div data-key="69" class="key border-right">A</div> <div data-key="70" class="key black">As</div> <div data-key="71" class="key border-right">B</div> <div data-key="72" class="key border-right">C5</div> <div data-key="73" class="key black">Cs</div> <div data-key="74" class="key border-right">D</div> <div data-key="75" class="key black">Ds</div> <div data-key="76" class="key border-right">E</div> <div data-key="77" class="key border-right">F</div> <div data-key="78" class="key black">Fs</div> <div data-key="79" class="key border-right">G</div> <div data-key="80" class="key black">Gs</div> <div data-key="81" class="key border-right">A</div> <div data-key="82" class="key black">As</div> <div data-key="83" class="key border-right">B</div> <div data-key="84" class="key border-right">C6</div> <div data-key="85" class="key black">Cs</div> <div data-key="86" class="key border-right">D</div> <div data-key="87" class="key black">Ds</div> <div data-key="88" class="key border-right">E</div> <div data-key="89" class="key border-right">F</div> <div data-key="90" class="key black">Fs</div> <div data-key="91" class="key border-right">G</div> <div data-key="92" class="key black">Gs</div> <div data-key="93" class="key border-right">A</div> <div data-key="94" class="key black">As</div> <div data-key="95" class="key border-right">B</div> <div data-key="96" class="key border-right">C7</div> <div data-key="97" class="key black">Cs</div> <div data-key="98" class="key border-right">D</div> <div data-key="99" class="key black">Ds</div> <div data-key="100" class="key border-right">E</div> <div data-key="101" class="key border-right">F</div> <div data-key="102" class="key black">Fs</div> <div data-key="103" class="key border-right">G</div> <div data-key="104" class="key black">Gs</div> <div data-key="105" class="key border-right">A</div> <div data-key="106" class="key black">As</div> <div data-key="107" class="key border-right">B</div> <div data-key="108" class="key border-right">C8</div> <div data-key="109" class="key black">Cs</div> <div data-key="110" class="key border-right">D</div> <div data-key="111" class="key black">Ds</div> <div data-key="112" class="key border-right">E</div> <div data-key="113" class="key border-right">F</div> <div data-key="114" class="key black">Fs</div> <div data-key="115" class="key border-right">G</div> <div data-key="116" class="key black">Gs</div> <div data-key="117" class="key border-right">A</div> <div data-key="118" class="key black">As</div> <div data-key="119" class="key border-right">B</div> <div data-key="120" class="key border-right">C9</div> <div data-key="121" class="key black">Cs</div> <div data-key="122" class="key border-right">D</div> <div data-key="123" class="key black">Ds</div> <div data-key="124" class="key border-right">E</div> <div data-key="125" class="key border-right">F</div> <div data-key="126" class="key black">Fs</div> <div data-key="127" class="key border-right">G</div> </div> </section>');
     });
 
     myLayout.registerComponent('Log', function(container, componentState) {
@@ -679,8 +794,8 @@ $(document).ready(function() {
         loadPatchAsk();
     });
 
-    $("#savetolibrarybtn").click(function() {
-       saveToLibraryDialog(); 
+    $("#exporttolibrarybtn").click(function() {
+       exportToLibraryDialog(); 
     });
 
     $("#resetlayout").click(function() {

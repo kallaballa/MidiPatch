@@ -439,6 +439,11 @@ int main(int argc, char ** argv) {
 						websocket->sendPatchList();
 					});
 
+					websocket->setDeletePatchCallback([&](const patchscript::PatchObject& po) {
+						pscript->deletePatches(po);
+						websocket->sendPatchList();
+					});
+
 				std::cerr << "RESET" << std::endl;
 					websocket->reset();
 					websocket->sendConfig();

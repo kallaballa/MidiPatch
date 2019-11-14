@@ -29,10 +29,21 @@ if (!document.registerElement) {
 <div id="confirmconcurrentmod" title="More than one user connected">
   <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Concurrent modification of MidiPatch not supported yet.</p>
 </div>
-<div id="savetolibrary" title="Save patch to library">
-  <label for="patchname">Name</label><br/><input id="patchname" type="text"></input><br/>
-  <label for="patchdescription">Description</label><br/>
-  <textarea id="patchdescription" rows="3" cols="35"></textarea>
+<div id="exporttolibrary" title="Export session to library">
+  <label class="ui-widget" for="sessionname">Name</label><br/><input id="sessionname" type="text"></input><br/>
+  <label class="ui-widget" for="sessiondescription">Description</label><br/>
+  <textarea class="ui-widget" id="sessiondescription" rows="3" cols="35"></textarea><br/>
+  <input class="ui-widget" type="checkbox" id="exportcode" checked/><label for="exportcode">Export code</label><br/>
+  <input class="ui-widget"  type="checkbox" id="exportparameters"/><label for="exportparameters">Export parameters</label><br/>
+  <input class="ui-widget" type="checkbox" id="exportlayout"/><label for="exportlayout">Export layout</label>
+</div>
+<div id="importfromlibrary" title="Import session from library">
+  <input class="ui-widget" type="checkbox" id="importcode"/><label for="importcode">Import code</label><br/>
+  <input class="ui-widget"  type="checkbox" id="importparameters"/><label for="importparameters">Import parameters</label><br/>
+  <input class="ui-widget" type="checkbox" id="importlayout"/><label for="importlayout">Import layout</label>
+</div>
+<div id="deletefromlibrary" title="Delete session from library?">
+  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Do you really want to delete the selected session?</p>
 </div>
 
 <script src="js/AudioContextMonkeyPatch.js"></script>

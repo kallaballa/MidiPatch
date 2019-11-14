@@ -38,6 +38,7 @@ class Websocket {
 	std::function<string()> sendConfigCallback_;
 	std::function<string()> sendPatchListCallback_;
 	std::function<void(const patchscript::PatchObject&)> updatePatchCallback_;
+	std::function<void(const patchscript::PatchObject&)> deletePatchCallback_;
 
 public:
 	Websocket(size_t port, const string& bankFile);
@@ -53,6 +54,10 @@ public:
 
 	void setUpdatePatchCallback(std::function<void(const patchscript::PatchObject&)> callback) {
 		updatePatchCallback_ = callback;
+	}
+
+	void setDeletePatchCallback(std::function<void(const patchscript::PatchObject&)> callback) {
+		deletePatchCallback_ = callback;
 	}
 
 	void setSetControlCallback(std::function<void(string, float)> callback) {

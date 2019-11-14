@@ -307,6 +307,26 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 
 							if(updatePatchCallback_)
 								updatePatchCallback_(po);
+						} else if(type == "delete-patch") {
+							patchscript::PatchObject po;
+							po.name_ = msg["name"];
+							po.revision_ = msg["revision"];
+							po.runtimeName_ = msg["runtimeName"];
+							po.runtimeVersion_ = msg["runtimeVersion"];
+							po.description_ = msg["description"];
+							po.date_ = msg["date"];
+							po.code_ = msg["code"];
+							if(!msg["layout"].is_null())
+								po.layout_ = msg["layout"];
+							if(!msg["parameters"].is_null())
+								po.parameters_ = msg["parameters"];
+							if(!msg["keyboardBindings"].is_null())
+								po.keyboardBindings_ = msg["keyboardBindings"];
+							if(!msg["midiBindings"].is_null())
+								po.midiBindings_ = msg["midiBindings"];
+
+							if(deletePatchCallback_)
+								deletePatchCallback_(po);
 						}
 					},
 					.drain = [](auto *ws) {
