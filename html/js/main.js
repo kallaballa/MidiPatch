@@ -269,7 +269,6 @@ function exportToLibrary(name, description, expCode, expParameters, expLayout) {
     var code = "";
     var parameters = "";
     var layout = "";
-    alert(expCode);
     if(expCode)
       code = codeMirror.getValue();
     if(expParameters)
