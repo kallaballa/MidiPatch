@@ -454,11 +454,28 @@ function connect() {
           var tbody = $("#librarytable tbody");
           var lastName = "";
           tbody.find("tr").remove();
+          
           for(var i = patchList.length - 1; i >= 0; --i) {
-            if(patchList[i].name != lastName)
-              tbody.append("<tr><td class=\"libname\">" + patchList[i].name + "</td><td class=\"librevision\">" + patchList[i].revision + "</td><td class=\"libdescription\">" + patchList[i].description + "</td><td>" + new Date(patchList[i].date * 1000).toLocaleString() + "</td><td><button class=\"ui-button ui-corner-all ui-widget  importfromlib\">Import</button><button class=\"ui-button ui-corner-all ui-widget exporttolib\">Export</button><button class=\"ui-button ui-corner-all ui-widget deletefromlib\">Delete</button></td></tr>");
+            if(patchList[i].name != lastName) {
+              var revStr = '<select class="revisionselect">';
+              for(var j = 0; j < patchList[i].revision; ++j) {
+                  revStr += "<option>" + (patchList[i].revision - j) + "</option>"
+              }
+              revStr += '</select>'
+
+              tbody.append("<tr><td class=\"libname\">" + patchList[i].name + "</td><td class=\"librevision\">" + revStr + "</td><td class=\"libdescription\">" + patchList[i].description + "</td><td>" + new Date(patchList[i].date * 1000).toLocaleString() + "</td><td><button class=\"ui-button ui-corner-all ui-widget  importfromlib\">Import</button><button class=\"ui-button ui-corner-all ui-widget exporttolib\">Export</button><button class=\"ui-button ui-corner-all ui-widget deletefromlib\">Delete</button></td></tr>");
+            }
             lastName = patchList[i].name;
           }
+
+          $('#librarytable .revisionselect').each(function() {
+            $(this).change(function() {
+              var name = $(this).parent().parent().find(".libname").html();
+              var revision = $(this).val();
+              importFromLibraryDialog(name,revision);
+             })
+          });
+
           $('#librarytable .exporttolib').each(function() {
             $(this).click(function() {
               var name = $(this).parent().parent().find(".libname").html();
