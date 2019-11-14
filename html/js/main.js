@@ -64,7 +64,7 @@ function confirmConcurrentMod() {
           });
 }
 
-function deleteFromLibraryDialog(name, revision) {
+function deleteFromLibraryDialog(name) {
           $( function() {
           $( "#deletefromlibrary" ).dialog({
             resizable: false,
@@ -73,7 +73,7 @@ function deleteFromLibraryDialog(name, revision) {
             modal: true,
             buttons: {
               "Delete": function() {
-                deleteFromLibrary(name, revision);
+                deleteFromLibrary(name);
                 $( this ).dialog( "close" );
               },
               "Cancel": function() {
@@ -292,11 +292,10 @@ function exportToLibrary(name, description, expCode, expParameters, expLayout) {
     socket.send(JSON.stringify(obj));
 }
 
-function deleteFromLibrary(name, revision) {
+function deleteFromLibrary(name) {
     var obj = {
         "type": "delete-patch",
         "name": name,
-        "revision": parseInt(revision,10),
         "runtimeName": "",
         "runtimeVersion": "",
         "description": "",
@@ -495,8 +494,7 @@ function connect() {
           $('#librarytable .deletefromlib').each(function() {
             $(this).click(function() {
               var name = $(this).parent().parent().find(".libname").html();
-              var revision = $(this).parent().parent().find(".librevision").html();
-              deleteFromLibraryDialog(name,revision);
+              deleteFromLibraryDialog(name);
             });
           });
 

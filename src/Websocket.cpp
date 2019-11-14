@@ -310,7 +310,6 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 						} else if(type == "delete-patch") {
 							patchscript::PatchObject po;
 							po.name_ = msg["name"];
-							po.revision_ = msg["revision"];
 							po.runtimeName_ = msg["runtimeName"];
 							po.runtimeVersion_ = msg["runtimeVersion"];
 							po.description_ = msg["description"];
