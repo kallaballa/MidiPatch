@@ -36,7 +36,7 @@ std::mutex midiMutex;
 patchscript::PatchScript* pscript = nullptr;
 midipatch::Websocket* websocket = nullptr;
 
-char specialChars[10] = {'$', '-', '_', '.', '+', '!', '\'', '(', ')', ',' };
+char specialChars[10] = {'-', '_', '.', '+', '!', '(', ')'};
 bool isValidSessionName(const string& n) {
 	if(n.empty() || n.size() > 255)
 		return false;
