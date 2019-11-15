@@ -318,7 +318,7 @@ function importFromLibrary(name, revision, impCode, impParameters, impLayout) {
                   if(impParameters) {
                     var parObj = JSON.parse(patchList[i].parameters);
                     Object.keys(parObj).forEach(function(key) {
-                      $(("#" + key).replace(".", "_")).val(parObj[key]);
+                      $("#" + key).val(parObj[key]);
                        setControl(key, parObj[key]);
                     });
                   }
@@ -508,9 +508,8 @@ function connect() {
               channel1[i] = (data.charCodeAt(i * 2 + 1) / 127.0) -1.0;
              }
         } else if (obj.type == "update-control") {
-            console.log(obj.data.parent + "_" + obj.data.child);
-            $("#" + obj.data.parent + "_" + obj.data.child).val(obj.data.value);
-            $("#" + obj.data.parent + "_" + obj.data.child).trigger("change");
+            $("#" + obj.data.parent + "." + obj.data.child).val(obj.data.value);
+            $("#" + obj.data.parent + "." + obj.data.child).trigger("change");
         } else if (obj.type == "update-log") {
             var current_datetime = new Date();
             var formatted_date = current_datetime.getFullYear() + "-" + appendLeadingZeroes(current_datetime.getMonth() + 1) + "-" + appendLeadingZeroes(current_datetime.getDate()) + " " + appendLeadingZeroes(current_datetime.getHours()) + ":" + appendLeadingZeroes(current_datetime.getMinutes()) + ":" + appendLeadingZeroes(current_datetime.getSeconds());
@@ -565,7 +564,7 @@ function connect() {
                 rackDiv += "<div class=\"control-row\" style=\"background-color: " + arrColors[Math.round((arrColors.length - 1) * Math.random())] + ";\" id=\"" + obj.data[i].name + "\"><label class=\"moduleLabel\">" + obj.data[i].name + "</label>"
                 for (var j = 0; j < obj.data[i].controls.length; ++j) {
                     if (obj.data[i].controls[j].name.charAt(0) != '_') {
-                        rackDiv += "<div class=\"control-cell\"><label>" + obj.data[i].controls[j].name + "</label><br/><input id=\"" + obj.data[i].name + "_" + obj.data[i].controls[j].name + "\" class=\"knob\" data-width=\"50\" data-fgColor=\"#000000\" data-height=\"50\" value=\"" + obj.data[i].controls[j].value + "\"></div>";
+                        rackDiv += "<div class=\"control-cell\"><label>" + obj.data[i].controls[j].name + "</label><br/><input id=\"" + obj.data[i].name + "." + obj.data[i].controls[j].name + "\" class=\"knob\" data-width=\"50\" data-fgColor=\"#000000\" data-height=\"50\" value=\"" + obj.data[i].controls[j].value + "\"></div>";
                     }
                 }
                 rackDiv += "<div style=\"width: 100%;\"></div></div><br/>";
