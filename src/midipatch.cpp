@@ -38,6 +38,9 @@ midipatch::Websocket* websocket = nullptr;
 
 char specialChars[10] = {'$', '-', '_', '.', '+', '!', '\'', '(', ')', ',' };
 bool isValidSessionName(const string& n) {
+	if(n.empty() || n.size() > 255)
+		return false;
+
 	for(const auto& c : n) {
 		if((c >= '\x30' && c <= '\x39') || (c >= '\x41' && c <= '\x5A') || (c >= '\x61' && c <= '\x7A')) {
 			continue;
