@@ -36,6 +36,24 @@ std::mutex midiMutex;
 patchscript::PatchScript* pscript = nullptr;
 midipatch::Websocket* websocket = nullptr;
 
+char specialChars[10] = {'$', '-', '_', '.', '+', '!', '\'', '(', ')', ',' };
+bool isValidSessionName(const string& n) {
+	for(const auto& c : n) {
+		if((c >= '\x30' && c <= '\x39') || (c >= '\x41' && c <= '\x5A') || (c >= '\x61' && c <= '\x7A')) {
+			continue;
+		} else {
+			for(const auto& s : specialChars) {
+				if(c == s) {
+					continue;
+				}
+			}
+		}
+		return false;
+	}
+
+	return true;
+}
+
 void log_error(const string& title, const string& msg = "") {
 	if(msg.empty())
 		LOG_ERR_STR(title);
@@ -435,6 +453,10 @@ int main(int argc, char ** argv) {
 					});
 
 					websocket->setUpdatePatchCallback([&](const patchscript::PatchObject& po) {
+						if(!isValidSessionName(po.name_)) {
+							log_error("Invalid session name", po.name_);
+							return;
+						}
 						pscript->storePatch(po);
 						websocket->sendPatchList();
 					});
