@@ -63,7 +63,7 @@ synth:setOutputGen((lpf:input(mix) * env) * (FixedValue(0.02) + noteVelocity * 0
 
 At the moment only Linux and Mac OS X are supported. It has been shown to work on OpenSuse 15.0, Ubuntu Xenial and Mac OS X.
 
-# Instructions for Ubunto Xenial install (tested on a fresh server image):
+# Instructions for Ubunto Xenial (tested on a fresh server image):
 
 ```shell
 # add toolchain repo
