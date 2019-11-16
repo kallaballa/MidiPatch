@@ -106,7 +106,7 @@ function exportToLibraryDialog(name, author, desc) {
           if(name)
             $("#sessionname").val(name);
           if(author)
-            $("#sessionauthor").val(desc);
+            $("#sessionauthor").val(author);
           if(desc)
             $("#sessiondescription").val(desc);
 
@@ -536,8 +536,8 @@ function connect() {
               channel1[i] = (data.charCodeAt(i * 2 + 1) / 127.0) -1.0;
              }
         } else if (obj.type == "update-control") {
-            $("#" + obj.data.parent + "." + obj.data.child).val(obj.data.value);
-            $("#" + obj.data.parent + "." + obj.data.child).trigger("change");
+            $("#" + obj.data.parent + "\\." + obj.data.child).val(obj.data.value);
+            $("#" + obj.data.parent + "\\." + obj.data.child).trigger("change");
         } else if (obj.type == "update-log") {
             var current_datetime = new Date();
             var formatted_date = current_datetime.getFullYear() + "-" + appendLeadingZeroes(current_datetime.getMonth() + 1) + "-" + appendLeadingZeroes(current_datetime.getDate()) + " " + appendLeadingZeroes(current_datetime.getHours()) + ":" + appendLeadingZeroes(current_datetime.getMinutes()) + ":" + appendLeadingZeroes(current_datetime.getSeconds());
@@ -605,6 +605,11 @@ function connect() {
             $("#rack").append(rackDiv);
 
             var knobs = document.getElementsByClassName('knob');
+            $(".knob").on("input", function(e) {
+              var par = $(this).parent().parent();
+              if(!isNaN(parseInt($(this).val(), 10)))
+                setControl(par.parent().find("label").html() + "." + par.find("label").html(), $(this).val());
+            });
             for (var i = 0; i < knobs.length; ++i) {
                 $(knobs[i]).knob({
                     'min': 0.0,
