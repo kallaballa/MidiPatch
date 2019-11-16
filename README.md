@@ -22,7 +22,9 @@ MidiPatch is a scriptable modular MIDI-synthesizer. The scripting is done in [lu
 
 For example to create a midi synthesizer with 3 voices, running the patch "bank.lua", connecting to the second midi port (port index starts at 0) and the first audio port, which automatically maps patch parameters to control numbers, starting at the control number offset (52) in ascending order:
 ```shell
-src/midipatch -m 1 -a 0 -o 52 -v 3 -p bank.lua
+cd MidiPatch
+# Using run.sh to automatically set up library paths
+./run.sh -m 1 -a 0 -o 52 -v 3 -p bank.lua
  ```
 # Example patch
 
