@@ -117,7 +117,7 @@ function exportToLibraryDialog(name, author, desc) {
             width: 400,
             modal: true,
             buttons: {
-              "Save": function() {
+              "Export": function() {
                 var name = $("#sessionname" ).val();
                 var desc = $("#sessiondescription").val();
                 var author = $("#sessionauthor").val();
@@ -169,7 +169,7 @@ function importFromLibraryDialog(name, author, revision) {
             width: 400,
             modal: true,
             buttons: {
-              "Save": function() {
+              "Import": function() {
                 var impCode = $("#importcode" ).is(':checked');
                 var impParameters = $("#importparameters").is(':checked');
                 var impLayout = $("#importlayout").is(':checked');
@@ -697,7 +697,7 @@ function makeLayout() {
     });
 
     myLayout.registerComponent('Library', function(container, componentState) {
-        container.getElement().html('<div><table id="librarytable"><thead><tr><th>Name</th><th>Revision</th><th>Description</th><th>Date</th><th></th></tr></thead><tbody></tbody></table></div>');
+        container.getElement().html('<div><table id="librarytable"><thead><tr><th>Name</th><th>Author</th><th>Revision</th><th>Description</th><th>Date</th><th></th></tr></thead><tbody></tbody></table></div>');
     });
 
    myLayout.registerComponent('Editor', function(container, componentState) {

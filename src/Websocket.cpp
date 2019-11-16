@@ -254,8 +254,8 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 							}
 						}
 
-						if(sendPatchListCallback_) {
-							string list = sendPatchListCallback_();
+						if(sendSessionListCallback_) {
+							string list = sendSessionListCallback_();
 							for (auto& client : clients_) {
 								client->send(list, uWS::TEXT);
 							}
@@ -289,43 +289,45 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 						} else if(type == "restart") {
 							restart_ = true;
 						} else if(type == "update-patch") {
-							patchscript::SessionObject po;
-							po.name_ = msg["name"];
-							po.runtimeName_ = msg["runtimeName"];
-							po.runtimeVersion_ = msg["runtimeVersion"];
-							po.description_ = msg["description"];
-							po.date_ = msg["date"];
-							po.code_ = msg["code"];
+							patchscript::SessionObject so;
+							so.name_ = msg["name"];
+							so.author_ = msg["author"];
+							so.runtimeName_ = msg["runtimeName"];
+							so.runtimeVersion_ = msg["runtimeVersion"];
+							so.description_ = msg["description"];
+							so.date_ = msg["date"];
+							so.code_ = msg["code"];
 							if(!msg["layout"].is_null())
-								po.layout_ = msg["layout"];
+								so.layout_ = msg["layout"];
 							if(!msg["parameters"].is_null())
-								po.parameters_ = msg["parameters"];
+								so.parameters_ = msg["parameters"];
 							if(!msg["keyboardBindings"].is_null())
-								po.keyboardBindings_ = msg["keyboardBindings"];
+								so.keyboardBindings_ = msg["keyboardBindings"];
 							if(!msg["midiBindings"].is_null())
-								po.midiBindings_ = msg["midiBindings"];
+								so.midiBindings_ = msg["midiBindings"];
 
-							if(updatePatchCallback_)
-								updatePatchCallback_(po);
+							if(updateSessionCallback_)
+								updateSessionCallback_(so);
 						} else if(type == "delete-patch") {
-							patchscript::SessionObject po;
-							po.name_ = msg["name"];
-							po.runtimeName_ = msg["runtimeName"];
-							po.runtimeVersion_ = msg["runtimeVersion"];
-							po.description_ = msg["description"];
-							po.date_ = msg["date"];
-							po.code_ = msg["code"];
+							patchscript::SessionObject so;
+							so.name_ = msg["name"];
+							so.author_ = msg["author"];
+							so.runtimeName_ = msg["runtimeName"];
+							so.runtimeVersion_ = msg["runtimeVersion"];
+							so.description_ = msg["description"];
+							so.date_ = msg["date"];
+							so.code_ = msg["code"];
 							if(!msg["layout"].is_null())
-								po.layout_ = msg["layout"];
+								so.layout_ = msg["layout"];
 							if(!msg["parameters"].is_null())
-								po.parameters_ = msg["parameters"];
+								so.parameters_ = msg["parameters"];
 							if(!msg["keyboardBindings"].is_null())
-								po.keyboardBindings_ = msg["keyboardBindings"];
+								so.keyboardBindings_ = msg["keyboardBindings"];
 							if(!msg["midiBindings"].is_null())
-								po.midiBindings_ = msg["midiBindings"];
+								so.midiBindings_ = msg["midiBindings"];
 
-							if(deletePatchCallback_)
-								deletePatchCallback_(po);
+							if(deleteSessionCallback_)
+								deleteSessionCallback_(so);
 						}
 					},
 					.drain = [](auto *ws) {
@@ -478,8 +480,8 @@ void Websocket::sendControlList() {
 
 void Websocket::sendPatchList() {
 	std::scoped_lock lock(mutex_);
-	if(sendPatchListCallback_) {
-		string list = sendPatchListCallback_();
+	if(sendSessionListCallback_) {
+		string list = sendSessionListCallback_();
 		for (auto& client : clients_) {
 			client->send(list, uWS::TEXT);
 		}

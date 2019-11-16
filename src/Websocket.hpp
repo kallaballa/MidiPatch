@@ -36,9 +36,9 @@ class Websocket {
 	std::function<void()> clearAllNotesCallback_;
 	std::function<string()> sendControlListCallback_;
 	std::function<string()> sendConfigCallback_;
-	std::function<string()> sendPatchListCallback_;
-	std::function<void(const patchscript::SessionObject&)> updatePatchCallback_;
-	std::function<void(const patchscript::SessionObject&)> deletePatchCallback_;
+	std::function<string()> sendSessionListCallback_;
+	std::function<void(const patchscript::SessionObject&)> updateSessionCallback_;
+	std::function<void(const patchscript::SessionObject&)> deleteSessionCallback_;
 
 public:
 	Websocket(size_t port, const string& bankFile);
@@ -48,16 +48,16 @@ public:
 		sendControlListCallback_ = callback;
 	}
 
-	void setSendPatchListCallback(std::function<string()> callback) {
-		sendPatchListCallback_ = callback;
+	void setSendSessionListCallback(std::function<string()> callback) {
+		sendSessionListCallback_ = callback;
 	}
 
-	void setUpdatePatchCallback(std::function<void(const patchscript::SessionObject&)> callback) {
-		updatePatchCallback_ = callback;
+	void setUpdateSessionCallback(std::function<void(const patchscript::SessionObject&)> callback) {
+		updateSessionCallback_ = callback;
 	}
 
-	void setDeletePatchCallback(std::function<void(const patchscript::SessionObject&)> callback) {
-		deletePatchCallback_ = callback;
+	void setDeleteSessionCallback(std::function<void(const patchscript::SessionObject&)> callback) {
+		deleteSessionCallback_ = callback;
 	}
 
 	void setSetControlCallback(std::function<void(string, float)> callback) {
