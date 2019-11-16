@@ -431,7 +431,7 @@ int main(int argc, char ** argv) {
 
 					websocket->setSendPatchListCallback([&]() {
 						std::vector<patchscript::SessionObject> list;
-						pscript->listPatches(list);
+						pscript->list(list);
 						std::ostringstream ss;
 						ss << "{ \"type\": \"patch-list\", \"list\": [";
 						for(size_t i = 0; i < list.size(); ++i) {
@@ -460,12 +460,12 @@ int main(int argc, char ** argv) {
 							log_error("Invalid session name", po.name_);
 							return;
 						}
-						pscript->storePatch(po);
+						pscript->store(po);
 						websocket->sendPatchList();
 					});
 
 					websocket->setDeletePatchCallback([&](const patchscript::SessionObject& po) {
-						pscript->deletePatches(po);
+						pscript->remove(po);
 						websocket->sendPatchList();
 					});
 

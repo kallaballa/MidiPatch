@@ -82,7 +82,7 @@ function confirmConcurrentMod() {
           });
 }
 
-function deleteFromLibraryDialog(name) {
+function deleteFromLibraryDialog(name,author) {
           $( function() {
           $( "#deletefromlibrary" ).dialog({
             resizable: false,
@@ -91,7 +91,7 @@ function deleteFromLibraryDialog(name) {
             modal: true,
             buttons: {
               "Delete": function() {
-                deleteFromLibrary(name);
+                deleteFromLibrary(name, author);
                 $( this ).dialog( "close" );
               },
               "Cancel": function() {
@@ -102,11 +102,14 @@ function deleteFromLibraryDialog(name) {
           });
 }
 
-function exportToLibraryDialog(name, desc) {
+function exportToLibraryDialog(name, author, desc) {
           if(name)
             $("#sessionname").val(name);
+          if(author)
+            $("#sessionauthor").val(desc);
           if(desc)
             $("#sessiondescription").val(desc);
+
           $( function() {
           $( "#exporttolibrary" ).dialog({
             resizable: false,
@@ -117,10 +120,11 @@ function exportToLibraryDialog(name, desc) {
               "Save": function() {
                 var name = $("#sessionname" ).val();
                 var desc = $("#sessiondescription").val();
+                var author = $("#sessionauthor").val();
                 var expCode = $("#exportcode" ).is(':checked');
                 var expParameters = $("#exportparameters").is(':checked');
                 var expLayout = $("#exportlayout").is(':checked');
-                exportToLibrary(name,desc, expCode, expParameters, expLayout);
+                exportToLibrary(name, author, desc, expCode, expParameters, expLayout);
                 $( this ).dialog( "close" );
               },
               "Cancel": function() {
@@ -131,12 +135,12 @@ function exportToLibraryDialog(name, desc) {
           });
 }
 
-function importFromLibraryDialog(name, revision) {
+function importFromLibraryDialog(name, author, revision) {
          var code;
          var parameters;
          var layout;
               for(var i = 0; i < patchList.length; ++i) {
-                if(patchList[i].name == name && patchList[i].revision == revision) {
+                if(patchList[i].name == name && patchList[i].author == author && patchList[i].revision == revision) {
                     code = patchList[i].code;
                     parameters = patchList[i].parameters;
                     layout = patchList[i].layout;
@@ -170,7 +174,7 @@ function importFromLibraryDialog(name, revision) {
                 var impParameters = $("#importparameters").is(':checked');
                 var impLayout = $("#importlayout").is(':checked');
 
-                importFromLibrary(name, revision, impCode, impParameters, impLayout);
+                importFromLibrary(name, author, revision, impCode, impParameters, impLayout);
                 $( this ).dialog( "close" );
               },
               "Cancel": function() {
@@ -282,7 +286,7 @@ function setControl(name, value) {
     socket.send(JSON.stringify(obj));
 }
 
-function exportToLibrary(name, description, expCode, expParameters, expLayout) {
+function exportToLibrary(name, author, description, expCode, expParameters, expLayout) {
     var code = "";
     var parameters = "";
     var layout = "";
@@ -295,6 +299,7 @@ function exportToLibrary(name, description, expCode, expParameters, expLayout) {
     var obj = {
         "type": "update-patch",
         "name": name,
+        "author": author,
         "runtimeName": "midipatch",
         "runtimeVersion": version,
         "description": description,
@@ -308,10 +313,11 @@ function exportToLibrary(name, description, expCode, expParameters, expLayout) {
     socket.send(JSON.stringify(obj));
 }
 
-function deleteFromLibrary(name) {
+function deleteFromLibrary(name,author) {
     var obj = {
         "type": "delete-patch",
         "name": name,
+        "author": author,
         "runtimeName": "",
         "runtimeVersion": "",
         "description": "",
@@ -325,9 +331,9 @@ function deleteFromLibrary(name) {
     socket.send(JSON.stringify(obj));
 }
 
-function importFromLibrary(name, revision, impCode, impParameters, impLayout) {
+function importFromLibrary(name, author, revision, impCode, impParameters, impLayout) {
               for(var i = 0; i < patchList.length; ++i) {
-                if(patchList[i].name == name && patchList[i].revision == revision) {
+                if(patchList[i].name == name && patchList[i].author == author && patchList[i].revision == revision) {
                   if(impCode) {
                     codeMirror.setValue(patchList[i].code);
                     storePatch();
@@ -478,7 +484,7 @@ function connect() {
               }
               revStr += '</select>'
 
-              tbody.append("<tr><td class=\"libname\">" + patchList[i].name + "</td><td class=\"librevision\">" + revStr + "</td><td class=\"libdescription\">" + patchList[i].description + "</td><td>" + new Date(patchList[i].date * 1000).toLocaleString() + "</td><td><button class=\"ui-button ui-corner-all ui-widget  importfromlib\">Import</button><button class=\"ui-button ui-corner-all ui-widget exporttolib\">Export</button><button class=\"ui-button ui-corner-all ui-widget deletefromlib\">Delete</button></td></tr>");
+              tbody.append("<tr><td class=\"libname\">" + patchList[i].name + "</td><td class=\"libauthor\">" + patchList[i].author + "</td><td class=\"librevision\">" + revStr + "</td><td class=\"libdescription\">" + patchList[i].description + "</td><td>" + new Date(patchList[i].date * 1000).toLocaleString() + "</td><td><button class=\"ui-button ui-corner-all ui-widget  importfromlib\">Import</button><button class=\"ui-button ui-corner-all ui-widget exporttolib\">Export</button><button class=\"ui-button ui-corner-all ui-widget deletefromlib\">Delete</button></td></tr>");
             }
             lastName = patchList[i].name;
           }
@@ -486,31 +492,35 @@ function connect() {
           $('#librarytable .revisionselect').each(function() {
             $(this).change(function() {
               var name = $(this).parent().parent().find(".libname").html();
+              var author = $(this).parent().parent().find(".libauthor").html();
               var revision = $(this).val();
-              importFromLibraryDialog(name,revision);
+              importFromLibraryDialog(name,author,revision);
              })
           });
 
           $('#librarytable .exporttolib').each(function() {
             $(this).click(function() {
               var name = $(this).parent().parent().find(".libname").html();
+              var author = $(this).parent().parent().find(".libauthor").html();
               var desc = $(this).parent().parent().find(".libdescription").html();
-              exportToLibraryDialog(name,desc);
+              exportToLibraryDialog(name,author,desc);
              })
           });
           
           $('#librarytable .importfromlib').each(function() { 
             $(this).click(function() {
               var name = $(this).parent().parent().find(".libname").html();
+              var author = $(this).parent().parent().find(".libauthor").html();
               var revision = $(this).parent().parent().find(".revisionselect").val();
-              importFromLibraryDialog(name,revision);
+              importFromLibraryDialog(name,author,revision);
             });
           });
 
           $('#librarytable .deletefromlib').each(function() {
             $(this).click(function() {
               var name = $(this).parent().parent().find(".libname").html();
-              deleteFromLibraryDialog(name);
+              var author = $(this).parent().parent().find(".libauthor").html();
+              deleteFromLibraryDialog(name,author);
             });
           });
 

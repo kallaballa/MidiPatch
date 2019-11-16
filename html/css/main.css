@@ -31,6 +31,9 @@ body {
   
 }
 
+#errordialog {
+  display: none;
+}
 #exporttolibrary {
   display: none;
 }
