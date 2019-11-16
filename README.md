@@ -20,11 +20,12 @@ MidiPatch is a scriptable modular MIDI-synthesizer. The scripting is done in [lu
       -p, --patchFile arg  The lua patchFile to use for the voices (default:~/.patchscript/data/midipatch.pat)
       -f, --logFile arg    The file to log to (default: ~/.patchscript/logs//midipatch.log)
 
-For example to create a midi synthesizer with 3 voices, running the patch "bank.lua", connecting to the second midi port (port index starts at 0) and the first audio port, which automatically maps patch parameters to control numbers, starting at the control number offset (52) in ascending order:
+For example to create a midi synthesizer with 16 voices, running the patch "bank.lua", connecting to the second midi port (port index starts at 0) and the first audio port, which automatically maps patch parameters to control numbers, starting at the control number offset (52) in ascending order and opening listening for http/websocket on port 8080
+
 ```shell
 cd MidiPatch
 # Using run.sh to automatically set up library paths
-./run.sh -m 1 -a 0 -o 52 -v 3 -p bank.lua
+./run.sh -o 52 -m 1 -a 0 2 -v 16 -w 8080 -p bank.lua
  ```
 # Example patch
 
