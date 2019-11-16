@@ -289,7 +289,7 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 						} else if(type == "restart") {
 							restart_ = true;
 						} else if(type == "update-patch") {
-							patchscript::PatchObject po;
+							patchscript::SessionObject po;
 							po.name_ = msg["name"];
 							po.runtimeName_ = msg["runtimeName"];
 							po.runtimeVersion_ = msg["runtimeVersion"];
@@ -308,7 +308,7 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 							if(updatePatchCallback_)
 								updatePatchCallback_(po);
 						} else if(type == "delete-patch") {
-							patchscript::PatchObject po;
+							patchscript::SessionObject po;
 							po.name_ = msg["name"];
 							po.runtimeName_ = msg["runtimeName"];
 							po.runtimeVersion_ = msg["runtimeVersion"];
