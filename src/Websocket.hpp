@@ -17,7 +17,7 @@
 #include <mutex>
 #include "App.h"
 #include "PolySynth.hpp"
-#include "SqlStore.hpp"
+#include "SessionObject.hpp"
 
 std::string escape_json(const std::string &s);
 
@@ -37,8 +37,8 @@ class Websocket {
 	std::function<string()> sendControlListCallback_;
 	std::function<string()> sendConfigCallback_;
 	std::function<string()> sendPatchListCallback_;
-	std::function<void(const patchscript::PatchObject&)> updatePatchCallback_;
-	std::function<void(const patchscript::PatchObject&)> deletePatchCallback_;
+	std::function<void(const patchscript::SessionObject&)> updatePatchCallback_;
+	std::function<void(const patchscript::SessionObject&)> deletePatchCallback_;
 
 public:
 	Websocket(size_t port, const string& bankFile);
@@ -52,11 +52,11 @@ public:
 		sendPatchListCallback_ = callback;
 	}
 
-	void setUpdatePatchCallback(std::function<void(const patchscript::PatchObject&)> callback) {
+	void setUpdatePatchCallback(std::function<void(const patchscript::SessionObject&)> callback) {
 		updatePatchCallback_ = callback;
 	}
 
-	void setDeletePatchCallback(std::function<void(const patchscript::PatchObject&)> callback) {
+	void setDeletePatchCallback(std::function<void(const patchscript::SessionObject&)> callback) {
 		deletePatchCallback_ = callback;
 	}
 
