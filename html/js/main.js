@@ -336,7 +336,7 @@ function importFromLibrary(name, revision, impCode, impParameters, impLayout) {
                   if(impParameters) {
                     var parObj = JSON.parse(patchList[i].parameters);
                     Object.keys(parObj).forEach(function(key) {
-                      $("#" + key).val(parObj[key]);
+                      $(("#" + key).replace(".","\\.")).val(parObj[key]);
                        setControl(key, parObj[key]);
                     });
                   }
