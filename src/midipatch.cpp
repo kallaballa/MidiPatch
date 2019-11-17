@@ -44,11 +44,15 @@ bool isValidSessionName(const string& n) {
 		if((c >= '\x30' && c <= '\x39') || (c >= '\x41' && c <= '\x5A') || (c >= '\x61' && c <= '\x7A')) {
 			continue;
 		} else {
+			bool found = false;
 			for(const auto& s : specialChars) {
 				if(c == s) {
-					continue;
+					found = true;
+					break;
 				}
 			}
+			if(found)
+				break;
 		}
 		return false;
 	}
