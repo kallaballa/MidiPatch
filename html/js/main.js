@@ -620,6 +620,7 @@ function connect() {
               if(!isNaN(parseInt($(this).val(), 10))) {
                 setControl(par.parent().find("label").html() + "." + par.find("label").html(), $(this).val());
                 localStorage.setItem("savedControlParameters",JSON.stringify(getControlParameters()));
+                $(this).scrollIntoView();
               }
             });
             for (var i = 0; i < knobs.length; ++i) {
@@ -633,6 +634,7 @@ function connect() {
                         var par = this.$.parent().parent()
                         setControl(par.parent().find("label").html() + "." + par.find("label").html(), value);
                         localStorage.setItem("savedControlParameters",JSON.stringify(getControlParameters()));
+                        $(this).scrollIntoView();
                     }
                 });
             }
