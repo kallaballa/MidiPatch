@@ -216,7 +216,6 @@ int main(int argc, char ** argv) {
 	size_t port = 8080;
 	string patchFile;
 	string logFile;
-	string dbFile;
 	string bankFile;
 	size_t numVoices;
 	const char* home = std::getenv(DEFAULT_ENV_VARIABLE);
@@ -241,8 +240,6 @@ int main(int argc, char ** argv) {
 				cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
 			("v,voices", "The number of voices to run",
 					cxxopts::value<size_t>(numVoices)->default_value("8"))
-			("d,db",	"The database file used for the library component",
-					cxxopts::value<string>(dbFile)->default_value(string(home) + "/" + DEFAULT_DATA_DIR + "/sessions.db"))
 			("p,patchFile",	"The lua patchFile to use for the voices",
 					cxxopts::value<string>(patchFile)->default_value(string(home) + "/" + DEFAULT_DATA_DIR + "/midipatch.pat"))
 			("f,logFile", "The file to log to",
