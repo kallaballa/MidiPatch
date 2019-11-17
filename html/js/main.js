@@ -339,7 +339,6 @@ function importFromLibrary(name, author, revision, impCode, impParameters, impLa
                     Object.keys(parObj).forEach(function(key) {
                       $(("#" + key).replace(".","\\.")).val(parObj[key]);
                       $(("#" + key).replace(".","\\.")).trigger("change");
-                       setControl(key, parObj[key]);
                     });
                     localStorage.setItem("savedControlParameters", patchList[i].parameters);
                  }
@@ -539,7 +538,7 @@ function connect() {
              }
         } else if (obj.type == "update-control") {
             $("#" + obj.data.parent + "\\." + obj.data.child).val(obj.data.value);
-            localStorage.setItem("savedControlParameters",JSON.stringify(getControlParameters()));
+            $("#" + obj.data.parent + "\\." + obj.data.child).trigger("change");
         } else if (obj.type == "update-log") {
             var current_datetime = new Date();
             var formatted_date = current_datetime.getFullYear() + "-" + appendLeadingZeroes(current_datetime.getMonth() + 1) + "-" + appendLeadingZeroes(current_datetime.getDate()) + " " + appendLeadingZeroes(current_datetime.getHours()) + ":" + appendLeadingZeroes(current_datetime.getMinutes()) + ":" + appendLeadingZeroes(current_datetime.getSeconds());
@@ -928,7 +927,6 @@ $(document).ready(function() {
       Object.keys(cp).forEach(function(key) {
         $(("#" + key).replace(".","\\.")).val(cp[key]);
         $(("#" + key).replace(".","\\.")).trigger("change");
-        setControl(key, cp[key]);
       });
     }
 });
