@@ -539,6 +539,7 @@ function connect() {
         } else if (obj.type == "update-control") {
             $("#" + obj.data.parent + "\\." + obj.data.child).val(obj.data.value);
             $("#" + obj.data.parent + "\\." + obj.data.child).trigger("change");
+            $("#" + obj.data.parent + "\\." + obj.data.child).get(0).scrollIntoView();
         } else if (obj.type == "update-log") {
             var current_datetime = new Date();
             var formatted_date = current_datetime.getFullYear() + "-" + appendLeadingZeroes(current_datetime.getMonth() + 1) + "-" + appendLeadingZeroes(current_datetime.getDate()) + " " + appendLeadingZeroes(current_datetime.getHours()) + ":" + appendLeadingZeroes(current_datetime.getMinutes()) + ":" + appendLeadingZeroes(current_datetime.getSeconds());
@@ -620,7 +621,6 @@ function connect() {
               if(!isNaN(parseInt($(this).val(), 10))) {
                 setControl(par.parent().find("label").html() + "." + par.find("label").html(), $(this).val());
                 localStorage.setItem("savedControlParameters",JSON.stringify(getControlParameters()));
-                this.scrollIntoView();
               }
             });
             for (var i = 0; i < knobs.length; ++i) {
@@ -634,7 +634,6 @@ function connect() {
                         var par = this.$.parent().parent()
                         setControl(par.parent().find("label").html() + "." + par.find("label").html(), value);
                         localStorage.setItem("savedControlParameters",JSON.stringify(getControlParameters()));
-                        this.scrollIntoView();
                     }
                 });
             }
