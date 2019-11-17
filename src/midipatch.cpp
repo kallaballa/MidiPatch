@@ -30,7 +30,6 @@ enum ExitCodes {
 const unsigned int nChannels = 2;
 uint8_t current_program = 127;
 size_t controlNumberOffset = 0;
-string save_file;
 
 std::mutex midiMutex;
 patchscript::PatchScript* pscript = nullptr;
@@ -204,41 +203,6 @@ void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) 
 
 }
 
-void save_parameters() {
-	auto params = pscript->getPolySynth()->getVoices()[0].synth.getParameters();
-	ofstream ofs(save_file);
-	for (auto& p : params) {
-		ofs << p.getName() << (char) 0 << std::to_string(p.getValue()) << (char) 0;
-	}
-}
-
-void load_parameters() {
-	ifstream ifs(save_file);
-	char buf0[1024];
-	char buf1[1024];
-
-	std::map<string, float> loadMap;
-	while (ifs.getline(buf0, 1024, (char) 0) && ifs.getline(buf1, 1024, (char) 0)) {
-		loadMap[string(buf0)] = std::stof(string(buf1));
-	}
-
-	for (auto& v : pscript->getPolySynth()->getVoices()) {
-		auto params = v.synth.getParameters();
-
-		for (auto& p : params) {
-			auto it = loadMap.find(p.getName());
-			if (it != loadMap.end()) {
-				v.synth.setParameter(p.getName(), (*it).second);
-			}
-		}
-	}
-}
-
-void signalHandler(int signum) {
-	save_parameters();
-	exit(signum);
-}
-
 int main(int argc, char ** argv) {
 	std::string appName = argv[0];
 	std::vector<int> midiIndex;
@@ -248,7 +212,7 @@ int main(int argc, char ** argv) {
 	size_t port = 8080;
 	string patchFile;
 	string logFile;
-	string saveFile;
+	string dbFile;
 	string bankFile;
 	size_t numVoices;
 	const char* home = std::getenv(DEFAULT_ENV_VARIABLE);
@@ -273,8 +237,8 @@ int main(int argc, char ** argv) {
 				cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
 			("v,voices", "The number of voices to run",
 					cxxopts::value<size_t>(numVoices)->default_value("8"))
-			("s,save",	"The file where current patch settings are stored",
-					cxxopts::value<string>(saveFile)->default_value(string(home) + "/" + DEFAULT_DATA_DIR + "/midipatch.sav"))
+			("d,db",	"The database file used for the library component",
+					cxxopts::value<string>(dbFile)->default_value(string(home) + "/" + DEFAULT_DATA_DIR + "/sessions.db"))
 			("p,patchFile",	"The lua patchFile to use for the voices",
 					cxxopts::value<string>(patchFile)->default_value(string(home) + "/" + DEFAULT_DATA_DIR + "/midipatch.pat"))
 			("f,logFile", "The file to log to",
@@ -287,10 +251,6 @@ int main(int argc, char ** argv) {
 		exit(OPTIONS_ERROR);
 	}
 	midipatch::Logger::init(midipatch::L_DEBUG, logFile);
-
-	if (!saveFile.empty()) {
-		save_file = saveFile;
-	}
 
 	pscript = new patchscript::PatchScript(sampleRate);
 	if (port > 0)
@@ -357,11 +317,6 @@ int main(int argc, char ** argv) {
 				websocket->sendConfig();
 			}
 			if(!pscript->getPolySynth()->getVoices().empty()) {
-				load_parameters();
-				signal(SIGINT, signalHandler);
-				signal(SIGTERM, signalHandler);
-				signal(SIGKILL, signalHandler);
-
 				if (websocket) {
 					websocket->setSetControlCallback([&](string n, float v) {
 						for(auto& voice : pscript->getPolySynth()->getVoices()) {
@@ -524,7 +479,6 @@ int main(int argc, char ** argv) {
 					log_warn("Can't clean up audio port");
 				}
 
-				save_parameters();
 				pscript->destroy();
 
 				while (dac.isStreamOpen()) {

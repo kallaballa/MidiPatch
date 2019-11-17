@@ -284,6 +284,7 @@ function setControl(name, value) {
         "value": parseFloat(value)
     };
     socket.send(JSON.stringify(obj));
+    localStorage.setItem("savedControlParameters",JSON.stringify(getControlParameters()));
 }
 
 function exportToLibrary(name, author, description, expCode, expParameters, expLayout) {
@@ -341,8 +342,10 @@ function importFromLibrary(name, author, revision, impCode, impParameters, impLa
 
                   if(impParameters) {
                     var parObj = JSON.parse(patchList[i].parameters);
+                    localStorage.setItem("savedControlParameters", patchList[i].parameters);
                     Object.keys(parObj).forEach(function(key) {
                       $(("#" + key).replace(".","\\.")).val(parObj[key]);
+                      $(("#" + key).replace(".","\\.")).trigger("change");
                        setControl(key, parObj[key]);
                     });
                   }
@@ -538,6 +541,7 @@ function connect() {
         } else if (obj.type == "update-control") {
             $("#" + obj.data.parent + "\\." + obj.data.child).val(obj.data.value);
             $("#" + obj.data.parent + "\\." + obj.data.child).trigger("change");
+            localStorage.setItem("savedControlParameters",JSON.stringify(getControlParameters()));
         } else if (obj.type == "update-log") {
             var current_datetime = new Date();
             var formatted_date = current_datetime.getFullYear() + "-" + appendLeadingZeroes(current_datetime.getMonth() + 1) + "-" + appendLeadingZeroes(current_datetime.getDate()) + " " + appendLeadingZeroes(current_datetime.getHours()) + ":" + appendLeadingZeroes(current_datetime.getMinutes()) + ":" + appendLeadingZeroes(current_datetime.getSeconds());
@@ -591,7 +595,7 @@ function connect() {
             }
             lastControlListData = event.data;
             $("#rack").html("");
-            var rackDiv = "<div id=\"rackdiv\">";
+            var rackDiv = "<button class=\"ui-button ui-corner-all ui-widget\" id=\"resettodefaults\">Reset to defaults</button><div id=\"rackdiv\">";
             for (var i = 0; i < obj.data.length; ++i) {
                 rackDiv += "<div class=\"control-row\" style=\"background-color: " + arrColors[Math.round((arrColors.length - 1) * Math.random())] + ";\" id=\"" + obj.data[i].name + "\"><label class=\"moduleLabel\">" + obj.data[i].name + "</label>"
                 for (var j = 0; j < obj.data[i].controls.length; ++j) {
@@ -623,6 +627,10 @@ function connect() {
                     }
                 });
             }
+            $("#resettodefaults").click(function() {
+                localStorage.removeItem("savedControlParameters");
+                restart();
+            });
         }
     };
 
@@ -694,7 +702,7 @@ function makeLayout() {
     }
 
     myLayout.registerComponent('Toolbar', function(container, componentState) {
-        container.getElement().html('<div id="toolbar"><button class="ui-button ui-corner-all ui-widget" id="restart">Restart</button><button class="ui-button ui-corner-all ui-widget" id="loadpatch">Download</button><button class="ui-button ui-corner-all ui-widget" id="storepatch">Upload</button><button class="ui-button ui-corner-all ui-widget" id="exporttolibrarybtn">Export to library</button><button class="ui-button ui-corner-all ui-widget" id="resetlayout">Reset Layout</button><input type="checkbox" id="restartonsave" value="Restart on save" checked/><label for="restartonsave" id="restartonsavelbl">Restart on store</label><section id="connectionstatus">Status:<span>Disconnected</span></div></div>');
+        container.getElement().html('<div id="toolbar"><button class="ui-button ui-corner-all ui-widget" id="restart">Restart</button><button class="ui-button ui-corner-all ui-widget" id="loadpatch">Download</button><button class="ui-button ui-corner-all ui-widget" id="storepatch">Upload</button><button class="ui-button ui-corner-all ui-widget" id="exporttolibrarybtn">Export to library</button><button class="ui-button ui-corner-all ui-widget" id="resetlayout">Reset Layout</button><section id="editorselectsection"><label class="ui-corner-all ui-widget" id="editorselectlbl" for="editorselect">Mode:</label><select id="editorselect"><option value="sublime">Sublime</option><option value="vim">Vim</option><option value="emacs">Emacs</option></select></section><input type="checkbox" id="restartonsave" value="Restart on save" checked/><label for="restartonsave" id="restartonsavelbl">Restart on store</label><section id="connectionstatus">Status:<span>Disconnected</span></div></div>');
     });
 
     myLayout.registerComponent('Analyser', function(container, componentState) {
@@ -706,7 +714,7 @@ function makeLayout() {
     });
 
    myLayout.registerComponent('Editor', function(container, componentState) {
-        container.getElement().html('<section id="editorselectsection"><label class="ui-corner-all ui-widget" id="editorselectlbl" for="editorselect">Mode:</label><select id="editorselect"><option value="sublime">Sublime</option><option value="vim">Vim</option><option value="emacs">Emacs</option></select></section><section id="editorpane"><textarea id="editor"></textarea></section>');
+        container.getElement().html('<section id="editorpane"><textarea id="editor"></textarea></section>');
 
         window.setTimeout(function() {
         codeMirror = CodeMirror.fromTextArea(document.getElementById("editor"), {
@@ -904,5 +912,11 @@ $(document).ready(function() {
         e.preventDefault();
     });
 
-
+    var cpStr = localStorage.getItem("savedControlParameters"); 
+    if(cpStr) {
+      var cp = JSON.parse(cpStr);
+      Object.keys(cp).forEach(function(key) {
+        setControl(key, parObj[key]);
+      });
+    }
 });

@@ -178,6 +178,9 @@ overflow-y:auto;
   color: white;
 }
 
+#editorpane {
+  height: 100%;
+}
 #editorselectsection {
   display: inline;
 }
