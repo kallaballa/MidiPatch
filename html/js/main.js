@@ -601,7 +601,6 @@ function connect() {
                 rackDiv += "<div class=\"control-row\" style=\"background-color: " + arrColors[Math.round((arrColors.length - 1) * Math.random())] + ";\" id=\"" + obj.data[i].name + "\"><label class=\"moduleLabel\">" + obj.data[i].name + "</label>"
                 for (var j = 0; j < obj.data[i].controls.length; ++j) {
                     var value = oldControlParams[obj.data[i].name + "." + obj.data[i].controls[j].name];
-                    alert(value);
                     if(!value)
                       value = obj.data[i].controls[j].value;
                     
