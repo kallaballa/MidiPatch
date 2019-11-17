@@ -539,7 +539,7 @@ function connect() {
         } else if (obj.type == "update-control") {
             $("#" + obj.data.parent + "\\." + obj.data.child).val(obj.data.value);
             $("#" + obj.data.parent + "\\." + obj.data.child).trigger("change");
-            $("#" + obj.data.parent + "\\." + obj.data.child).get(0).scrollIntoView();
+            $("#" + obj.data.parent + "\\." + obj.data.child).parent().get(0).scrollIntoView();
         } else if (obj.type == "update-log") {
             var current_datetime = new Date();
             var formatted_date = current_datetime.getFullYear() + "-" + appendLeadingZeroes(current_datetime.getMonth() + 1) + "-" + appendLeadingZeroes(current_datetime.getDate()) + " " + appendLeadingZeroes(current_datetime.getHours()) + ":" + appendLeadingZeroes(current_datetime.getMinutes()) + ":" + appendLeadingZeroes(current_datetime.getSeconds());
