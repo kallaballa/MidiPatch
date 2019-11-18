@@ -24,13 +24,11 @@ outputs the frequency in Hz.
 ]]--
 local freq = ControlMidiToFreq():input(noteNum)
 
-
 --[[
 The sine wave oscillator generating the actual tone at the
 note frequency
 ]]--
 local tone = SineWave():freq(freq);
-
 
 --[[
 This parameters is driven by the note velocity and leads to 
@@ -52,7 +50,6 @@ local envelope = ADSR()
 	:release(0.01)
 	:doesSustain(1)
 	:trigger(gate)
-
 
 --[[
 Attenuate the "tone" (sine wave) by the "velocityMod" (higher 
