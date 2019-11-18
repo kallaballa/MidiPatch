@@ -29,37 +29,69 @@ cd MidiPatch
  ```
 # Example patch
 
-The following code creates a MIDI patch with 3 oscillators, a low pass filter and an ADSR envelope. Every parameter added with "addParameter" will be audomatically exposed to the midi interface except those starting with '_' (those are private). It  closely resembles the Tonic C++ API.
+The following code shows how to generate a sine wave from MIDI events. Every parameter added with "addParameter" will be audomatically exposed to the web and midi interface except those starting with '_' (those are private). It  closely resembles the Tonic C++ API. See the "examples" folder for more advanced usage.
 
 ```lua
-local noteNum = synth:addParameter("_polyNote", 0.0);
-local gate = synth:addParameter("_polyGate", 0.0);
-local noteVelocity = synth:addParameter("_polyVelocity", 0.0);
-local voiceNumber = synth:addParameter("_polyVoiceNumber", 0.0);
-local gain = synth:addParameter("Global.Gain", 1.0);
-local sine = synth:addParameter("Global.Sine", 1.0);
-local square = synth:addParameter("Global.Square", 1.0);
-local triangle = synth:addParameter("Global.Triangle", 1.0);
-local cutoffFreq = synth:addParameter("Low Pass.Frequency", 1.0);
-local cutoffQ = synth:addParameter("Low Pass.Resonance", 1.0);
+--[[
+The MIDI note parameters send by the engine. Note that they
+all start with an underscore, which means they are private 
+and are not included in the rack.
+]]--
+local noteNum = synth:addParameter("_polyNote", 0.0)
+local gate = synth:addParameter("_polyGate", 0.0)
+local noteVelocity = synth:addParameter("_polyVelocity", 0.0)
+local voiceNumber = synth:addParameter("_polyVoiceNumber", 0.0)
 
-local voiceFreq = ControlMidiToFreq():input(noteNum)
-local tone0 = SineWave():freq(voiceFreq)
-local tone1 = SquareWave():freq(voiceFreq)
-local tone2 = TriangleWave():freq(voiceFreq)
-local mix = ((tone0 * sine) + (tone1 * square) + (tone2 * triangle )) / 3.0 * gain;
+--[[
+The global volume parameter. Scales the signal at the very end
+]]--
+local volume = synth:addParameter("Global.Volume", 0.3)
 
-local lpf = LPF24():cutoff(FixedValue(5000) * cutoffFreq):Q(FixedValue(20) * cutoffQ)
+--[[
+A ControlGenerator that takes MIDI note numbers as input and
+outputs the frequency in Hz.
+]]--
+local freq = ControlMidiToFreq():input(noteNum)
 
-local env = ADSR()
-:attack(synth:addParameter("Envelope.Attack",0.1))
-:decay(synth:addParameter("Envelope.Decay", 0 ))
-:sustain(synth:addParameter("Envelope.Sustain",1))
-:release(synth:addParameter("Envelope.Release",0.1))
-:doesSustain(1)
-:trigger(gate)
+--[[
+The sine wave oscillator generating the actual tone at the
+note frequency
+]]--
+local tone = SineWave():freq(freq);
 
-synth:setOutputGen((lpf:input(mix) * env) * (FixedValue(0.02) + noteVelocity * 0.005));
+--[[
+This parameters is driven by the note velocity and leads to 
+a louder tone with a higher velocity.
+]]--
+local velocityMod = FixedValue(0.02) + noteVelocity * 0.005;
+
+--[[
+we need the envelope for two reasons:
+1. to prevent clicking on noteOn and noteOff (hence the slight
+   attack and release)
+2. So we can use it as a gate. Without it the oscillator would 
+   be generating a continous signal
+]]--
+local envelope = ADSR()
+	:attack(0.01)
+	:decay(0)
+	:sustain(1)
+	:release(0.01)
+	:doesSustain(1)
+	:trigger(gate)
+
+--[[
+Attenuate the "tone" (sine wave) by the "velocityMod" (higher 
+velocity -> louder tone). Then apply the "envelope" (which in
+our case does nearly nothing) and scale the signal by
+"volume". 
+]]--
+local signal = tone * velocityMod * envelope * volume;
+
+--[[
+Assign the generator "signal" to the synth.
+]]--
+synth:setOutputGen(signal);
 ```
 
 # Build
