@@ -606,7 +606,7 @@ function connect() {
                       value = obj.data[i].controls[j].value;
  
                     if (obj.data[i].controls[j].name.charAt(0) != '_') {
-                         rackDiv += "<div class=\"control-cell\"><label>" + obj.data[i].controls[j].name + "</label><br/><input id=\"" + obj.data[i].name + "." + obj.data[i].controls[j].name + "\" class=\"knob\" data-width=\"50\" data-fgColor=\"#000000\" data-height=\"50\" value=\"" + value + "\"></div>";
+                         rackDiv += "<div class=\"control-cell\"><label style=\"white-space: nowrap;\">" + obj.data[i].controls[j].displayName + "</label><br/><input id=\"" + obj.data[i].name + "." + obj.data[i].controls[j].name + "\" class=\"knob\" data-width=\"50\" data-fgColor=\"#000000\" data-height=\"50\" value=\"" + value + "\"></div>";
                     }
                 }
                 rackDiv += "<div style=\"width: 100%;\"></div></div><br/>";
