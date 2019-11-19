@@ -31,6 +31,24 @@ cd MidiPatch
 
 The following code shows how to generate a sine wave from MIDI events. Every parameter added with "addParameter" will be audomatically exposed to the web and midi interface except those starting with '_' (those are private). It  closely resembles the Tonic C++ API. See the "examples" folder for more advanced usage.
 
+## Short version
+```lua
+
+local noteNum = synth:addParameter("_polyNote", 0.0)
+local gate = synth:addParameter("_polyGate", 0.0)
+local noteVelocity = synth:addParameter("_polyVelocity", 0.0)
+local voiceNumber = synth:addParameter("_polyVoiceNumber", 0.0)
+local volume = synth:addParameter("Global.Volume", 0.3);
+
+synth:setOutputGen(
+	SineWave():freq(ControlMidiToFreq():input(noteNum)) *
+	(FixedValue(0.02) + noteVelocity * 0.005) *
+  	ADSR():attack(0.01):decay(0):sustain(1):release(0.01):doesSustain(1):trigger(gate) *
+  	volume
+);
+```
+
+## Long version
 ```lua
 --[[
 The MIDI note parameters send by the engine. Note that they
