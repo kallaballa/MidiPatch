@@ -342,7 +342,13 @@ int main(int argc, char ** argv) {
 						return string("");
 						auto params = pscript->getPolySynth()->getVoices()[0].synth.getParameters();
 						std::vector<string> parents;
-						std::map<string, std::vector<std::pair<string, float>>> hierachie;
+						struct CP {
+							float value_;
+							float min_;
+							float max_;
+							string displayName_;
+						};
+						std::map<string, std::vector<std::pair<string, CP>>> hierachie;
 						for (size_t i = 0; i < params.size(); ++i) {
 							const string& name = params[i].getName();
 							if (name.empty() || name.at(0) == '_')
@@ -360,17 +366,21 @@ int main(int argc, char ** argv) {
 							if (std::find(parents.begin(), parents.end(), parent) == parents.end()) {
 								parents.push_back(parent);
 							}
-							hierachie[parent].push_back( {child, params[i].getValue()});
+							hierachie[parent].push_back( {child, {params[i].getValue(), params[i].getMin(), params[i].getMax(), params[i].getDisplayName()}});
 						}
 
 						size_t i = 0;
 						for (const auto& parent : parents) {
 							const string& module = parent;
-							const std::vector<std::pair<string, float>>& children = hierachie[parent];
+							const auto& children = hierachie[parent];
 							ss << "{ \"name\": \"" << escape_json(module) << "\", \"controls\": [";
 							size_t j = 0;
 							for (const auto& child : children) {
-								ss << "{ \"name\" :\"" << escape_json(child.first) << "\", \"value\": \"" << child.second << "\" }";
+								ss << "{ \"name\" :\"" << escape_json(child.first)
+														<< "\", \"value\": \"" << child.second.value_
+														<< "\", \"min\": \"" << child.second.min_
+														<< "\", \"max\": \"" << child.second.max_
+														<< "\", \"displayName\": \"" << child.second.displayName_ << "\" }";
 								if (j < children.size() - 1)
 								ss << ',';
 
@@ -426,7 +436,6 @@ int main(int argc, char ** argv) {
 						websocket->sendPatchList();
 					});
 
-				std::cerr << "RESET" << std::endl;
 					websocket->reset();
 					websocket->sendConfig();
 					websocket->sendControlList();

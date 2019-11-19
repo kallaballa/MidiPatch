@@ -602,12 +602,11 @@ function connect() {
                     var value;
                     if(oldControlParams)
                       value = oldControlParams[obj.data[i].name + "." + obj.data[i].controls[j].name];
-                    if(!value)
+                    else
                       value = obj.data[i].controls[j].value;
-                    
+ 
                     if (obj.data[i].controls[j].name.charAt(0) != '_') {
-                        setControl(obj.data[i].name + "." + obj.data[i].controls[j].name, value);
-                        rackDiv += "<div class=\"control-cell\"><label>" + obj.data[i].controls[j].name + "</label><br/><input id=\"" + obj.data[i].name + "." + obj.data[i].controls[j].name + "\" class=\"knob\" data-width=\"50\" data-fgColor=\"#000000\" data-height=\"50\" value=\"" + value + "\"></div>";
+                         rackDiv += "<div class=\"control-cell\"><label>" + obj.data[i].controls[j].displayName + "</label><br/><input id=\"" + obj.data[i].name + "." + obj.data[i].controls[j].name + "\" class=\"knob\" data-width=\"50\" data-fgColor=\"#000000\" data-height=\"50\" value=\"" + value + "\"></div>";
                     }
                 }
                 rackDiv += "<div style=\"width: 100%;\"></div></div><br/>";
@@ -623,19 +622,24 @@ function connect() {
                 localStorage.setItem("savedControlParameters",JSON.stringify(getControlParameters()));
               }
             });
-            for (var i = 0; i < knobs.length; ++i) {
-                $(knobs[i]).knob({
-                    'min': 0.0,
-                    'max': 1.0,
-                    'step': 0.01,
-                    'readOnly': false,
-                    'stopper': true,
-                    change: function(value) {
-                        var par = this.$.parent().parent()
-                        setControl(par.parent().find("label").html() + "." + par.find("label").html(), value);
-                        localStorage.setItem("savedControlParameters",JSON.stringify(getControlParameters()));
+
+            for (var i = 0; i < obj.data.length; ++i) {
+                for (var j = 0; j < obj.data[i].controls.length; ++j) {
+                    if (obj.data[i].controls[j].name.charAt(0) != '_') {
+                      $("#" + obj.data[i].name + "\\." + obj.data[i].controls[j].name).knob({
+                        'min': obj.data[i].controls[j].min,
+                        'max': obj.data[i].controls[j].max,
+                        'step': 0.001,
+                        'readOnly': false,
+                        'stopper': true,
+                        change: function(value) {
+                            var par = this.$.parent().parent()
+                            setControl(par.parent().find("label").html() + "." + par.find("label").html(), value);
+                            localStorage.setItem("savedControlParameters",JSON.stringify(getControlParameters()));
+                        }
+                      });
                     }
-                });
+                }
             }
             $("#resettodefaults").click(function() {
                 localStorage.removeItem("savedControlParameters");
