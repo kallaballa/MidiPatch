@@ -1,6 +1,7 @@
 --[[
-This examples shows how to generate a sine wave from MIDI 
-events.
+This examples shows how to generate a sine wave driven by MIDI 
+events and control parameters. Note that in this example the
+volume parameter is in Db.
 ]]--
 
 --[[
@@ -16,7 +17,7 @@ local voiceNumber = synth:addParameter("_polyVoiceNumber", 0.0)
 --[[
 The global volume parameter. Scales the signal at the very end
 ]]--
-local volume = synth:addParameter("Global.Volume", 0.3)
+local volume = synth:addParameter("Global.Volume", -10):displayName("Volume (Db)"):min(-30):max(30):logarithmic(true)
 
 --[[
 A ControlGenerator that takes MIDI note numbers as input and
@@ -44,20 +45,21 @@ we need the envelope for two reasons:
    be generating a continous signal
 ]]--
 local envelope = ADSR()
-	:attack(0.01)
-	:decay(0)
-	:sustain(1)
-	:release(0.01)
-	:doesSustain(1)
-	:trigger(gate)
+        :attack(0.01)
+        :decay(0)
+        :sustain(1)
+        :release(0.01)
+        :doesSustain(1)
+        :trigger(gate)
 
 --[[
 Attenuate the "tone" (sine wave) by the "velocityMod" (higher 
 velocity -> louder tone). Then apply the "envelope" (which in
 our case does nearly nothing) and scale the signal by
-"volume". 
+"volume". The "volume" parameter is in Db, hence the
+conversion to linear.
 ]]--
-local signal = tone * velocityMod * envelope * volume;
+local signal = tone * velocityMod * envelope * ControlDbToLinear():input(volume);
 
 --[[
 Assign the generator "signal" to the synth.
