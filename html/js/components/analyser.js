@@ -1,6 +1,6 @@
 class MPAnalyser {
-    constructor() {
-
+    constructor(midipatch) {
+        this.midipatch = midipatch;
     }
     
     isInitialized() {
@@ -45,8 +45,20 @@ class MPAnalyser {
         this.startDrawing(30);
     }
     
+    resume() {
+        this.audioCtx.resume();        
+    }
+    
     makeHTML() {
-        return "<canvas id='scope' width=400 height=200></canvas><br/><canvas id='spectrum' width=400 height=200>";
+        return "<button id='enableanalyserbtn'>Enable Analyser</button><canvas id='scope' width=400 height=200></canvas><br/><canvas id='spectrum' width=400 height=200>";
+    }
+
+    bind() {
+        var mp = this.midipatch;
+        var a = this;
+        $("#enableanalyserbtn").click(function() {
+            a.init(mp.sampleRate, mp.bufferFrames, mp.channels);
+        });
     }
 
     drawFrame() {
@@ -125,6 +137,9 @@ class MPAnalyser {
     }
     
     getChannel(num) {
-        return this.rawAudio.getChannelData(num);
+        if(this.rawAudio)
+            return this.rawAudio.getChannelData(num);
+        else
+            return null;        
     }
 }
