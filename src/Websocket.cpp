@@ -273,12 +273,12 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 							if(setControlCallback_)
 								setControlCallback_(name,value);
 						} else if(type == "note-on") {
-							size_t note = msg["note"].get<size_t>();
-							size_t velocity = msg["velocity"].get<size_t>();
+							off_t note = msg["note"].get<off_t>();
+							off_t velocity = msg["velocity"].get<off_t>();
 							if(noteOnCallback_)
 								noteOnCallback_(note,velocity);
 						} else if(type == "note-off") {
-							size_t note = msg["note"].get<size_t>();
+							off_t note = msg["note"].get<off_t>();
 							if(noteOffCallback_)
 								noteOffCallback_(note);
 						} else if(type == "clear-all-notes") {
