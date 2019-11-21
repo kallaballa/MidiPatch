@@ -1,5 +1,4 @@
 var version;
-var codeMirror;
 var textarea = document.getElementById("editor");
 var myLayout;
 var socket;
@@ -115,7 +114,7 @@ class MidiPatch {
                 $("#" + obj.data.parent + "\\." + obj.data.child).parent().parent().get(0).scrollIntoView();
             } else if (obj.type == "update-log") {
                 if(obj.severity == 1) {
-                    errorDialog(obj.title, obj.msg);
+                    midipatch.errorDialog(obj.title, obj.msg);
                 }
                 
                 log.update(obj)
@@ -222,7 +221,7 @@ class MidiPatch {
         var parameters = "";
         var layout = "";
         if(expCode)
-        code = codeMirror.getValue();
+        code = editor.getValue();
         if(expParameters)
         parameters = JSON.stringify(getControlParameters());
         if(expLayout)
@@ -280,8 +279,8 @@ class MidiPatch {
             }
 
             if(impCode) {
-                codeMirror.setValue(patchList[i].code);
-                storePatch();
+                editor.setValue(patchList[i].code);
+                this.storePatch();
             }
             }
         }
@@ -341,7 +340,7 @@ class MidiPatch {
             modal: true,
             buttons: {
             "Overwrite": function() {
-                codeMirror.setValue(content);
+                editor.setValue(content);
                 $( this ).dialog( "close" );
             },
             Cancel: function() {
@@ -369,6 +368,7 @@ class MidiPatch {
     }
 
     deleteFromLibraryDialog(name,author) {
+        var mp = this;
         $( function() {
         $( "#deletefromlibrary" ).dialog({
             resizable: false,
@@ -377,7 +377,7 @@ class MidiPatch {
             modal: true,
             buttons: {
             "Delete": function() {
-                midipatch.deleteFromLibrary(name, author);
+                mp.deleteFromLibrary(name, author);
                 $( this ).dialog( "close" );
             },
             "Cancel": function() {
@@ -396,6 +396,8 @@ class MidiPatch {
         if(desc)
             $("#sessiondescription").val(desc);
 
+        var mp = this;
+        
         $( function() {
         $( "#exporttolibrary" ).dialog({
             resizable: false,
@@ -410,7 +412,7 @@ class MidiPatch {
                 var expCode = $("#exportcode" ).is(':checked');
                 var expParameters = $("#exportparameters").is(':checked');
                 var expLayout = $("#exportlayout").is(':checked');
-                midipatch.exportToLibrary(name, author, desc, expCode, expParameters, expLayout);
+                mp.exportToLibrary(name, author, desc, expCode, expParameters, expLayout);
                 $( this ).dialog( "close" );
             },
             "Cancel": function() {
@@ -425,14 +427,14 @@ class MidiPatch {
         var code;
         var parameters;
         var layout;
-            for(var i = 0; i < patchList.length; ++i) {
-                if(patchList[i].name == name && patchList[i].author == author && patchList[i].revision == revision) {
-                    code = patchList[i].code;
-                    parameters = patchList[i].parameters;
-                    layout = patchList[i].layout;
-                    break;
-                }
-                }
+        for(var i = 0; i < patchList.length; ++i) {
+            if(patchList[i].name == name && patchList[i].author == author && patchList[i].revision == revision) {
+                code = patchList[i].code;
+                parameters = patchList[i].parameters;
+                layout = patchList[i].layout;
+                break;
+            }
+        }
         if(!code || code.length == 0)
             $("#importcode" ).attr("disabled", true);
         else
@@ -448,30 +450,33 @@ class MidiPatch {
         else
             $("#importlayout" ).removeAttr("disabled");
 
-        $( function() {
-        $( "#importfromlibrary" ).dialog({
-            resizable: false,
-            height: "auto",
-            width: 400,
-            modal: true,
-            buttons: {
-            "Import": function() {
-                var impCode = $("#importcode" ).is(':checked');
-                var impParameters = $("#importparameters").is(':checked');
-                var impLayout = $("#importlayout").is(':checked');
+        var mp = this;
 
-                midipatch.importFromLibrary(name, author, revision, impCode, impParameters, impLayout);
-                $( this ).dialog( "close" );
-            },
-            "Cancel": function() {
-                $( this ).dialog( "close" );
-            }
-            }
-        });
+        $( function() {
+            $( "#importfromlibrary" ).dialog({
+                resizable: false,
+                height: "auto",
+                width: 400,
+                modal: true,
+                buttons: {
+                    "Import": function() {
+                        var impCode = $("#importcode" ).is(':checked');
+                        var impParameters = $("#importparameters").is(':checked');
+                        var impLayout = $("#importlayout").is(':checked');
+
+                        mp.importFromLibrary(name, author, revision, impCode, impParameters, impLayout);
+                        $( this ).dialog( "close" );
+                    },
+                    "Cancel": function() {
+                        $( this ).dialog( "close" );
+                    }
+                }
+            });
         });
     }
 
     askContentDifferDialog(content) {
+        var mp = this;
         $( function() {
         $( "#askcontentdiffer" ).dialog({
             resizable: false,
@@ -480,12 +485,12 @@ class MidiPatch {
             modal: true,
             buttons: {
             "Keep editor content?": function() {
-                codeMirror.setValue(content);
-                storePatch();
+                editor.setValue(content);
+                mp.storePatch();
                 $( this ).dialog( "close" );
             },
             "Overwrite editor content?": function() {
-                loadPatch();
+                mp.loadPatch();
                 $( this ).dialog( "close" );
             }
             }
@@ -494,15 +499,65 @@ class MidiPatch {
     }
 
     setEditorMode(mode) {
-        if(mode == "vim") {
-            codeMirror.setOption("vimMode", true);
-        }
-      codeMirror.setOption("keyMap", mode);   
+        editor.setMode(mode);
     }
     
     resetLayout() {
         localStorage.removeItem('savedLayoutState');
         window.location.reload();
+    }
+    
+    loadPatchAsk() {
+        $.get("/cgi-bin/loadPatch.cgi", function(data) {
+            if (data.length == 0)
+                return;
+            $.notify("Loading", "success")
+            editor.setValueAsk(data);
+        });
+    }
+
+
+    loadPatch() {
+        $.get("/cgi-bin/loadPatch.cgi", function(data) {
+            if (data.length == 0)
+                return;
+            $.notify("Loading", "success")
+            editor.setValue(data);
+        });
+    } 
+
+    compareEditorAndServerPatch(editorContent) {
+        var mp = this;
+        $.get("/cgi-bin/loadPatch.cgi", function(data) {
+            if(editorContent.localeCompare(data) != 0) {
+                mp.askContentDifferDialog(editorContent);
+            } else {
+                editor.setValue(data);
+            }
+        });
+    }
+
+    storePatch() {
+        var mp = this;
+        var code = editor.getValue();
+        $.post('/cgi-bin/storePatch.cgi', {
+                code: code
+            },
+            function(data, status, jqXHR) {
+                $.notify("Patch saved", "success");
+                if ($("#restartonsave").prop('checked')) {
+                    mp.restart();
+                }
+            }
+        )
+    }
+
+    getControlParameters() {
+        var cp = {};
+        $("#rackdiv input").each(function() {
+            cp[$(this).attr("id")] = $(this).val();
+        })
+        return cp;
     }
 }
 
@@ -510,88 +565,14 @@ var midipatch = new MidiPatch(8080);
 var toolbar = new MPToolbar(midipatch);
 var piano = new MPPiano(midipatch);
 var analyser = new MPAnalyser();
-var editor;
+var editor = new MPEditor(midipatch);
 var log = new MPLog(editor);
-
 
 
 function scrollToBottom(id) {
     var element = document.getElementById(id);
     element.scrollTop = element.scrollHeight - element.clientHeight;
 }
-
-
-
-function loadPatchAsk() {
-    $.get("/cgi-bin/loadPatch.cgi", function(data) {
-        if (data.length == 0)
-            return;
-        $.notify("Loading", "success")
-        codeMirror.setValueAsk(data);
-    });
-}
-
-
-function loadPatch() {
-    $.get("/cgi-bin/loadPatch.cgi", function(data) {
-        if (data.length == 0)
-            return;
-        $.notify("Loading", "success")
-        codeMirror.setValue(data);
-    });
-} 
-
-function compareEditorAndServerPatch(editorContent) {
-    $.get("/cgi-bin/loadPatch.cgi", function(data) {
-        if(editorContent.localeCompare(data) != 0) {
-          midipatch.askContentDifferDialog(editorContent);
-        } else {
-          codeMirror.setValue(data);
-        }
-    });
-}
-
-function storePatch() {
-    var code = codeMirror.getValue();
-    $.post('/cgi-bin/storePatch.cgi', {
-            code: code
-        },
-        function(data, status, jqXHR) {
-            $.notify("Patch saved", "success");
-            if ($("#restartonsave").prop('checked')) {
-                midipatch.restart();
-            }
-        }
-    )
-}
-
-
-function getControlParameters() {
-  var cp = {};
-  $("#rackdiv input").each(function() {
-    cp[$(this).attr("id")] = $(this).val();
-  })
-  return cp;
-}
-
-
-function appendLeadingZeroes(n){  
-  if(n <= 9){
-    return "0" + n;
-  }
-  return n
-}
-
-function str2ab(str) {
-    var buf = new ArrayBuffer(str.length); // 2 bytes for each char
-    var bufView = new Int16Array(buf);
-    for (var i = 0, strLen = str.length; i < strLen / 2; i++) {
-        bufView[i] = 0x0000FFFF & (str.charCodeAt(i * 2) | str.charCodeAt(i * 2 + 1) << 8);
-    }
-    return buf;
-}
-
-
 
 function makeLayout() {
     //not used but saved as an example
@@ -664,34 +645,10 @@ function makeLayout() {
     });
 
    myLayout.registerComponent('Editor', function(container, componentState) {
-        container.getElement().html('<section id="editorpane"><textarea id="editor"></textarea></section>');
+        container.getElement().html(editor.makeHTML());
 
         window.setTimeout(function() {
-        codeMirror = CodeMirror.fromTextArea(document.getElementById("editor"), {
-          lineNumbers: true,
-          styleSelectedText: true,
-          keyMap: "sublime",
-          styleActiveLine: {nonEmpty: true},
-          matchBrackets: true,
-          showCursorWhenSelecting: true,
-          mode: "lua",
-          theme: "midnight",
-          inputStyle: "contenteditable"
-        });
-
-        codeMirror.setValueAsk = function(content) {
-          confirmOverwriteDialog(content);
-        } 
-
-        codeMirror.on("change", function(cm, change) {
-           localStorage.setItem("savedEditorContent", cm.getValue());
-        });
-        var content = localStorage.getItem("savedEditorContent");
-        if(content) {
-          compareEditorAndServerPatch(content);
-        } else {
-          loadPatch();
-        }
+            editor.init();
         }, 100);
     });
 
@@ -743,7 +700,7 @@ $(document).ready(function() {
     });
 
     keyboardJS.bind('alt+s', function(e) {
-        storePatch();
+        midipatch.storePatch();
         e.preventDefault();
     });
 
