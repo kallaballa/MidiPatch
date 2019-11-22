@@ -17,7 +17,7 @@ local attack = synth:addParameter("Global.Attack",0.1)
 local decay = synth:addParameter("Global.Decay", 0 )
 local sustain = synth:addParameter("Global.Sustain",1)
 local release = synth:addParameter("Global.Release",0.1)
-local shiftAmount = synth:addParameter("Global.PitchShiftAmount", 1)
+local shiftAmount = synth:addParameter("Global.PitchShiftAmount", 0)
 
 local lpCutoff = synth:addParameter("Filter.LP_Freq", 1.0)
 local lpQ = synth:addParameter("Filter.LP_Q", 0.0)
@@ -32,7 +32,7 @@ local gain = synth:addParameter("Compressor.gain", 0):displayName( "Makeup Gain 
 local bypass = synth:addParameter("Compressor.bypass",0):parameterType(1);
 
 local voiceFreq = ControlMidiToFreq():input(noteNum)
-local randomShift = ControlRandom():min(0.01):max(shiftAmount);
+local randomShift = ControlRandom():min(-shiftAmount):max(shiftAmount);
 
 function makeOSC(index, total, voiceFreq)
   local name = "Oscillator" .. (index - 1)
@@ -45,9 +45,9 @@ function makeOSC(index, total, voiceFreq)
   local triangle = synth:addParameter(name .. ".Triangle", 0.5)
   local triangleP = synth:addParameter(name .. ".TrianglePitch", pitch)
   return  (
-            (SineWave():freq(voiceFreq * (sineP * randomShift)) * sine) +
-            (SquareWave():freq(voiceFreq * (squareP * randomShift)) * square) +
-            (TriangleWave():freq(voiceFreq * (triangleP * randomShift)) * triangle)
+            (SineWave():freq(voiceFreq * (sineP + randomShift)) * sine) +
+            (SquareWave():freq(voiceFreq * (squareP + randomShift)) * square) +
+            (TriangleWave():freq(voiceFreq * (triangleP + randomShift)) * triangle)
           ) * 0.33 * gain
 end
 
