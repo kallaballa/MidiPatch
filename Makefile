@@ -19,7 +19,7 @@ endif
 ifeq ($(UNAME_S), Darwin)
   CXX=clang++
   LD=clang++
-  CXXFLAGS += -stdlib=libc++
+  CXXFLAGS += -stdlib=libc++ -DMIBY_USER_CONFIG=\"midipatch_miby_config.h\"
   LDFLAGS += -stdlib=libc++ -framework CoreAudio -framework AudioToolbox -framework CoreMIDI -framework CoreData -framework CoreFoundation -framework Accelerate
 endif
 
