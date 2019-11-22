@@ -15,6 +15,8 @@
 #include "RtError.h"
 #include "lua.h"
 
+#include "miby.h"
+
 #include "logger.hpp"
 #include "Websocket.hpp"
 #include "PatchScript.hpp"
@@ -122,90 +124,125 @@ int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFr
 	return 0;
 }
 
-void midiCallback(double deltatime, vector<unsigned char>* msg, void* userData) {
+
+// 
+// MIDI Callbacks
+//
+// NOTE: these are brokered through the Miby parser, for which a state is
+// instantiated for all configured MIDI inputs
+// 
+void MIDIPATCH_Control_Change(miby_this_t a_miby) {
+
+	std::cout << "MIDIPATCH_Control_Change C:" << int(MIBY_CHAN(a_miby)) << " CC1: " 
+				<< int(MIBY_ARG0(a_miby)) << " CC2: " << int(MIBY_ARG1(a_miby)) << std::endl;
+
+	std::vector<string> commonParams;
+
+	//try to set a common parameter for all synths. NOTE: only works if all synthesizers have the same public parameters
+	if (!pscript->getPolySynth()->getVoices().empty()) {
+		Synth s;
+		std::vector<string> currentParams;
+		bool first = true;
+
+			//check if all parameters match between all synths
+		for (auto& pv : pscript->getPolySynth()->getVoices()) {
+			currentParams.clear();
+			s = pv.synth;
+			for (auto& cp : s.getParameters()) {
+				const string name = cp.getDisplayName();
+					//Parameters with a name starting with '_' are private
+				if (!name.empty() && name.at(0) != '_') {
+					currentParams.push_back(name);
+				}
+			}
+			if (first) {
+				commonParams = currentParams;
+				first = false;
+			} else {
+				if (currentParams != commonParams) {
+					log_warn("Synth parameters differ, can't set parameters globally");
+					break;
+				}
+			}
+		}
+
+		std::vector<string> publicParameters = currentParams;
+		string parent;
+		string child;
+		for (auto& pv : pscript->getPolySynth()->getVoices()) {
+			s = pv.synth;
+
+			// Note: MIBY_ARG0 = CC1, MIBY_ARG1 = CC2
+			if (((uint8_t)MIBY_ARG0(a_miby) - controlNumberOffset) < publicParameters.size()) {
+				const string& name = publicParameters[(uint8_t)MIBY_ARG0(a_miby) - controlNumberOffset];
+
+				auto delim = name.find(".");
+
+				if (delim != string::npos) {
+					parent = name.substr(0, delim);
+					child = name.substr(delim + 1);
+				} else {
+					parent = "Global";
+					child = name;
+				}
+				s.setParameter(name, (float) MIBY_ARG0(a_miby) / 127.0);
+				if (websocket)
+					websocket->updateParameter(name, (float) MIBY_ARG0(a_miby) / 127.0);
+			}
+		}
+
+	}
+}
+
+void MIDIPATCH_Note_On(miby_this_t a_miby) {
+	std::cout << "MIDIPATCH_Note_On C: " << (int)MIBY_CHAN(a_miby) 
+				<< " N: " << (int)MIBY_ARG0(a_miby) << " V: " << (int)MIBY_ARG1(a_miby) << std::endl;
+
+	pscript->getPolySynth()->noteOn((uint8_t)MIBY_ARG0(a_miby), (uint8_t)MIBY_ARG1(a_miby));
+
+	if (websocket)
+		websocket->sendNoteOn((int)MIBY_ARG0(a_miby), (int)MIBY_ARG1(a_miby));
+}
+
+void MIDIPATCH_Note_Off(miby_this_t a_miby) {
+	std::cout << "MIDIPATCH_Note_Off C:" << (int)MIBY_CHAN(a_miby) << std::endl;
+
+	pscript->getPolySynth()->noteOff((int)MIBY_ARG0(a_miby));
+
+	if (websocket)
+		websocket->sendNoteOff((int)MIBY_ARG0(a_miby));
+}
+
+void MIDIPATCH_Start(miby_this_t a_miby) {
+	std::cout << "MIDIPATCH_Start." << std::endl;
+}
+
+void MIDIPATCH_Stop(miby_this_t a_miby) {
+	std::cout << "MIDIPATCH_Stop." << std::endl;
+}
+
+void MIDIPATCH_Program_Change(miby_this_t a_miby) {
+	std::cout << "MIDIPATCH_Program_Change C: " << (int)MIBY_CHAN(a_miby) 
+				<< " P: " << (int)MIBY_ARG0(a_miby) << std::endl;
+
+		current_program = (int)MIBY_ARG0(a_miby);
+}
+
+
+//
+// main entrypoint for MIDI messages
+//
+void mainMIDICallback(double deltatime, vector<unsigned char>* msg, void* userData) {
 	std::scoped_lock lock(midiMutex);
 	if (websocket && websocket->isRestartRequested())
 		return;
 
-	int chan = (*msg)[0] & 0xf;
-	int msgtype = (*msg)[0] & 0xf0;
-	int b1 = (*msg)[1];
-	int b2 = 0;
-	if (msg->size() >= 2)
-		b2 = (*msg)[2];
-
-	if (msgtype == 0x80 || (msgtype == 0x90 && b2 == 0)) {
-		std::cout << "MIDI Note OFF  C: " << chan << " N: " << b1 << std::endl;
-		pscript->getPolySynth()->noteOff(b1);
-		if (websocket)
-			websocket->sendNoteOff(b1);
-	} else if (msgtype == 0x90) {
-		std::cout << "MIDI Note ON   C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
-		pscript->getPolySynth()->noteOn(b1, b2);
-		if (websocket)
-			websocket->sendNoteOn(b1, b2);
-	} else if (msgtype == 0xB0) {
-		std::cout << "MIDI CC ON     C: " << chan << " N: " << b1 << " V: " << b2 << std::endl;
-		std::vector<string> commonParams;
-
-		//try to set a common parameter for all synths. NOTE: only works if all synthesizers have the same public parameters
-		if (!pscript->getPolySynth()->getVoices().empty()) {
-			Synth s;
-			std::vector<string> currentParams;
-			bool first = true;
-
-			//check if all parameters match between all synths
-			for (auto& pv : pscript->getPolySynth()->getVoices()) {
-				currentParams.clear();
-				s = pv.synth;
-				for (auto& cp : s.getParameters()) {
-					const string name = cp.getDisplayName();
-					//Parameters with a name starting with '_' are private
-					if (!name.empty() && name.at(0) != '_') {
-						currentParams.push_back(name);
-					}
-				}
-				if (first) {
-					commonParams = currentParams;
-					first = false;
-				} else {
-					if (currentParams != commonParams) {
-						log_warn("Synth parameters differ, can't set parameters globally");
-						break;
-					}
-				}
-			}
-
-			std::vector<string> publicParameters = currentParams;
-			string parent;
-			string child;
-			for (auto& pv : pscript->getPolySynth()->getVoices()) {
-				s = pv.synth;
-
-				if ((b1 - controlNumberOffset) < publicParameters.size()) {
-					const string& name = publicParameters[b1 - controlNumberOffset];
-
-					auto delim = name.find(".");
-
-					if (delim != string::npos) {
-						parent = name.substr(0, delim);
-						child = name.substr(delim + 1);
-					} else {
-						parent = "Global";
-						child = name;
-					}
-					s.setParameter(name, (float) b2 / 127.0);
-					if (websocket)
-						websocket->updateParameter(name, (float) b2 / 127.0);
-				}
-			}
-		}
-	} else if (msgtype == 0xC0) {
-		std::cout << "MIDI Program change  C: " << chan << " P: " << b1 << std::endl;
-		current_program = b1;
+	for(auto& inb: *msg) {
+		// std::cout << " inb: " << inb << std::endl;
+		miby_parse((miby_t *)userData, inb);
 	}
-
 }
+
 
 int main(int argc, char ** argv) {
 	std::string appName = argv[0];
@@ -285,6 +322,7 @@ int main(int argc, char ** argv) {
 	});
 
 	std::vector<RtMidiIn*> midiIn(midiIndex.size(), nullptr);
+	std::vector<miby_t*> miby_State(midiIndex.size());
 
 	while (true) {
 		RtAudio dac;
@@ -444,10 +482,15 @@ int main(int argc, char ** argv) {
 				for (size_t i = 0; i < midiIndex.size(); ++i) {
 					try {
 						const int& mi = midiIndex[i];
+						miby_State[i] = new miby_t;
+
+						log_info("Setting up miby parser "  + std::to_string(i));
+						miby_init(miby_State[i], miby_State[i]); // self as user-data
+
 						log_info("Initialize MIDI", "Port: " + std::to_string(mi));
 						midiIn[i] = new RtMidiIn();
 						midiIn[i]->openPort(mi);
-						midiIn[i]->setCallback(&midiCallback);
+						midiIn[i]->setCallback(&mainMIDICallback, miby_State[i]);
 					} catch (std::exception& e) {
 						log_warn("Unable to open midi port");
 					}
