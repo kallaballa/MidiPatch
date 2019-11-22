@@ -5,7 +5,7 @@ INLINEROPTS = -m -n
 ifeq ($(UNAME_S), Darwin)
  CUSTOM_DEFS = -Wno-register
  AUDIO_BACKEND=-D__MACOSX_CORE__
- MIDI_BACKEND=-D__MACOSX_CORE__
+ MIDI_BACKEND=-D__MACOSX_CORE__ 
  PACK_CMD=nasm -fmacho64 index.s -o index.o
 endif
 
@@ -16,7 +16,7 @@ ifeq ($(UNAME_S), Linux)
    LIBS += -lpulse -lpulse-simple -lasound
  else ifeq (${JACK}, 1)
    AUDIO_BACKEND = -D__UNIX_JACK__
-   MIDI_BACKEND = -D__LINUX_ALSA__
+   MIDI_BACKEND = -D__LINUX_ALSA__ 
    LIBS += -ljack -lasound
  else
    AUDIO_BACKEND = -D__LINUX_ALSA__
@@ -34,7 +34,7 @@ TARGET := midipatch.html
 endif
 
 SRCS  := midipatch.cpp Websocket.cpp logger.cpp
-CXXFLAGS += -I/usr/lib64/ -I../third/uSockets-0.3.2/src/ -I../third/uWebSockets-0.16.1/src -I../PatchScript/src/ -I../PatchScript/third/SQLiteCPP -I../PatchScript/third/kaguya/include -I../PatchScript/third/lua-5.3.5/src -I../PatchScript/third/Tonic/src -I../third/cxxopts-2.2.0/include -I../third/nlohmann-json-3.7.0/ -I../third/RtMidi -I../third/RtAudio -I../third/ ${CUSTOM_DEFS}
+CXXFLAGS += -I/usr/lib64/ -I../third/uSockets-0.3.2/src/ -I../third/uWebSockets-0.16.1/src -I../PatchScript/src/ -I../PatchScript/third/SQLiteCPP -I../PatchScript/third/kaguya/include -I../PatchScript/third/lua-5.3.5/src -I../PatchScript/third/Tonic/src -I../third/cxxopts-2.2.0/include -I../third/nlohmann-json-3.7.0/ -I../third/miby -I../third/RtMidi -I../third/RtAudio -I../third/ ${CUSTOM_DEFS}
 LIBS += -ltonic -llua -ldl -llilv-0 -luSockets -lsqlite3 -lz -lpatchscript 
 LDFLAGS += -L../PatchScript/third/lua-5.3.5/src -L../PatchScript/third/Tonic/src -L../third/uSockets-0.3.2/ -L../PatchScript/src/
 ASSET_DIRS = $(shell find ../html/ -type d -not -name ".." -not -name "html")
@@ -58,8 +58,11 @@ profile: ${TARGET}
 hardcore: ${TARGET}
 asan: ${TARGET}
 
-${TARGET}: ../html/index.o ../third/RtMidi/RtMidi.o ../third/RtAudio/RtAudio.o ${OBJS}
+${TARGET}: ../html/index.o ../third/RtMidi/RtMidi.o ../third/RtAudio/RtAudio.o ../third/miby/miby.o ${OBJS}
 	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS} 
+
+../third/miby/miby.o: ../third/miby/miby.cpp ../third/miby/miby_config.h
+	${CXX} ${CXXFLAGS} ${MIDI_BACKEND} -o $@ -c $<
 
 ../third/RtMidi/RtMidi.o: ../third/RtMidi/RtMidi.cpp
 	${CXX} ${CXXFLAGS} ${MIDI_BACKEND} -o $@ -c $<
@@ -90,7 +93,7 @@ uninstall:
 	rm ${DESTDIR}/${PREFIX}/bin/${TARGET}
 
 clean:
-	rm -f *~ ${DEPS} ${OBJS} ${GCH} ${TARGET} ../html/index.o ../html/index.min.pack ../third/RtMidi/RtMidi.o ../third/RtAudio/RtAudio.o
+	rm -f *~ ${DEPS} ${OBJS} ${GCH} ${TARGET} ../html/index.o ../html/index.min.pack ../third/RtMidi/RtMidi.o ../third/RtAudio/RtAudio.o ../third/miby/miby.o
 
 distclean: clean
 
