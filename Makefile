@@ -5,7 +5,7 @@ ifeq ($(UNAME_S), Darwin)
 endif
 
 CXX      := g++-7
-CXXFLAGS := -pthread -fno-strict-aliasing -std=c++17 -pedantic -Wall
+CXXFLAGS := -pthread -fno-strict-aliasing -std=c++17 -pedantic -Wall -DMIBY_USER_CONFIG=\"midipatch_miby_config.h\"
 LIBS     := -lpthread -lm 
 .PHONY: all release debian-release info debug clean debian-clean distclean asan
 DESTDIR := /
@@ -19,7 +19,7 @@ endif
 ifeq ($(UNAME_S), Darwin)
   CXX=clang++
   LD=clang++
-  CXXFLAGS += -stdlib=libc++
+  CXXFLAGS += -stdlib=libc++ -DMIBY_USER_CONFIG=\"midipatch_miby_config.h\"
   LDFLAGS += -stdlib=libc++ -framework CoreAudio -framework AudioToolbox -framework CoreMIDI -framework CoreData -framework CoreFoundation -framework Accelerate
 endif
 
