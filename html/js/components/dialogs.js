@@ -6,7 +6,7 @@ class MPDialogs {
     makeHTML() {
         return `
             <div id="errordialog" title="">
-                <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span><span class="errormessage"></span></p>
+                <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span><pre class="errormessage"></pre></p>
             </div>
             <div id="confirmoverwrite" title="Replace editor content?">
                 <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Do you really want to replace the editors content?</p>
@@ -44,7 +44,7 @@ class MPDialogs {
             $( "#errordialog" ).dialog({
             resizable: false,
             height: "auto",
-            width: 400,
+            width: 620,
             modal: true,
             buttons: {
                 "Ok": function() {

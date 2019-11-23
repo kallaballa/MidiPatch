@@ -110,17 +110,19 @@ void log_syntax_error(const string& title, const string& msg = "") {
 
 int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime,
 		RtAudioStreamStatus status, void *userData) {
-	if (websocket && websocket->isRestartRequested())
-		return 0;
-	pscript->fill((float*) outputBuffer, nBufferFrames, nChannels);
-	size_t lenBuf = nBufferFrames * nChannels;
-	std::vector<float> samples(lenBuf, 0);
+	if (websocket && websocket->isRestartRequested()) {
+		return 1;
+	} else {
+		pscript->fill((float*) outputBuffer, nBufferFrames, nChannels);
+		size_t lenBuf = nBufferFrames * nChannels;
+		std::vector<float> samples(lenBuf, 0);
 
-	for (size_t i = 0; i < lenBuf; ++i) {
-		samples[i] = ((float*) outputBuffer)[i];
+		for (size_t i = 0; i < lenBuf; ++i) {
+			samples[i] = ((float*) outputBuffer)[i];
+		}
+		if (websocket)
+			websocket->sendAudio(samples);
 	}
-	if (websocket)
-		websocket->sendAudio(samples);
 	return 0;
 }
 
@@ -547,6 +549,7 @@ int main(int argc, char ** argv) {
 				}
 				log_info("Restarting");
 			}
+
 		} catch (RtError& e) {
 			log_error("Exception", e.getMessage());
 			exit(UNKNOWN_ERROR);
