@@ -1,6 +1,5 @@
 class MPDialogs {
     constructor(midipatch) {
-        alert(midipatch.setEditorValue);
         this.midipatch = midipatch;
     }
     
