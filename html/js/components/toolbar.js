@@ -21,7 +21,7 @@ class MPToolbar {
             });
 
             $("#exporttolibrarybtn").click(function() {
-                midipatch.exportToLibraryDialog(); 
+                dialogs.exportToLibraryDialog(); 
             });
 
             $("#resetlayout").click(function() {

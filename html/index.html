@@ -20,36 +20,6 @@ if (!document.registerElement) {
 <link rel="stylesheet" href="css/main.css"/>
 </head>
 <body>
-<div id="errordialog" title="">
-  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span><span class="errormessage"></span></p>
-</div>
-
-<div id="confirmoverwrite" title="Replace editor content?">
-  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Do you really want to replace the editors content?</p>
-</div>
-<div id="askcontentdiffer" title="Server patch and local patch differ">
-  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>The patch stored in the server and your local patch stored in the browser diff.</p>
-</div>
-<div id="confirmconcurrentmod" title="More than one user connected">
-  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Concurrent modification of MidiPatch not supported yet.</p>
-</div>
-<div id="exporttolibrary" title="Export session to library">
-  <label class="ui-widget" for="sessionname">Name</label><br/><input id="sessionname" type="text"></input><br/>
-  <label class="ui-widget" for="sessionauthor">Author</label><br/><input id="sessionauthor" type="text"></input><br/>
-  <label class="ui-widget" for="sessiondescription">Description</label><br/>
-  <textarea class="ui-widget" id="sessiondescription" rows="3" cols="35"></textarea><br/>
-  <input class="ui-widget" type="checkbox" id="exportcode" checked/><label for="exportcode">Export code</label><br/>
-  <input class="ui-widget"  type="checkbox" id="exportparameters"/><label for="exportparameters">Export parameters</label><br/>
-  <input class="ui-widget" type="checkbox" id="exportlayout"/><label for="exportlayout">Export layout</label>
-</div>
-<div id="importfromlibrary" title="Import session from library">
-  <input class="ui-widget" type="checkbox" id="importcode"/><label for="importcode">Import code</label><br/>
-  <input class="ui-widget"  type="checkbox" id="importparameters"/><label for="importparameters">Import parameters</label><br/>
-  <input class="ui-widget" type="checkbox" id="importlayout"/><label for="importlayout">Import layout</label>
-</div>
-<div id="deletefromlibrary" title="Delete session from library?">
-  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Do you really want to delete the selected session?</p>
-</div>
 
 <script src="js/AudioContextMonkeyPatch.js"></script>
 <script src="js/jquery-3.4.1.min.js"></script>
@@ -66,6 +36,7 @@ if (!document.registerElement) {
 <script src="js/notify.js"></script>
 <script src="js/keyboard.min.js"></script>
 
+<script src="js/components/dialogs.js"></script>
 <script src="js/components/rack.js"></script>
 <script src="js/components/library.js"></script>
 <script src="js/components/editor.js"></script>

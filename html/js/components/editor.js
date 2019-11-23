@@ -17,7 +17,7 @@ class MPEditor {
         });
         var mp = this.midipatch;
         this.codeMirror.setValueAsk = function(content) {
-          mp.confirmOverwriteDialog(content);
+          dialogs.confirmOverwriteDialog(content);
         } 
 
         this.codeMirror.on("change", function(cm, change) {

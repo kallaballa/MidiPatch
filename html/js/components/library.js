@@ -31,7 +31,7 @@ class MPLibrary {
             var name = $(this).parent().parent().find(".libname").html();
             var author = $(this).parent().parent().find(".libauthor").html();
             var revision = $(this).val();
-            mp.importFromLibraryDialog(name,author,revision);
+            dialogs.importFromLibraryDialog(name,author,revision);
             })
         });
 
@@ -40,7 +40,7 @@ class MPLibrary {
             var name = $(this).parent().parent().find(".libname").html();
             var author = $(this).parent().parent().find(".libauthor").html();
             var desc = $(this).parent().parent().find(".libdescription").html();
-            mp.exportToLibraryDialog(name,author,desc);
+            dialogs.exportToLibraryDialog(name,author,desc);
             })
         });
         
@@ -49,7 +49,7 @@ class MPLibrary {
             var name = $(this).parent().parent().find(".libname").html();
             var author = $(this).parent().parent().find(".libauthor").html();
             var revision = $(this).parent().parent().find(".revisionselect").val();
-            mp.importFromLibraryDialog(name,author,revision);
+            dialogs.importFromLibraryDialog(name,author,revision);
             });
         });
 
@@ -57,7 +57,7 @@ class MPLibrary {
             $(this).click(function() {
             var name = $(this).parent().parent().find(".libname").html();
             var author = $(this).parent().parent().find(".libauthor").html();
-            mp.deleteFromLibraryDialog(name,author);
+            dialogs.deleteFromLibraryDialog(name,author);
             });
         });
 

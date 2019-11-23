@@ -65,7 +65,7 @@ class MidiPatch {
                 $("#" + obj.data.parent + "\\." + obj.data.child).parent().parent().get(0).scrollIntoView();
             } else if (obj.type == "update-log") {
                 if(obj.severity == 1) {
-                    midipatch.errorDialog(obj.title, obj.msg);
+                    dialogs.errorDialog(obj.title, obj.msg);
                 }
                 if (!$("#log").length)
                     return;
@@ -213,195 +213,18 @@ class MidiPatch {
         socket.send(JSON.stringify(obj));
     }
     
-    errorDialog(title, msg) {
-        $("#errordialog" ).attr("title", title);
-        $("#errordialog .errormessage" ).html(msg);
-        $( function() {
-        $( "#errordialog" ).dialog({
-        resizable: false,
-        height: "auto",
-        width: 400,
-        modal: true,
-        buttons: {
-            "Ok": function() {
-            $( this ).dialog( "close" );
-            },
-        }
-        });
-        });
-    }
-
-    confirmOverwriteDialog(content) {
-        $( function() {
-        $( "#confirmoverwrite" ).dialog({
-            resizable: false,
-            height: "auto",
-            width: 400,
-            modal: true,
-            buttons: {
-            "Overwrite": function() {
-                editor.setValue(content);
-                $( this ).dialog( "close" );
-            },
-            Cancel: function() {
-                $( this ).dialog( "close" );
-            }
-            }
-        });
-        });
-    }
-
-    confirmConcurrentMod() {
-        $( function() {
-        $( "#confirmconcurrentmod" ).dialog({
-            resizable: false,
-            height: "auto",
-            width: 400,
-            modal: true,
-            buttons: {
-            "I understand": function() {
-                $( this ).dialog( "close" );
-            }
-            }
-        });
-        });
-    }
-
-    deleteFromLibraryDialog(name,author) {
-        var mp = this;
-        $( function() {
-        $( "#deletefromlibrary" ).dialog({
-            resizable: false,
-            height: "auto",
-            width: 400,
-            modal: true,
-            buttons: {
-            "Delete": function() {
-                mp.deleteFromLibrary(name, author);
-                $( this ).dialog( "close" );
-            },
-            "Cancel": function() {
-                $( this ).dialog( "close" );
-            }
-            }
-        });
-        });
-    }
-
-    exportToLibraryDialog(name, author, desc) {
-        if(name)
-            $("#sessionname").val(name);
-        if(author)
-            $("#sessionauthor").val(author);
-        if(desc)
-            $("#sessiondescription").val(desc);
-
-        var mp = this;
-        
-        $( function() {
-        $( "#exporttolibrary" ).dialog({
-            resizable: false,
-            height: "auto",
-            width: 400,
-            modal: true,
-            buttons: {
-            "Export": function() {
-                var name = $("#sessionname" ).val();
-                var desc = $("#sessiondescription").val();
-                var author = $("#sessionauthor").val();
-                var expCode = $("#exportcode" ).is(':checked');
-                var expParameters = $("#exportparameters").is(':checked');
-                var expLayout = $("#exportlayout").is(':checked');
-                mp.exportToLibrary(name, author, desc, expCode, expParameters, expLayout);
-                $( this ).dialog( "close" );
-            },
-            "Cancel": function() {
-                $( this ).dialog( "close" );
-            }
-            }
-        });
-        });
-    }
-
-    importFromLibraryDialog(name, author, revision) {
-        var code;
-        var parameters;
-        var layout;
-        for(var i = 0; i < patchList.length; ++i) {
-            if(patchList[i].name == name && patchList[i].author == author && patchList[i].revision == revision) {
-                code = patchList[i].code;
-                parameters = patchList[i].parameters;
-                layout = patchList[i].layout;
-                break;
-            }
-        }
-        if(!code || code.length == 0)
-            $("#importcode" ).attr("disabled", true);
-        else
-            $("#importcode" ).removeAttr("disabled");
-
-        if(!parameters || parameters.length == 0)
-            $("#importparameters" ).attr("disabled", true);
-        else
-            $("#importparameters" ).removeAttr("disabled");
-
-        if(!layout || layout.length == 0)
-            $("#importlayout" ).attr("disabled", true);
-        else
-            $("#importlayout" ).removeAttr("disabled");
-
-        var mp = this;
-
-        $( function() {
-            $( "#importfromlibrary" ).dialog({
-                resizable: false,
-                height: "auto",
-                width: 400,
-                modal: true,
-                buttons: {
-                    "Import": function() {
-                        var impCode = $("#importcode" ).is(':checked');
-                        var impParameters = $("#importparameters").is(':checked');
-                        var impLayout = $("#importlayout").is(':checked');
-
-                        mp.importFromLibrary(name, author, revision, impCode, impParameters, impLayout);
-                        $( this ).dialog( "close" );
-                    },
-                    "Cancel": function() {
-                        $( this ).dialog( "close" );
-                    }
-                }
-            });
-        });
-    }
-
-    askContentDifferDialog(content) {
-        var mp = this;
-        $( function() {
-        $( "#askcontentdiffer" ).dialog({
-            resizable: false,
-            height: "auto",
-            width: 500,
-            modal: true,
-            buttons: {
-            "Keep editor content?": function() {
-                editor.setValue(content);
-                mp.storePatch();
-                $( this ).dialog( "close" );
-            },
-            "Overwrite editor content?": function() {
-                mp.loadPatch();
-                $( this ).dialog( "close" );
-            }
-            }
-        });
-        });
-    }
-
     setEditorMode(mode) {
         editor.setMode(mode);
     }
     
+    setEditorValue(v) {
+        editor.setValue(v);
+    }
+
+    setEditorValueAsk(v) {
+        editor.setValueAsk(v);
+    }
+
     resetLayout() {
         localStorage.removeItem('savedLayoutState');
         window.location.reload();
@@ -430,7 +253,7 @@ class MidiPatch {
         var mp = this;
         $.get("/cgi-bin/loadPatch.cgi", function(data) {
             if(editorContent.localeCompare(data) != 0) {
-                mp.askContentDifferDialog(editorContent);
+                dialogs.askContentDifferDialog(editorContent);
             } else {
                 editor.setValue(data);
             }
@@ -462,6 +285,7 @@ class MidiPatch {
 }
 
 var midipatch = new MidiPatch(8080);
+var dialogs = new MPDialogs(midipatch);
 var toolbar = new MPToolbar(midipatch);
 var piano = new MPPiano(midipatch);
 var analyser = new MPAnalyser(midipatch);
@@ -585,6 +409,8 @@ function makeLayoutMobile() {
 }
 
 $(document).ready(function() {
+    $("body").append(dialogs.makeHTML());
+
     if(isMobileBrowser()) {
         makeLayoutMobile();
         midipatch.connect();
