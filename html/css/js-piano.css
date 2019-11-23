@@ -7,7 +7,7 @@
   height: 200px;
   width: 4500px;
   padding: 10px;
-  margin:auto;
+  margin-top: 17px;
 }
 
 .key {
@@ -51,8 +51,4 @@
 
 #holdmodesection {
   position:fixed;
-}
-
-#spacer {
-  height: 26px;
 }

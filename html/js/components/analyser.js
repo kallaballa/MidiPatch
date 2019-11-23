@@ -50,7 +50,9 @@ class MPAnalyser {
     }
     
     makeHTML() {
-        return "<button id='enableanalyserbtn'>Enable Analyser</button><canvas id='scope' width=400 height=200></canvas><br/><canvas id='spectrum' width=400 height=200>";
+        return `<button class="ui-button ui-corner-all ui-widget" id='enableanalyserbtn'>Enable Analyser</button>><br/>
+                <canvas id='scope' width=400 height=200></canvas><br/>
+                <canvas id='spectrum' width=400 height=200>`;
     }
 
     bind() {
