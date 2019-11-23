@@ -6,34 +6,33 @@ class MPDialogs {
     makeHTML() {
         return `
             <div id="errordialog" title="">
-            <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span><span class="errormessage"></span></p>
+                <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span><span class="errormessage"></span></p>
             </div>
-
             <div id="confirmoverwrite" title="Replace editor content?">
-            <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Do you really want to replace the editors content?</p>
+                <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Do you really want to replace the editors content?</p>
             </div>
             <div id="askcontentdiffer" title="Server patch and local patch differ">
-            <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>The patch stored in the server and your local patch stored in the browser diff.</p>
+                <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>The patch stored in the server and your local patch stored in the browser diff.</p>
             </div>
             <div id="confirmconcurrentmod" title="More than one user connected">
-            <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Concurrent modification of MidiPatch not supported yet.</p>
+                <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Concurrent modification of MidiPatch not supported yet.</p>
             </div>
             <div id="exporttolibrary" title="Export session to library">
-            <label class="ui-widget" for="sessionname">Name</label><br/><input id="sessionname" type="text"></input><br/>
-            <label class="ui-widget" for="sessionauthor">Author</label><br/><input id="sessionauthor" type="text"></input><br/>
-            <label class="ui-widget" for="sessiondescription">Description</label><br/>
-            <textarea class="ui-widget" id="sessiondescription" rows="3" cols="35"></textarea><br/>
-            <input class="ui-widget" type="checkbox" id="exportcode" checked/><label for="exportcode">Export code</label><br/>
-            <input class="ui-widget"  type="checkbox" id="exportparameters"/><label for="exportparameters">Export parameters</label><br/>
-            <input class="ui-widget" type="checkbox" id="exportlayout"/><label for="exportlayout">Export layout</label>
+                <label class="ui-widget" for="sessionname">Name</label><br/><input id="sessionname" type="text"></input><br/>
+                <label class="ui-widget" for="sessionauthor">Author</label><br/><input id="sessionauthor" type="text"></input><br/>
+                <label class="ui-widget" for="sessiondescription">Description</label><br/>
+                <textarea class="ui-widget" id="sessiondescription" rows="3" cols="35"></textarea><br/>
+                <input class="ui-widget" type="checkbox" id="exportcode" checked/><label for="exportcode">Export code</label><br/>
+                <input class="ui-widget"  type="checkbox" id="exportparameters"/><label for="exportparameters">Export parameters</label><br/>
+                <input class="ui-widget" type="checkbox" id="exportlayout"/><label for="exportlayout">Export layout</label>
             </div>
             <div id="importfromlibrary" title="Import session from library">
-            <input class="ui-widget" type="checkbox" id="importcode"/><label for="importcode">Import code</label><br/>
-            <input class="ui-widget"  type="checkbox" id="importparameters"/><label for="importparameters">Import parameters</label><br/>
-            <input class="ui-widget" type="checkbox" id="importlayout"/><label for="importlayout">Import layout</label>
+                <input class="ui-widget" type="checkbox" id="importcode"/><label for="importcode">Import code</label><br/>
+                <input class="ui-widget"  type="checkbox" id="importparameters"/><label for="importparameters">Import parameters</label><br/>
+                <input class="ui-widget" type="checkbox" id="importlayout"/><label for="importlayout">Import layout</label>
             </div>
-            <div id="deletefromlibrary" title="Delete session from library?">
-            <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Do you really want to delete the selected session?</p>
+            <div id="controlparametersmatch" title="Control parameters match exactly.">
+                <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>The patch you are importing has exactly the same control parameters like your current patch.<br/>What do you want to do?</p>
             </div>
     `;
     }
@@ -42,17 +41,17 @@ class MPDialogs {
         $("#errordialog" ).attr("title", title);
         $("#errordialog .errormessage" ).html(msg);
         $( function() {
-        $( "#errordialog" ).dialog({
-        resizable: false,
-        height: "auto",
-        width: 400,
-        modal: true,
-        buttons: {
-            "Ok": function() {
-            $( this ).dialog( "close" );
-            },
-        }
-        });
+            $( "#errordialog" ).dialog({
+            resizable: false,
+            height: "auto",
+            width: 400,
+            modal: true,
+            buttons: {
+                "Ok": function() {
+                $( this ).dialog( "close" );
+                },
+            }
+            });
         });
     }
 
@@ -217,6 +216,28 @@ class MPDialogs {
             },
             "Overwrite editor content?": function() {
                 mp.loadPatch();
+                $( this ).dialog( "close" );
+            }
+            }
+        });
+        });
+    }
+    
+    askControlParametersMatch(keepCallBack, loadCallback) {
+        var mp = this.midipatch;
+        $( function() {
+        $( "#controlparametersmatch" ).dialog({
+            resizable: false,
+            height: "auto",
+            width: 500,
+            modal: true,
+            buttons: {
+            "Keep current parameters values": function() {
+                keepCallBack();
+                $( this ).dialog( "close" );
+            },
+            "Load defaults of imported patch": function() {
+                loadCallback()
                 $( this ).dialog( "close" );
             }
             }

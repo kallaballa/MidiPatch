@@ -62,6 +62,12 @@ body {
 #confirmconcurrentmod {
   display: none;
 }
+
+#controlparametersmatch {
+  display: none;
+}
+
+
 .lm_content {
 overflow-x:auto;
 overflow-y:auto;
