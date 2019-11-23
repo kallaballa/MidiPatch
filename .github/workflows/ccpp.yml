@@ -10,6 +10,6 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: prepare
-      run: ./prep_ubuntu.sh
+      run: sudo ./prep_ubuntu.sh
     - name: make
       run: make
