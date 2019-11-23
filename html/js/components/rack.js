@@ -12,7 +12,26 @@ class MPRack {
     updateControlList(obj) {
         var mp = this.midipatch;
         var cpStr = localStorage.getItem("savedControlParameters");
-        var oldControlParams = JSON.parse(cpStr);
+        var oldControlParams;
+
+        if(cpStr) {
+            oldControlParams = JSON.parse(cpStr);
+    
+            var matches = true;
+            for (var i = 0; i < obj.data.length; ++i) {
+                for (var j = 0; j < obj.data[i].controls.length; ++j) {
+                    if(!oldControlParams[obj.data[i].name + "." + obj.data[i].controls[j].name]) {
+                        matches = false;
+                        break;
+                    }
+                }
+                if(!matches)
+                    break;
+            }
+            if(!matches)
+                oldControlParams = undefined;
+        }
+
         $("#rack").html("");
         var rackDiv = "<button class=\"ui-button ui-corner-all ui-widget\" id=\"resettodefaults\">Reset to defaults</button><div id=\"rackdiv\">";
         for (var i = 0; i < obj.data.length; ++i) {
@@ -35,28 +54,28 @@ class MPRack {
 
         var knobs = document.getElementsByClassName('knob');
         $(".knob").on("input", function(e) {
-        var par = $(this).parent().parent();
-        if(!isNaN(parseInt($(this).val(), 10))) {
-            mp.sendControlChange(par.parent().find("label").html() + "." + par.find("label").data("name"), $(this).val());
-            localStorage.setItem("savedControlParameters",JSON.stringify(mp.getControlParameters()));
-        }
+            var par = $(this).parent().parent();
+            if(!isNaN(parseInt($(this).val(), 10))) {
+                mp.sendControlChange(par.parent().find("label").html() + "." + par.find("label").data("name"), $(this).val());
+                localStorage.setItem("savedControlParameters",JSON.stringify(mp.getControlParameters()));
+            }
         });
 
         for (var i = 0; i < obj.data.length; ++i) {
             for (var j = 0; j < obj.data[i].controls.length; ++j) {
                 if (obj.data[i].controls[j].name.charAt(0) != '_') {
-                $("#" + obj.data[i].name + "\\." + obj.data[i].controls[j].name).knob({
-                    'min': obj.data[i].controls[j].min,
-                    'max': obj.data[i].controls[j].max,
-                    'step': 0.001,
-                    'readOnly': false,
-                    'stopper': true,
-                    change: function(value) {
-                        var par = this.$.parent().parent()
-                        mp.sendControlChange(par.parent().find("label").html() + "." + par.find("label").data("name"), value);
-                        localStorage.setItem("savedControlParameters",JSON.stringify(mp.getControlParameters()));
-                    }
-                });
+                    $("#" + obj.data[i].name + "\\." + obj.data[i].controls[j].name).knob({
+                        'min': obj.data[i].controls[j].min,
+                        'max': obj.data[i].controls[j].max,
+                        'step': 0.001,
+                        'readOnly': false,
+                        'stopper': true,
+                        change: function(value) {
+                            var par = this.$.parent().parent()
+                            mp.sendControlChange(par.parent().find("label").html() + "." + par.find("label").data("name"), value);
+                            localStorage.setItem("savedControlParameters",JSON.stringify(mp.getControlParameters()));
+                        }
+                    });
                 }
             }
         }

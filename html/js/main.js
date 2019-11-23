@@ -2,7 +2,6 @@ var version;
 var textarea = document.getElementById("editor");
 var myLayout;
 var socket;
-var lastControlListData;
 var patchFile;
 var patchList;
 
@@ -83,10 +82,6 @@ class MidiPatch {
 
             } else if (obj.type == "display") {
             } else if (obj.type == "control-list") {
-                if (lastControlListData == event.data) {
-                    return;
-                }
-                lastControlListData = event.data;
                 rack.updateControlList(obj);
             }
         };
