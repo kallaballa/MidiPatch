@@ -9,9 +9,11 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-    with:
+      with:
         submodules: true
-    - name: prepare
+    - name: Prepare Ubuntu
       run: sudo ./prep_ubuntu.sh
-    - name: make
+    - name: Build third party
+      run: ./build_third.sh
+    - name: Build MidiPatch
       run: make
