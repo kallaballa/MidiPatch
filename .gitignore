@@ -19,3 +19,4 @@ src/*.dep
 src/midipatch
 html/index.min.pack
 html/index.o
+packaging/MidiPatch.app/
