@@ -20,3 +20,5 @@ src/midipatch
 html/index.min.pack
 html/index.o
 packaging/MidiPatch.app/
+third/macdylibbundler/dylibbundler
+

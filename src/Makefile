@@ -48,13 +48,10 @@ GCH     := ${HEADERS:.hpp=.gch}
 OBJS    := ${SRCS:.cpp=.o}
 DEPS    := ${SRCS:.cpp=.dep} 
 
-.PHONY: all release debug clean distclean
+.PHONY: all bundle release debug clean distclean
 
-ifeq ($(UNAME_S), Darwin)
-all: release clean_app package_app
-else
+
 all: release
-endif
 release: INLINEROPTS = -m 
 release: ${TARGET}
 debug: ${TARGET}
@@ -62,6 +59,9 @@ info: ${TARGET}
 profile: ${TARGET}
 hardcore: ${TARGET}
 asan: ${TARGET}
+ifeq ($(UNAME_S), Darwin)
+bundle: clean_app package_app
+endif
 
 clean_app:
 	rm -rf "../packaging/$(APP_NAME).app/"
@@ -69,8 +69,11 @@ clean_app:
 package_app:
 	mkdir -p "../packaging/$(APP_NAME).app"/Contents/{MacOS,Resources}
 	cp "../packaging/macosx/Info.plist" "../packaging/$(APP_NAME).app/Contents/"
+	cp "../packaging/macosx/wrapper.sh" "../packaging/$(APP_NAME).app/Contents/MacOS/"
 	cp ./midipatch "../packaging/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)"
+	cp ../PatchScript/third/Tonic/src/libtonic.so ../PatchScript/src/libpatchscript.dylib .
 	../third/macdylibbundler/dylibbundler -od -b -x "../packaging/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)" -d "../packaging/$(APP_NAME).app/Contents/libs/"
+	rm libtonic.so libpatchscript.dylib
 	
 ${TARGET}: ../html/index.o ../third/RtMidi/RtMidi.o ../third/RtAudio/RtAudio.o ../third/miby/miby.o ${OBJS}
 	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS} 
@@ -83,6 +86,7 @@ ${TARGET}: ../html/index.o ../third/RtMidi/RtMidi.o ../third/RtAudio/RtAudio.o .
 
 ../third/RtAudio/RtAudio.o: ../third/RtAudio/RtAudio.cpp
 	${CXX} ${CXXFLAGS} ${AUDIO_BACKEND} -o $@ -c $<
+
 
 ../html/index.o: ../html/index.min.pack
 	cd ../html; ${PACK_CMD}

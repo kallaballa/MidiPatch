@@ -7,7 +7,11 @@ endif
 CXX      := g++-7
 CXXFLAGS := -pthread -fno-strict-aliasing -std=c++17 -pedantic -Wall -DMIBY_USER_CONFIG=\"midipatch_miby_config.h\"
 LIBS     := -lpthread -lm 
+ifeq ($(UNAME_S), Darwin)
+.PHONY: all bundle release debian-release info debug clean debian-clean distclean asan
+else
 .PHONY: all release debian-release info debug clean debian-clean distclean asan
+endif 
 DESTDIR := /
 PREFIX := /usr/local
 MACHINE := $(shell uname -m)
@@ -97,6 +101,11 @@ dirs:
 
 debian-release:
 	${MAKE} -C src/ -${MAKEFLAGS} CXX=${CXX} NVCC="${NVCC}" NVCC_HOST_CXX="${NVCC_HOST_CXX}" NVCC_CXXFLAGS="${NVCC_CXXFLAGS}" release
+
+ifeq ($(UNAME_S), Darwin)
+bundle:
+	${MAKE} -C src/ -${MAKEFLAGS} CXX=${CXX} NVCC="${NVCC}" NVCC_HOST_CXX="${NVCC_HOST_CXX}" NVCC_CXXFLAGS="${NVCC_CXXFLAGS}" bundle
+endif
 
 debian-clean:
 	${MAKE} -C src/ -${MAKEFLAGS} CXX=${CXX} NVCC="${NVCC}" NVCC_HOST_CXX="${NVCC_HOST_CXX}" NVCC_CXXFLAGS="${NVCC_CXXFLAGS}" clean
