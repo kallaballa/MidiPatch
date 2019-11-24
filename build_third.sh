@@ -7,3 +7,5 @@ make $@
 cd ../third/uSockets-0.3.2
 make $@
 mv uSockets.a libuSockets.a
+cd ../macdylibbundler
+make $@

@@ -1,4 +1,5 @@
 UNAME_S := $(shell uname -s)
+APP_NAME=MidiPatch
 
 INLINEROPTS = -m -n
 
@@ -49,7 +50,11 @@ DEPS    := ${SRCS:.cpp=.dep}
 
 .PHONY: all release debug clean distclean
 
+ifeq ($(UNAME_S), Darwin)
+all: release clean_app package_app
+else
 all: release
+endif
 release: INLINEROPTS = -m 
 release: ${TARGET}
 debug: ${TARGET}
@@ -58,6 +63,15 @@ profile: ${TARGET}
 hardcore: ${TARGET}
 asan: ${TARGET}
 
+clean_app:
+	rm -rf "../packaging/$(APP_NAME).app/"
+
+package_app:
+	mkdir -p "../packaging/$(APP_NAME).app"/Contents/{MacOS,Resources}
+	cp "../packaging/macosx/Info.plist" "../packaging/$(APP_NAME).app/Contents/"
+	cp ./midipatch "../packaging/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)"
+	../third/macdylibbundler/dylibbundler -od -b -x "../packaging/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)" -d "../packaging/$(APP_NAME).app/Contents/libs/"
+	
 ${TARGET}: ../html/index.o ../third/RtMidi/RtMidi.o ../third/RtAudio/RtAudio.o ../third/miby/miby.o ${OBJS}
 	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS} 
 
