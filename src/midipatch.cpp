@@ -38,6 +38,7 @@ patchscript::PatchScript* pscript = nullptr;
 midipatch::Websocket* websocket = nullptr;
 
 char specialChars[10] = {'-', '_', '.', '+', '!', '(', ')'};
+
 bool isValidSessionName(const string& n) {
 	if(n.empty() || n.size() > 255)
 		return false;
@@ -54,7 +55,7 @@ bool isValidSessionName(const string& n) {
 				}
 			}
 			if(found)
-				break;
+				continue;
 		}
 		return false;
 	}
@@ -459,6 +460,27 @@ int main(int argc, char ** argv) {
 								ss << ",";
 						}
 						ss << "]}";
+						return ss.str();
+					});
+
+					websocket->setSendStatusReportCallback([&]() {
+						std::ostringstream ss;
+						ss << "{ \"type\": \"status-report\", \"midiports\": [";
+						for(size_t i = 0; i < midiIndex.size(); ++i) {
+							const auto& index = midiIndex[i];
+							const auto& midiPort = midiIn[i];
+							ss << "{ \"index\": " << index
+									<< ", \"open\": " << midiPort->isPortOpen()
+									<< "}";
+							if(i < midiIndex.size() - 1)
+								ss << ",";
+						}
+
+						ss << "], \"audioport\": "
+									<< "{ \"index\": " << audioIndex
+									<< ", \"open\": " << dac.isStreamOpen()
+									<< "}";
+						ss << "}";
 						return ss.str();
 					});
 

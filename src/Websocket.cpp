@@ -260,6 +260,14 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 								client->send(list, uWS::TEXT);
 							}
 						}
+
+						if(sendStatusReportCallback_) {
+							string report = sendStatusReportCallback_();
+							for (auto& client : clients_) {
+								client->send(report, uWS::TEXT);
+							}
+						}
+
 						sendLogRecord("Connected", "", L_INFO, false, false);
 					},
 					.message = [&](auto *ws, std::string_view message, uWS::OpCode opCode) {

@@ -83,6 +83,17 @@ class MidiPatch {
             } else if (obj.type == "display") {
             } else if (obj.type == "control-list") {
                 rack.updateControlList(obj);
+            } else if (obj.type == "status-report") {
+                var msg = "";
+                
+                for(var i = 0; i < obj.midiports.length; ++i) {
+                    msg += "MIDI port: " + obj.midiports[i].index + " (" + (obj.midiports[i].open ? "open)" : "closed)") + ", ";
+                }
+
+                msg += "Audio port: " + obj.audioport.index + " (" + (obj.audioport.open ? "open)" : "closed)") + "\n";
+
+                var logObj = { "type": "update-log", "title": "Status report", "msg": msg, "severity": 3, "highlight": false };
+                log.update(logObj);
             }
         };
 
