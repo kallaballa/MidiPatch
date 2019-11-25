@@ -3,7 +3,15 @@ APP_NAME=MidiPatch
 
 INLINEROPTS = -m -n
 
-ifeq ($(UNAME_S), Darwin)
+
+ifeq ($(MACHINE), x86_64)
+  LIBDIR = lib64
+endif
+ifeq ($(MACHINE), i686)
+  LIBDIR = lib
+endif
+
+q ($(UNAME_S), Darwin)
  CUSTOM_DEFS = -Wno-register
  AUDIO_BACKEND=-D__MACOSX_CORE__
  MIDI_BACKEND=-D__MACOSX_CORE__ 
@@ -36,7 +44,7 @@ endif
 
 SRCS  := midipatch.cpp Websocket.cpp logger.cpp
 CXXFLAGS += -I/usr/lib64/ -I../third/uSockets-0.3.2/src/ -I../third/uWebSockets-0.16.1/src -I../PatchScript/src/ -I../PatchScript/third/SQLiteCPP -I../PatchScript/third/kaguya/include -I../PatchScript/third/lua-5.3.5/src -I../PatchScript/third/Tonic/src -I../third/cxxopts-2.2.0/include -I../third/nlohmann-json-3.7.0/ -I../third/miby -I../third/RtMidi -I../third/RtAudio -I../third/ ${CUSTOM_DEFS}
-LIBS += -ltonic -llua -ldl -llilv-0 -luSockets -lsqlite3 -lz -lpatchscript 
+LIBS += -ltonic -llua -ldl -luSockets -lsqlite3 -lz -lpatchscript 
 LDFLAGS += -L../PatchScript/third/lua-5.3.5/src -L../PatchScript/third/Tonic/src -L../third/uSockets-0.3.2/ -L../PatchScript/src/
 ASSET_DIRS = $(shell find ../html/ -type d -not -name ".." -not -name "html")
 ASSET_FILES = $(shell find ../html/ -type f -not -name index.o -not -name index.min.pack)
@@ -91,8 +99,8 @@ ${TARGET}: ../html/index.o ../third/RtMidi/RtMidi.o ../third/RtAudio/RtAudio.o .
 ../html/index.o: ../html/index.min.pack
 	cd ../html; ${PACK_CMD}
 
-../html/index.min.pack: $(ASSET_DIRS) $(ASSET_FILES)
-	cd ../html; inliner ${INLINEROPTS} index.html > index.min.pack
+#../html/index.min.pack: $(ASSET_DIRS) $(ASSET_FILES)
+#	cd ../html; inliner ${INLINEROPTS} index.html > index.min.pack
 
 ${OBJS}: %.o: %.cpp %.dep ${GCH}
 	${CXX} ${CXXFLAGS} -o $@ -c $< 
@@ -114,12 +122,15 @@ install:
 
 uninstall:
 	rm ${DESTDIR}/${PREFIX}/bin/${TARGET}
-	rm ${DESTDIR}/${PREFIX}/lib/libpatchscript.so
-	rm ${DESTDIR}/${PREFIX}/lib/libuSockets.a
-	rm ${DESTDIR}/${PREFIX}/lib/libtonic.so
-	rm ${DESTDIR}/${PREFIX}/lib/liblua.a
+	rm ${DESTDIR}/${PREFIX}/${LIBDIR}/libpatchscript.so
+	rm ${DESTDIR}/${PREFIX}/${LIBDIR}/libuSockets.a
+	rm ${DESTDIR}/${PREFIX}/${LIBDIR}/libtonic.so
+	rm ${DESTDIR}/${PREFIX}/${LIBDIR}/liblua.a
 
 clean:
-	rm -f *~ ${DEPS} ${OBJS} ${GCH} ${TARGET} ../html/index.o ../html/index.min.pack ../third/RtMidi/RtMidi.o ../third/RtAudio/RtAudio.o ../third/miby/miby.o
+	rm -f *~ ${DEPS} ${OBJS} ${GCH} ${TARGET} ../html/index.o ../third/RtMidi/RtMidi.o ../third/RtAudio/RtAudio.o ../third/miby/miby.o
 
 distclean: clean
+
+
+
