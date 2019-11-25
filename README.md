@@ -1,4 +1,5 @@
-![](https://github.com/kallaballa/MidiPatch/workflows/.github/workflows/ccpp.yml/badge.svg)
+![](https://github.com/kallaballa/MidiPatch/workflows/C%2FC%2B%2B%20CI/badge.svg)
+
 
 Join the discussion! https://discord.gg/5Ca7vc5
 
