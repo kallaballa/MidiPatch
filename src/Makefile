@@ -3,7 +3,15 @@ APP_NAME=MidiPatch
 
 INLINEROPTS = -m -n
 
-ifeq ($(UNAME_S), Darwin)
+
+ifeq ($(MACHINE), x86_64)
+  LIBDIR = lib64
+endif
+ifeq ($(MACHINE), i686)
+  LIBDIR = lib
+endif
+
+q ($(UNAME_S), Darwin)
  CUSTOM_DEFS = -Wno-register
  AUDIO_BACKEND=-D__MACOSX_CORE__
  MIDI_BACKEND=-D__MACOSX_CORE__ 
@@ -114,10 +122,10 @@ install:
 
 uninstall:
 	rm ${DESTDIR}/${PREFIX}/bin/${TARGET}
-	rm ${DESTDIR}/${PREFIX}/lib/libpatchscript.so
-	rm ${DESTDIR}/${PREFIX}/lib/libuSockets.a
-	rm ${DESTDIR}/${PREFIX}/lib/libtonic.so
-	rm ${DESTDIR}/${PREFIX}/lib/liblua.a
+	rm ${DESTDIR}/${PREFIX}/${LIBDIR}/libpatchscript.so
+	rm ${DESTDIR}/${PREFIX}/${LIBDIR}/libuSockets.a
+	rm ${DESTDIR}/${PREFIX}/${LIBDIR}/libtonic.so
+	rm ${DESTDIR}/${PREFIX}/${LIBDIR}/liblua.a
 
 clean:
 	rm -f *~ ${DEPS} ${OBJS} ${GCH} ${TARGET} ../html/index.o ../third/RtMidi/RtMidi.o ../third/RtAudio/RtAudio.o ../third/miby/miby.o
