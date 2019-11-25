@@ -1,0 +1,12 @@
+Source: midipatch
+Section: misc
+Priority: optional
+Maintainer: Amir Hassan <amir@viel-zu.org>
+Build-Depends: debhelper (>= 7.0.50~)
+Standards-Version: 3.8.4
+Homepage: http://github.com/kallaballa/MidiPatch
+
+Package: midipatch
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},  ${dist:Depends}, 
+Description: MidiPatch is a scriptable modular MIDI-synthesizer
