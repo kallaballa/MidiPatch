@@ -11,7 +11,7 @@ ifeq ($(MACHINE), i686)
   LIBDIR = lib
 endif
 
-q ($(UNAME_S), Darwin)
+ifeq ($(UNAME_S), Darwin)
  CUSTOM_DEFS = -Wno-register
  AUDIO_BACKEND=-D__MACOSX_CORE__
  MIDI_BACKEND=-D__MACOSX_CORE__ 
