@@ -99,8 +99,8 @@ ${TARGET}: ../html/index.o ../third/RtMidi/RtMidi.o ../third/RtAudio/RtAudio.o .
 ../html/index.o: ../html/index.min.pack
 	cd ../html; ${PACK_CMD}
 
-#../html/index.min.pack: $(ASSET_DIRS) $(ASSET_FILES)
-#	cd ../html; inliner ${INLINEROPTS} index.html > index.min.pack
+../html/index.min.pack: $(ASSET_DIRS) $(ASSET_FILES)
+	cd ../html; inliner ${INLINEROPTS} index.html > index.min.pack
 
 ${OBJS}: %.o: %.cpp %.dep ${GCH}
 	${CXX} ${CXXFLAGS} -o $@ -c $< 
