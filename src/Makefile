@@ -106,14 +106,20 @@ ${GCH}: %.gch: ${HEADERS}
 install:
 	mkdir -p ${DESTDIR}/${PREFIX}/bin
 	cp ${TARGET} ${DESTDIR}/${PREFIX}/bin
+	mkdir -p ${DESTDIR}/${PREFIX}/lib
+	cp ../PatchScript/src/libpatchscript.so ${DESTDIR}/${PREFIX}/lib
+	cp ../third/uSockets-0.3.2/libuSockets.a ${DESTDIR}/${PREFIX}/lib
+	cp ../PatchScript/third/Tonic/src/libtonic.so ${DESTDIR}/${PREFIX}/lib
+	cp ../PatchScript/third/lua-5.3.5/src/liblua.a ${DESTDIR}/${PREFIX}/lib
 
 uninstall:
 	rm ${DESTDIR}/${PREFIX}/bin/${TARGET}
+	rm ${DESTDIR}/${PREFIX}/lib/libpatchscript.so
+	rm ${DESTDIR}/${PREFIX}/lib/libuSockets.a
+	rm ${DESTDIR}/${PREFIX}/lib/libtonic.so
+	rm ${DESTDIR}/${PREFIX}/lib/liblua.a
 
 clean:
 	rm -f *~ ${DEPS} ${OBJS} ${GCH} ${TARGET} ../html/index.o ../html/index.min.pack ../third/RtMidi/RtMidi.o ../third/RtAudio/RtAudio.o ../third/miby/miby.o
 
 distclean: clean
-
-
-
