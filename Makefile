@@ -6,16 +6,15 @@ ifeq ($(UNAME_S), Darwin)
 endif
 
 ifeq (, $(shell which g++-9))
- CXX := g++-8
+  CXX := g++-8
+  ifeq (, $(shell which g++-8))
+    CXX := g++-7
+    ifeq (, $(shell which g++-7))
+      CXX := g++
+    endif
+  endif
 endif
 
-ifeq (, $(shell which g++-8))
- CXX := g++-7
-endif
-
-ifeq (, $(shell which g++-7))
- CXX := g++
-endif
 
 CXXFLAGS := -pthread -fno-strict-aliasing -std=c++17 -pedantic -Wall -DMIBY_USER_CONFIG=\"midipatch_miby_config.h\"
 LIBS     := -lpthread -lm 
