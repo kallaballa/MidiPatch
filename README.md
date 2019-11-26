@@ -142,6 +142,23 @@ make -j2
 sudo make install
 ```
 
+# Instructions for Manjaro (Arch Linux):
+
+```shell
+
+# install dependencies
+sudo pacman -S sqlite zlib alsa-lib lilv npm make libpulse git gcc lv2
+sudo npm install -g inliner
+
+# clone and build
+git clone http://github.com/kallaballa/MidiPatch.git
+cd MidiPatch/
+git submodule update --init --recursive
+./build_third.sh -j2
+PULSE=1 make -j2
+
+```
+
 # Instructions for Mac OS X Mojave
 
 ```shell
