@@ -1,14 +1,12 @@
 UNAME_S := $(shell uname -s)
+MACHINE := $(shell uname -m)
+
+LIBDIR=lib64
 APP_NAME=MidiPatch
+INLINEROPTS= -m -n
 
-INLINEROPTS = -m -n
-
-
-ifeq ($(MACHINE), x86_64)
-  LIBDIR = lib64
-endif
-ifeq ($(MACHINE), i686)
-  LIBDIR = lib
+ifneq ($(MACHINE), x86_64)
+ LIBDIR = lib
 endif
 
 ifeq ($(UNAME_S), Darwin)
@@ -114,18 +112,14 @@ ${GCH}: %.gch: ${HEADERS}
 install:
 	mkdir -p ${DESTDIR}/${PREFIX}/bin
 	cp ${TARGET} ${DESTDIR}/${PREFIX}/bin
-	mkdir -p ${DESTDIR}/${PREFIX}/lib
-	cp ../PatchScript/src/libpatchscript.so ${DESTDIR}/${PREFIX}/lib
-	cp ../third/uSockets-0.3.2/libuSockets.a ${DESTDIR}/${PREFIX}/lib
-	cp ../PatchScript/third/Tonic/src/libtonic.so ${DESTDIR}/${PREFIX}/lib
-	cp ../PatchScript/third/lua-5.3.5/src/liblua.a ${DESTDIR}/${PREFIX}/lib
+	mkdir -p ${DESTDIR}/${PREFIX}/${LIBDIR}
+	cp ../PatchScript/src/libpatchscript.so ${DESTDIR}/${PREFIX}/${LIBDIR}
+	cp ../PatchScript/third/Tonic/src/libtonic.so ${DESTDIR}/${PREFIX}/${LIBDIR}
 
 uninstall:
 	rm ${DESTDIR}/${PREFIX}/bin/${TARGET}
 	rm ${DESTDIR}/${PREFIX}/${LIBDIR}/libpatchscript.so
-	rm ${DESTDIR}/${PREFIX}/${LIBDIR}/libuSockets.a
 	rm ${DESTDIR}/${PREFIX}/${LIBDIR}/libtonic.so
-	rm ${DESTDIR}/${PREFIX}/${LIBDIR}/liblua.a
 
 clean:
 	rm -f *~ ${DEPS} ${OBJS} ${GCH} ${TARGET} ../html/index.o ../third/RtMidi/RtMidi.o ../third/RtAudio/RtAudio.o ../third/miby/miby.o
