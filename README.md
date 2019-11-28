@@ -1,9 +1,9 @@
 ![](https://github.com/kallaballa/MidiPatch/workflows/C%2FC%2B%2B%20CI/badge.svg)
 
-
 Join the discussion! https://discord.gg/5Ca7vc5
 
-MidiPatch is a scriptable modular MIDI-synthesizer. The scripting is done in [lua](https://www.lua.org) and it basically exposes [Tonic](https://github.com/TonicAudio/Tonic) as literal as possible to the scripts. Additionally to the MIDI interface, there is a web interface with live editor, a visual rack generated from the code, an oscilloscope and more. The web app is compiled into and directly served by MidiPatch. To connect to it visit http://127.0.0.1:8080/index.html
+MidiPatch is a novel kind of a scriptable modular software synthesizer. What makes it so different is that it doesn’t provide a single synthesizer model to make music with. Instead it provides a synthesizer engine that can create all kinds of synthesizers and sounds in the world. A synthesizer model can be created by using a very simple, yet powerful, scripting language: PatchScript. But a scriptable synthesizer is hardly a novelty – What makes it so different is how you script synthesizers. Instead of doing live coding (= directly shaping the signal) you declare a synthesizer by combining modules with a building block system.
+It provides the artist with an intergrate development environment (IDE) aiding in the creation of synthesizer models. At the moment the IDE features a code editor, a rack generated from the code, a patch library, a spectrograph, an oscilloscope and a virtual piano. 
 
 ![Screenshot of the web interface](https://github.com/kallaballa/MidiPatch/raw/master/doc/screen.png "Screenshot of the web interface")
 
