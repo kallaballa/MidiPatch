@@ -272,70 +272,80 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 					},
 					.message = [&](auto *ws, std::string_view message, uWS::OpCode opCode) {
 						if(restart_)
-							return;
-						json msg = json::parse(std::string(message));
-						std::string type = msg["type"];
-						if(type == "set-control") {
-							string name = msg["name"];
-							float value = msg["value"].get<float>();
-							if(setControlCallback_)
+						return;
+						try {
+							json msg = json::parse(std::string(message));
+
+							std::string type = msg["type"];
+							if(type == "set-control") {
+								string name = msg["name"];
+								float value = msg["value"].get<float>();
+								if(setControlCallback_)
 								setControlCallback_(name,value);
-						} else if(type == "note-on") {
-							off_t note = msg["note"].get<off_t>();
-							off_t velocity = msg["velocity"].get<off_t>();
-							if(noteOnCallback_)
+							} else if(type == "note-on") {
+								off_t note = msg["note"].get<off_t>();
+								off_t velocity = msg["velocity"].get<off_t>();
+								if(noteOnCallback_)
 								noteOnCallback_(note,velocity);
-						} else if(type == "note-off") {
-							off_t note = msg["note"].get<off_t>();
-							if(noteOffCallback_)
+							} else if(type == "note-off") {
+								off_t note = msg["note"].get<off_t>();
+								if(noteOffCallback_)
 								noteOffCallback_(note);
-						} else if(type == "clear-all-notes") {
-							if(clearAllNotesCallback_)
+							} else if(type == "clear-all-notes") {
+								if(clearAllNotesCallback_)
 								clearAllNotesCallback_();
-						} else if(type == "audio-stream-enabled") {
-							audioStreamEnabled_ = msg["data"].get<bool>();
-						} else if(type == "restart") {
-							restart_ = true;
-						} else if(type == "update-patch") {
-							patchscript::SessionObject so;
-							so.name_ = msg["name"];
-							so.author_ = msg["author"];
-							so.runtimeName_ = msg["runtimeName"];
-							so.runtimeVersion_ = msg["runtimeVersion"];
-							so.description_ = msg["description"];
-							so.date_ = msg["date"];
-							so.code_ = msg["code"];
-							if(!msg["layout"].is_null())
+							} else if(type == "audio-stream-enabled") {
+								audioStreamEnabled_ = msg["data"].get<bool>();
+							} else if(type == "restart") {
+								restart_ = true;
+							} else if(type == "update-patch") {
+								patchscript::SessionObject so;
+								so.name_ = msg["name"];
+								so.author_ = msg["author"];
+								so.runtimeName_ = msg["runtimeName"];
+								so.runtimeVersion_ = msg["runtimeVersion"];
+								so.description_ = msg["description"];
+								so.date_ = msg["date"];
+								so.code_ = msg["code"];
+								if(!msg["layout"].is_null())
 								so.layout_ = msg["layout"];
-							if(!msg["parameters"].is_null())
+								if(!msg["parameters"].is_null())
 								so.parameters_ = msg["parameters"];
-							if(!msg["keyboardBindings"].is_null())
+								if(!msg["keyboardBindings"].is_null())
 								so.keyboardBindings_ = msg["keyboardBindings"];
-							if(!msg["midiBindings"].is_null())
+								if(!msg["midiBindings"].is_null())
 								so.midiBindings_ = msg["midiBindings"];
 
-							if(updateSessionCallback_)
+								if(updateSessionCallback_)
 								updateSessionCallback_(so);
-						} else if(type == "delete-patch") {
-							patchscript::SessionObject so;
-							so.name_ = msg["name"];
-							so.author_ = msg["author"];
-							so.runtimeName_ = msg["runtimeName"];
-							so.runtimeVersion_ = msg["runtimeVersion"];
-							so.description_ = msg["description"];
-							so.date_ = msg["date"];
-							so.code_ = msg["code"];
-							if(!msg["layout"].is_null())
+							} else if(type == "delete-patch") {
+								patchscript::SessionObject so;
+								so.name_ = msg["name"];
+								so.author_ = msg["author"];
+								so.runtimeName_ = msg["runtimeName"];
+								so.runtimeVersion_ = msg["runtimeVersion"];
+								so.description_ = msg["description"];
+								so.date_ = msg["date"];
+								so.code_ = msg["code"];
+								if(!msg["layout"].is_null())
 								so.layout_ = msg["layout"];
-							if(!msg["parameters"].is_null())
+								if(!msg["parameters"].is_null())
 								so.parameters_ = msg["parameters"];
-							if(!msg["keyboardBindings"].is_null())
+								if(!msg["keyboardBindings"].is_null())
 								so.keyboardBindings_ = msg["keyboardBindings"];
-							if(!msg["midiBindings"].is_null())
+								if(!msg["midiBindings"].is_null())
 								so.midiBindings_ = msg["midiBindings"];
 
-							if(deleteSessionCallback_)
+								if(deleteSessionCallback_)
 								deleteSessionCallback_(so);
+							}
+
+						} catch (json::exception& ex) {
+							if(messageParsingErrorCallback_)
+								messageParsingErrorCallback_(ex.what(), std::string(message));
+						} catch (std::exception& ex) {
+							if(messageParsingErrorCallback_)
+								messageParsingErrorCallback_("General exception", std::string(message));
 						}
 					},
 					.drain = [](auto *ws) {

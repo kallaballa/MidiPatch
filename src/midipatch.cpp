@@ -294,9 +294,12 @@ int main(int argc, char ** argv) {
 	midipatch::Logger::init(midipatch::L_DEBUG, logFile);
 
 	pscript = new patchscript::PatchScript(sampleRate);
-	if (port > 0)
+	if (port > 0) {
 		websocket = new midipatch::Websocket(port, patchFile);
-
+		websocket->setMessageParsingErrorCallback([&](string type, string msg) {
+			log_error("Message parsing error", type + "(" + msg + ")");
+		});
+	}
 	pscript->setErrorHandler([](int status, const char* msg) {
 		switch (status) {
 			case LUA_ERRSYNTAX:

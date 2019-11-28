@@ -38,6 +38,7 @@ class Websocket {
 	std::function<string()> sendConfigCallback_;
 	std::function<string()> sendSessionListCallback_;
 	std::function<string()> sendStatusReportCallback_;
+	std::function<void(string,string)> messageParsingErrorCallback_;
 	std::function<void(const patchscript::SessionObject&)> updateSessionCallback_;
 	std::function<void(const patchscript::SessionObject&)> deleteSessionCallback_;
 
@@ -83,6 +84,10 @@ public:
 
 	void setSendConfigCallback(std::function<string()> callback) {
 		sendConfigCallback_ = callback;
+	}
+
+	void setMessageParsingErrorCallback(std::function<void(string,string)> callback) {
+		messageParsingErrorCallback_ = callback;
 	}
 
 	void clear();
