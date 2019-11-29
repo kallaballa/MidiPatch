@@ -129,7 +129,7 @@ class MidiPatch {
         if(expCode)
         code = editor.getValue();
         if(expParameters)
-        parameters = JSON.stringify(getControlParameters());
+        parameters = JSON.stringify(this.getControlParameters());
         if(expLayout)
         layout = JSON.stringify(myLayout.toConfig());
         var obj = {
