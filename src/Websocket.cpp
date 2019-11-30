@@ -274,6 +274,7 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 						if(restart_)
 						return;
 						try {
+							LOG_DEBUG_MSG("Message received", message);
 							json msg = json::parse(std::string(message));
 
 							std::string type = msg["type"];
@@ -298,7 +299,7 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 								audioStreamEnabled_ = msg["data"].get<bool>();
 							} else if(type == "restart") {
 								restart_ = true;
-							} else if(type == "update-patch") {
+							} else if(type == "update-session") {
 								patchscript::SessionObject so;
 								so.name_ = msg["name"];
 								so.author_ = msg["author"];
@@ -317,8 +318,8 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 								so.midiBindings_ = msg["midiBindings"];
 
 								if(updateSessionCallback_)
-								updateSessionCallback_(so);
-							} else if(type == "delete-patch") {
+									updateSessionCallback_(so);
+							} else if(type == "delete-session") {
 								patchscript::SessionObject so;
 								so.name_ = msg["name"];
 								so.author_ = msg["author"];
@@ -337,7 +338,7 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 								so.midiBindings_ = msg["midiBindings"];
 
 								if(deleteSessionCallback_)
-								deleteSessionCallback_(so);
+									deleteSessionCallback_(so);
 							}
 
 						} catch (json::exception& ex) {

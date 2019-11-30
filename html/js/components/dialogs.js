@@ -31,6 +31,9 @@ class MPDialogs {
                 <input class="ui-widget"  type="checkbox" id="importparameters"/><label for="importparameters">Import parameters</label><br/>
                 <input class="ui-widget" type="checkbox" id="importlayout"/><label for="importlayout">Import layout</label>
             </div>
+            <div id="deletefromlibrary" title="Delete session from library">
+                <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Do you really want to delete all revisions of this session?</p>
+            </div>
             <div id="controlparametersmatch" title="Control parameters match exactly.">
                 <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>The patch you are importing has exactly the same control parameters like your current patch.<br/>What do you want to do?</p>
             </div>

@@ -135,7 +135,7 @@ class MidiPatch {
         if(expLayout)
         layout = JSON.stringify(myLayout.toConfig());
         var obj = {
-            "type": "update-patch",
+            "type": "update-session",
             "name": name,
             "author": author,
             "runtimeName": "midipatch",
@@ -153,7 +153,7 @@ class MidiPatch {
 
     deleteFromLibrary(name,author) {
         var obj = {
-            "type": "delete-patch",
+            "type": "delete-session",
             "name": name,
             "author": author,
             "runtimeName": "",
