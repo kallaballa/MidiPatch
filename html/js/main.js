@@ -110,6 +110,8 @@ class MidiPatch {
         var obj = {
             "type": "restart"
         };
+        if(piano)
+            piano.resetKeys();
         socket.send(JSON.stringify(obj));
     }
     
@@ -216,6 +218,8 @@ class MidiPatch {
         var obj = {
             "type": "clear-all-notes"
         };
+        if(piano)
+            piano.resetKeys();
         socket.send(JSON.stringify(obj));
     }
     

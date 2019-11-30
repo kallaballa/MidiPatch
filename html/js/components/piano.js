@@ -176,4 +176,10 @@ class MPPiano {
         }
         }));        
     }
+    
+    resetKeys() {
+        $(".key").each(function( index ) {
+           $(this).removeClass('playing');    
+        });
+    }
 }
