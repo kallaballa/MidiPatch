@@ -1,3 +1,6 @@
+ifeq (, $(shell which inliner))
+ $(error "No inliner found, consider doing 'npm install -g inliner'")
+endif
 
 UNAME_S := $(shell uname -s)
 
