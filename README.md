@@ -1,13 +1,17 @@
+__Note:__ Development is very active and i don't have time to update the packages regularily. It is recommended that you build MidiPatch yourself.
+
+
 ![](https://github.com/kallaballa/MidiPatch/workflows/C%2FC%2B%2B%20CI/badge.svg)
 
 Join the discussion! https://discord.gg/5Ca7vc5
 
-MidiPatch is a novel kind of a scriptable modular software synthesizer. What makes it so different is that it doesn’t provide a single synthesizer model to make music with. Instead it provides a synthesizer engine that can create all kinds of synthesizers and sounds in the world. A synthesizer model can be created by using a very simple, yet powerful, scripting language: PatchScript. But a scriptable synthesizer is hardly a novelty – What makes it so different is how you script synthesizers. Instead of doing live coding (= directly shaping the signal) you declare a synthesizer by combining modules with a building block system.
+# MidiPatch is a novel kind of synthesizer. 
+What makes it so different is that it doesn’t provide a single synthesizer model to make music with. Instead it provides a synthesizer engine that can create all kinds of synthesizers and sounds in the world. A synthesizer model can be created by using a very simple, yet powerful, scripting language: PatchScript. But a scriptable synthesizer is hardly a novelty – What makes it so different is how you script synthesizers. Instead of doing live coding (= directly shaping the signal) you declare a synthesizer by combining modules with a building block system.
 It provides the artist with an intergrate development environment (IDE) aiding in the creation of synthesizer models. At the moment the IDE features a code editor, a rack generated from the code, a patch library, a spectrograph, an oscilloscope and a virtual piano. 
 
 ![Screenshot of the web interface](https://github.com/kallaballa/MidiPatch/raw/master/doc/screen.png "Screenshot of the web interface")
 
-# Usage
+## Usage
 
     A scriptable, modular and real-time MIDI synthesizer
     Usage:
@@ -30,11 +34,11 @@ For example to create a midi synthesizer with 16 voices, running the patch "bank
 ```shell
 midipatch -o 52 -m 1 -a 0 2 -v 16 -w 8080 -p bank.lua
  ```
-# Example patch
+## Example patch
 
 The following code shows how to generate a sine wave from MIDI events. Every parameter added with "addParameter" will be audomatically exposed to the web and midi interface except those starting with '_' (those are private). It  closely resembles the Tonic C++ API. See the "examples" folder for more advanced usage.
 
-## Short version
+### Short version
 ```lua
 
 local noteNum = synth:addParameter("_polyNote", 0.0)
@@ -51,7 +55,7 @@ synth:setOutputGen(
 );
 ```
 
-## Long version
+### Long version
 ```lua
 --[[
 The MIDI note parameters send by the engine. Note that they
@@ -115,11 +119,11 @@ Assign the generator "signal" to the synth.
 synth:setOutputGen(signal);
 ```
 
-# Build
+## Build
 
 At the moment only Linux and Mac OS X are supported. It has been shown to work on OpenSuse 15.0, Ubuntu Xenial and Mac OS X.
 
-# Instructions for Ubunto Xenial (tested on a fresh server image):
+## Instructions for Ubunto Xenial (tested on a fresh server image):
 
 ```shell
 # add toolchain repo
@@ -142,7 +146,7 @@ make -j2
 sudo make install
 ```
 
-# Instructions for Manjaro (Arch Linux):
+## Instructions for Manjaro (Arch Linux):
 
 ```shell
 
@@ -159,7 +163,7 @@ PULSE=1 make -j2
 
 ```
 
-# Instructions for Mac OS X Mojave
+## Instructions for Mac OS X Mojave
 
 ```shell
 # install/upgrade clang, we need C++17 support
@@ -186,22 +190,22 @@ make
 sudo make install
 ```
 
-# Building with other Linux audio backends then ALSA
+## Building with other Linux audio backends then ALSA
 
 If you want use pulseaudio or jack you can do that by prepending a variable to the make command
 
-## Building with pulse support:
+### Building with pulse support:
 ```shell
 PULSE=1 make
 ```
-## Building with jack support:
+### Building with jack support:
 ```shell
 JACK=1 make
 ```
-# Cross-compiling
+## Cross-compiling
 The makefile supports the sysroot flag. 
 
-## Example
+### Example
 ```shell
 SYSROOT=/arm-linux-sysroot/ make CXX=arm-suse-linux-gnueabi-g++-7 LD=arm-suse-linux-gnueabi-ld
 ```
