@@ -344,7 +344,6 @@ int main(int argc, char ** argv) {
 			auto initSuccess = pscript->init(patchFile, numVoices);
 			if (!initSuccess.first) {
 				log_error(initSuccess.second);
-				exit(PATCH_SCRIPT_ERROR);
 			}
 
 			if (websocket) {
@@ -360,7 +359,36 @@ int main(int argc, char ** argv) {
 					return ss.str();
 				});
 				websocket->sendConfig();
+
+				websocket->setSendSessionListCallback([&]() {
+					std::vector<patchscript::SessionObject> list;
+					pscript->list(list);
+					std::ostringstream ss;
+					ss << "{ \"type\": \"patch-list\", \"list\": [";
+					for(size_t i = 0; i < list.size(); ++i) {
+						const auto& po = list[i];
+						ss << "{ \"name\": \"" << escape_json(po.name_)
+								<< "\", \"author\": \"" << escape_json(po.author_)
+								<< "\", \"revision\": \"" << po.revision_
+								<< "\", \"runtimeName\": \"" << escape_json(po.runtimeName_)
+								<< "\", \"runtimeVersion\": \"" << escape_json(po.runtimeVersion_)
+								<< "\", \"description\": \"" << escape_json(po.description_)
+								<< "\", \"code\": \"" << escape_json(po.code_)
+								<< "\", \"date\": " << po.date_
+								<< ", \"layout\": \"" << escape_json(po.layout_)
+								<< "\", \"parameters\": \"" << escape_json(po.parameters_)
+								<< "\", \"keyboardBindings\": \"" << escape_json(po.keyboardBindings_)
+								<< "\", \"midiBindings\": \"" << escape_json(po.midiBindings_)
+								<< "\"}";
+						if(i < list.size() - 1)
+							ss << ",";
+					}
+					ss << "]}";
+					return ss.str();
+				});
+				websocket->sendSessionList();
 			}
+
 			if(!pscript->getPolySynth()->getVoices().empty()) {
 				if (websocket) {
 					websocket->setSetControlCallback([&](string n, float v) {
@@ -439,33 +467,6 @@ int main(int argc, char ** argv) {
 						return ss.str();
 					});
 
-					websocket->setSendSessionListCallback([&]() {
-						std::vector<patchscript::SessionObject> list;
-						pscript->list(list);
-						std::ostringstream ss;
-						ss << "{ \"type\": \"patch-list\", \"list\": [";
-						for(size_t i = 0; i < list.size(); ++i) {
-							const auto& po = list[i];
-							ss << "{ \"name\": \"" << escape_json(po.name_)
-									<< "\", \"author\": \"" << escape_json(po.author_)
-									<< "\", \"revision\": \"" << po.revision_
-									<< "\", \"runtimeName\": \"" << escape_json(po.runtimeName_)
-									<< "\", \"runtimeVersion\": \"" << escape_json(po.runtimeVersion_)
-									<< "\", \"description\": \"" << escape_json(po.description_)
-									<< "\", \"code\": \"" << escape_json(po.code_)
-									<< "\", \"date\": " << po.date_
-									<< ", \"layout\": \"" << escape_json(po.layout_)
-									<< "\", \"parameters\": \"" << escape_json(po.parameters_)
-									<< "\", \"keyboardBindings\": \"" << escape_json(po.keyboardBindings_)
-									<< "\", \"midiBindings\": \"" << escape_json(po.midiBindings_)
-									<< "\"}";
-							if(i < list.size() - 1)
-								ss << ",";
-						}
-						ss << "]}";
-						return ss.str();
-					});
-
 					websocket->setSendStatusReportCallback([&]() {
 						std::ostringstream ss;
 						ss << "{ \"type\": \"status-report\", \"midiports\": [";
@@ -493,18 +494,18 @@ int main(int argc, char ** argv) {
 							return;
 						}
 						pscript->store(po);
-						websocket->sendPatchList();
+						websocket->sendSessionList();
 					});
 
 					websocket->setDeleteSessionCallback([&](const patchscript::SessionObject& po) {
 						pscript->remove(po);
-						websocket->sendPatchList();
+						websocket->sendSessionList();
 					});
 
 					websocket->reset();
 					websocket->sendConfig();
 					websocket->sendControlList();
-					websocket->sendPatchList();
+					websocket->sendSessionList();
 				}
 				for (size_t i = 0; i < midiIndex.size(); ++i) {
 					try {

@@ -497,7 +497,7 @@ void Websocket::sendControlList() {
 	}
 }
 
-void Websocket::sendPatchList() {
+void Websocket::sendSessionList() {
 	std::scoped_lock lock(mutex_);
 	if(sendSessionListCallback_) {
 		string list = sendSessionListCallback_();

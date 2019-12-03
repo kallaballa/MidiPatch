@@ -112,7 +112,7 @@ public:
 	void sendConfig();
 	void sendLogRecord(const string& title, const string& msg, int severity, bool highlight, bool lock = true);
 	void sendControlList();
-	void sendPatchList();
+	void sendSessionList();
 	size_t hasClients();
 };
 
