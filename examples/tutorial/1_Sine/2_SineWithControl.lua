@@ -7,13 +7,13 @@ with a control parameters.
 The volume parameter. Scales the signal at the very end.
 Control parameters automatically show up in the rack
 ]]--
-local volume = synth:addParameter("Global.Volume", 10).displayName("Volume (%)"):min(0):max(100);
+local volume = synth:addParameter("Global.Volume", 10):displayName("Volume (%)"):min(0):max(100);
 
 --[[
 The frequency parameter which controls the pitch of the 
 tone
 ]]--
-local freq = synth:addParameter("Global.Frequency", 440).displayName("Frequency (Hz)"):min(10):max(10000);
+local freq = synth:addParameter("Global.Frequency", 440):displayName("Frequency (Hz)"):min(10):max(10000);
 
 
 --[[
