@@ -144,7 +144,8 @@ class MPPiano {
 
     prepare() {
         //scroll C5 into view
-        $(".key").get(72).scrollIntoView();
+        if ($( ".key" ).length)
+            $(".key").get(72).scrollIntoView();
     }
     
     bind() {
