@@ -51,8 +51,8 @@ class MPRack {
             for (var j = 0; j < obj.data[i].controls.length; ++j) {
                 if (obj.data[i].controls[j].name.charAt(0) != '_') {
                     $("#" + obj.data[i].name + "\\." + obj.data[i].controls[j].name).knob({
-                        'min': parseInt(obj.data[i].controls[j].min),
-                        'max': parseInt(obj.data[i].controls[j].max),
+                        'min': parseFloat(obj.data[i].controls[j].min),
+                        'max': parseFloat(obj.data[i].controls[j].max),
                         'step': 0.001,
                         'readOnly': false,
                         'stopper': true,
