@@ -172,7 +172,7 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 	};
 
 	std::thread t([&]() {
-		uWS::App().get("/index.html", [&](auto *res, auto *req) {
+		uWS::App().get("/", [&](auto *res, auto *req) {
 					res->writeHeader("Content-Type", "text/html");
 					char* start = &_binary_index_min_pack_start;
 					char* end = &_binary_index_min_pack_end;
@@ -221,7 +221,7 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 						sendLogRecord("Storing patch failed", ex.what(), L_ERROR, false, false);
 					}
 					res->end("");
-				}).ws<PerSocketData>("/*", {
+				}).ws<PerSocketData>("/ws/", {
 					/* Settings */
 					.compression = uWS::DEDICATED_COMPRESSOR,
 					.maxPayloadLength = 16 * 1024,

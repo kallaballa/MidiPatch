@@ -18,7 +18,7 @@ class MidiPatch {
 
     connect() {
         $("#connectionstatus span").html("Connecting");
-        socket = new ReconnectingWebSocket("ws://" + window.location.hostname + ":" + this.port);
+        socket = new ReconnectingWebSocket("ws://" + window.location.hostname + ":" + this.port + "/ws/");
 
         socket.onopen = function(e) {
         $("#connectionstatus span").html("Connected");
