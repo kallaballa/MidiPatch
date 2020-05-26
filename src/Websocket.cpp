@@ -272,7 +272,8 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 					},
 					.message = [&](auto *ws, std::string_view message, uWS::OpCode opCode) {
 						if(restart_)
-						return;
+							return;
+
 						try {
 							LOG_DEBUG_MSG("Message received", message);
 							json msg = json::parse(std::string(message));
