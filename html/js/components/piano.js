@@ -153,8 +153,9 @@ class MPPiano {
         var all = $("*");
         var hold = $("#holdmode");
         var activeKeys = [false, false, false, false, false, false, false, false, false, false, false, false];
-
+        var mappingKeys = ["Z", "S", "X", "D", "C", "V", "G", "B", "H", "N", "J", "M"];
         const keys = Array.from(document.querySelectorAll('.key'));
+
         keys.forEach(key => key.addEventListener('mousedown', function(e) {
             e.preventDefault();
 
@@ -184,39 +185,40 @@ class MPPiano {
         
         all.keydown(function(e) {
             var num = -1;
-
-            if(e.code.length < 2 || e.code.charAt(0) !== 'F' || isNaN(num = parseInt(e.code.substring(1))))
+            if(e.code.length !== 4 || e.code.substring(0,3) !== 'Key' || (num = mappingKeys.findIndex(element => element == e.code.charAt(3))) === -1)
                 return;
             
             e.preventDefault();
                       
-            if(activeKeys[num - 1]) {
+            if(activeKeys[num]) {
                 return;
             } else {
-                activeKeys[num - 1] = true;
+                activeKeys[num] = true;
             }
             
-            var target = keys[ num - 1];
+            var target = keys[num];
             target.classList.add('playing');
-            mp.noteOn(num - 1 + 36, 127);
+            mp.noteOn(num + 36, 127);
         });
         all.keyup(function(e) {
             var num = -1;
-             if(e.code.length < 2 || e.code.charAt(0) !== 'F' || isNaN(num = parseInt(e.code.substring(1))))
+
+            if(e.code.length !== 4 || e.code.substring(0,3) !== 'Key' || (num = mappingKeys.findIndex(element => element == e.code.charAt(3))) === -1)
                 return;
+            
             e.preventDefault();
             
-            if(activeKeys[num - 1]) {
-                activeKeys[num - 1] = false;
+            if(activeKeys[num]) {
+                activeKeys[num] = false;
             } else {
                 return;
             }
             
-            var target = keys[ num - 1];
+            var target = keys[num];
             console.log(target);
             e.preventDefault();
             target.classList.remove('playing');
-            mp.noteOff(num - 1 + 36);
+            mp.noteOff(num + 36);
         
         });
      
