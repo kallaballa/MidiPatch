@@ -55,7 +55,7 @@ namespace midipatch {
     static void registerThread(const string& name);
     static void removeThread();
   };
-
+#ifndef NDEBUG
   #define LOG_GLOBAL_STR(x) LOG(plog::verbose) << x
   #define LOG_DEBUG_STR(x) LOG(plog::debug) << x
   #define LOG_INFO_STR(x) LOG(plog::info) << x
@@ -74,7 +74,26 @@ namespace midipatch {
   #define LOG_WARN(x) LOG(plog::warning) << x
   #define LOG_ERR(x) LOG(plog::error) << "\033[1;31m" << x << "\033[0m"
   #define LOG_FATAL(x) LOG(plog::fatal) << "\033[1;31m" << x << "\033[0m"
-
+#else
+	#define LOG_GLOBAL_STR(x)
+	#define LOG_DEBUG_STR(x)
+	#define LOG_INFO_STR(x)
+	#define LOG_WARN_STR(x)
+	#define LOG_ERR_STR(x) LOG(plog::error) << "\033[1;31m" << x << "\033[0m"
+	#define LOG_FATAL_STR(x) LOG(plog::fatal) << "\033[1;31m" << x << "\033[0m"
+	#define LOG_GLOBAL_MSG(msg,x)
+	#define LOG_DEBUG_MSG(msg,x)
+	#define LOG_INFO_MSG(msg,x)
+	#define LOG_WARN_MSG(msg,x)
+	#define LOG_ERR_MSG(msg,x) LOG(plog::error) << msg << ": " << "\033[1;31m" << x << "\033[0m"
+	#define LOG_FATAL_MSG(msg,x) LOG(plog::fatal) << msg << ": " << "\033[1;31m" << x << "\033[0m"
+	#define LOG_GLOBAL(x)
+	#define LOG_DEBUG(x)
+	#define LOG_INFO(x)
+	#define LOG_WARN(x)
+	#define LOG_ERR(x) LOG(plog::error) << "\033[1;31m" << x << "\033[0m"
+	#define LOG_FATAL(x) LOG(plog::fatal) << "\033[1;31m" << x << "\033[0m"
+#endif
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
