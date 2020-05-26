@@ -150,32 +150,69 @@ class MPPiano {
     
     bind() {
         var mp = this.midipatch;
+        var all = $("*");
+        var hold = $("#holdmode");
+
         const keys = Array.from(document.querySelectorAll('.key'));
         keys.forEach(key => key.addEventListener('mousedown', function(e) {
             e.preventDefault();
 
-        if ($("#holdmode").prop("checked") && e.target.classList.contains("playing")) {
-            e.target.classList.remove('playing');
-            mp.noteOff($(e.target).data("key")); 
-        } else {
-            e.target.classList.add('playing');
-            mp.noteOn($(e.target).data("key"), 127);
-        }
+            if (hold.prop("checked") && e.target.classList.contains("playing")) {
+                e.target.classList.remove('playing');
+                mp.noteOff($(e.target).data("key")); 
+            } else {
+                e.target.classList.add('playing');
+                mp.noteOn($(e.target).data("key"), 127);
+            }
         }));
         keys.forEach(key => key.addEventListener('mouseup', function(e) {
-        if (!$("#holdmode").prop("checked")) {
-            e.preventDefault();
-            e.target.classList.remove('playing');
-            mp.noteOff($(e.target).data("key"));
-        }
+            if (!hold.prop("checked")) {
+                e.preventDefault();
+                e.target.classList.remove('playing');
+                mp.noteOff($(e.target).data("key"));
+            }
         }));
         keys.forEach(key => key.addEventListener('mouseleave', function(e) {
-        if (!$("#holdmode").prop("checked")) {
-            e.preventDefault();
-            e.target.classList.remove('playing');
-            mp.noteOff($(e.target).data("key"));
-        }
-        }));        
+            if (!hold.prop("checked")) {
+                e.preventDefault();
+                e.target.classList.remove('playing');
+                mp.noteOff($(e.target).data("key"));
+            }
+        }));
+
+        
+        all.keydown(function(e) {
+            var num = -1;
+            
+            if(e.code.length < 2 || e.code.charAt(0) !== 'F' || isNaN(num = parseInt(e.code.substring(1))))
+                return;
+                       
+            var target = keys[ num - 1];
+
+            if (hold.prop("checked") && target.classList.has("playing")) {
+                e.preventDefault();
+                target.classList.remove('playing');
+                mp.noteOff(num - 1 + 36);
+            } else {
+                e.preventDefault();
+                target.classList.add('playing');
+                mp.noteOn(num - 1 + 36, 127);
+            }
+        });
+        all.keyup(function(e) {
+            var num = -1;
+             if(e.code.length < 2 || e.code.charAt(0) !== 'F' || isNaN(num = parseInt(e.code.substring(1))))
+                return;
+            
+            var target = keys[ num - 1];
+            
+            if (!hold.prop("checked")) {
+                e.preventDefault();
+                target.classList.remove('playing');
+                mp.noteOff(num - 1 + 36);
+            }
+        });
+     
     }
     
     resetKeys() {

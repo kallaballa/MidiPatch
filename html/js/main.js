@@ -200,6 +200,7 @@ class MidiPatch {
             "note": key,
             "velocity": velocity
         };
+        console.log("SEND TS: " + (Date.now() - 1590494570000));
         socket.send(JSON.stringify(obj));
     }
 
