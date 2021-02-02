@@ -70,6 +70,7 @@ CXXFLAGS += -m32
 LDFLAGS += -L/usr/lib -static-libgcc -m32 -Wl,-Bstatic
 endif 
 
+all: release
 
 ifneq ($(UNAME_S), Darwin)
 release: LDFLAGS += -s
