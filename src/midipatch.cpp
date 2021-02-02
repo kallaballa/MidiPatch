@@ -14,7 +14,7 @@
 #include "RtMidi.h"
 #include "RtError.h"
 #include "lua.h"
-
+#include "webview.h"
 #include "miby.h"
 
 #include "logger.hpp"
@@ -236,7 +236,7 @@ void MIDIPATCH_Program_Change(miby_this_t a_miby) {
 // main entrypoint for MIDI messages
 //
 void mainMIDICallback(double deltatime, vector<unsigned char>* msg, void* userData) {
-	std::scoped_lock lock(midiMutex);
+	std::unique_lock lock(midiMutex);
 	if (websocket && websocket->isRestartRequested())
 		return;
 
@@ -300,6 +300,18 @@ int main(int argc, char ** argv) {
 			log_error("Message parsing error", type + "(" + msg + ")");
 		});
 	}
+
+	std::thread webThread([](){
+		webview::webview w(true, nullptr);
+		w.set_title("MidiPatch");
+		w.set_size(480, 320, WEBVIEW_HINT_NONE);
+		w.navigate("http://localhost:8080");
+		w.run();
+		exit(0);
+	});
+
+	webThread.detach();
+
 	pscript->setErrorHandler([](int status, const char* msg) {
 		switch (status) {
 			case LUA_ERRSYNTAX:
