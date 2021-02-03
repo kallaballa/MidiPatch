@@ -301,17 +301,6 @@ int main(int argc, char ** argv) {
 		});
 	}
 
-	std::thread webThread([](){
-		webview::webview w(true, nullptr);
-		w.set_title("MidiPatch");
-		w.set_size(480, 320, WEBVIEW_HINT_NONE);
-		w.navigate("http://localhost:8080");
-		w.run();
-		exit(0);
-	});
-
-	webThread.detach();
-
 	pscript->setErrorHandler([](int status, const char* msg) {
 		switch (status) {
 			case LUA_ERRSYNTAX:
@@ -341,6 +330,20 @@ int main(int argc, char ** argv) {
 
 	std::vector<RtMidiIn*> midiIn(midiIndex.size(), nullptr);
 	std::vector<miby_t*> miby_State(midiIndex.size());
+
+	std::thread webThread([](){
+#ifdef WEBVIEW_GTK
+    setenv("GTK_OVERLAY_SCROLLING", "0", 1);
+#endif
+		webview::webview w(true, nullptr);
+		w.set_title("MidiPatch");
+		w.set_size(960, 540, WEBVIEW_HINT_NONE);
+		w.navigate("http://localhost:8080");
+		w.run();
+		exit(0);
+	});
+
+	webThread.detach();
 
 	while (true) {
 		RtAudio dac;
