@@ -10,7 +10,6 @@
 
 #include "cxxopts.hpp"
 #include "RtAudio.h"
-#include "RtAudio.h"
 #include "RtMidi.h"
 #include "RtError.h"
 #include "lua.h"
