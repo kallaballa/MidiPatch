@@ -1,4 +1,5 @@
-#include "Websocket.hpp"
+#include "websocket.hpp"
+
 #include "defines.hpp"
 #include <thread>
 #include <mutex>
@@ -53,6 +54,8 @@ std::string escape_json(const std::string &s) {
 using json = nlohmann::json;
 
 namespace midipatch {
+
+Websocket* Websocket::instance_ = nullptr;
 
 static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		"abcdefghijklmnopqrstuvwxyz"

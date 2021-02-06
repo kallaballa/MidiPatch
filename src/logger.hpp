@@ -28,33 +28,9 @@
 #include <mutex>
 #include "plog/Log.h"
 #include "plog/Appenders/ConsoleAppender.h"
+#include "websocket.hpp"
 
 namespace midipatch {
-  using std::string;
-
-  enum LogLevel {
-    L_FATAL = 0,
-    L_ERROR = 1,
-    L_WARNING = 2,
-    L_INFO = 3,
-    L_DEBUG = 4,
-    L_GLOBAL = 5
-  };
-
-  class Logger {
-  private:
-    bool dblog_;
-    Logger(const LogLevel l, const string& logFile);
-    static Logger* instance_;
-  public:
-    LogLevel level_;
-
-    static void init(const LogLevel l, const string& logFile);
-    static Logger& getInstance();
-    static LogLevel getLevel();
-    static void registerThread(const string& name);
-    static void removeThread();
-  };
 #ifndef NDEBUG
   #define LOG_GLOBAL_STR(x) LOG(plog::verbose) << x
   #define LOG_DEBUG_STR(x) LOG(plog::debug) << x
@@ -98,10 +74,82 @@ namespace midipatch {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 #endif
-  #define JANOSH_TRACE(...) if(Logger::isTracing()) Logger::trace(string(__FUNCTION__), ##__VA_ARGS__);
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
+  using std::string;
+
+  enum LogLevel {
+    L_FATAL = 0,
+    L_ERROR = 1,
+    L_WARNING = 2,
+    L_INFO = 3,
+    L_DEBUG = 4,
+    L_GLOBAL = 5
+  };
+
+  class Logger {
+  private:
+    bool dblog_;
+    Logger(const LogLevel l, const string& logFile);
+    static Logger* instance_;
+  public:
+    LogLevel level_;
+
+    static void init(const LogLevel l, const string& logFile);
+    static Logger& getInstance();
+    static LogLevel getLevel();
+    static void registerThread(const string& name);
+    static void removeThread();
+
+
+    void error(const string& title, const string& msg = "") {
+    	if(msg.empty())
+    		LOG_ERR_STR(title);
+    	else
+    		LOG_ERR_MSG(title, msg);
+    	if (Websocket::isInitialized())
+    		Websocket::getInstance()->sendLogRecord(title, msg, (int) midipatch::L_ERROR, false);
+    }
+
+    void warn(const string& title, const string& msg = "") {
+    	if(msg.empty())
+    		LOG_WARN_STR(title);
+    	else
+    		LOG_WARN_MSG(title, msg);
+    	if (Websocket::isInitialized())
+    		Websocket::getInstance()->sendLogRecord(title, msg, (int) midipatch::L_WARNING, false);
+    }
+    void debug(const string& title, const string& msg = "") {
+    	if(msg.empty())
+    		LOG_DEBUG_STR(title);
+    	else
+    		LOG_DEBUG_MSG(title, msg);
+    	if (Websocket::isInitialized())
+    		Websocket::getInstance()->sendLogRecord(title, msg, (int) midipatch::L_DEBUG, false);
+    }
+
+    void info(const string& title, const string& msg = "") {
+    	if(msg.empty())
+    		LOG_INFO_STR(title);
+    	else
+    		LOG_INFO_MSG(title, msg);
+
+    	if (Websocket::isInitialized())
+    		Websocket::getInstance()->sendLogRecord(title, msg, (int) midipatch::L_INFO, false);
+    }
+
+    void syntax_error(const string& title, const string& msg = "") {
+    	if(msg.empty())
+    		LOG_ERR_STR(title);
+    	else
+    		LOG_ERR_MSG(title, msg);
+
+    	if (Websocket::isInitialized())
+    		Websocket::getInstance()->sendLogRecord(title, msg, (int) midipatch::L_ERROR, true);
+    }
+  };
+
 
 }
 

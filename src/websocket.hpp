@@ -41,9 +41,29 @@ class Websocket {
 	std::function<void(string,string)> messageParsingErrorCallback_;
 	std::function<void(const patchscript::SessionObject&)> updateSessionCallback_;
 	std::function<void(const patchscript::SessionObject&)> deleteSessionCallback_;
-
-public:
 	Websocket(size_t port, const string& bankFile);
+
+	static Websocket* instance_;
+public:
+	static void init(size_t port, const string& bankFile) {
+		assert(instance_ == nullptr);
+		instance_ = new Websocket(port, bankFile);
+	}
+
+	static bool isInitialized() {
+		return instance_ != nullptr;
+	}
+
+	static Websocket* getInstance() {
+		return instance_;
+	}
+
+	static void destroy() {
+		assert(instance_ != nullptr);
+		delete instance_;
+		instance_ = nullptr;
+	}
+
 	virtual ~Websocket();
 
 	void setSendControlListCallback(std::function<string()> callback) {
