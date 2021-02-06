@@ -6,6 +6,7 @@ class MPEditor {
     init() {
         this.codeMirror = CodeMirror.fromTextArea(document.getElementById("editor"), {
           lineNumbers: true,
+          lineWrapping: "wrap",
           styleSelectedText: true,
           keyMap: "sublime",
           styleActiveLine: {nonEmpty: true},
