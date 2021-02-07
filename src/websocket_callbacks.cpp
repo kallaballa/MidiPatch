@@ -1,4 +1,5 @@
-#include "callbacks.hpp"
+#include "websocket_callbacks.hpp"
+
 #include "logger.hpp"
 #include "version.hpp"
 
@@ -107,7 +108,7 @@ void setup_websocket_callbacks(patchscript::PatchScript* pscript, std::vector<in
 							float max_;
 							string displayName_;
 						};
-						std::map<string, std::vector<std::pair<string, CP>>> hierachie;
+						std::map<string, std::vector<std::pair<string, CP>>> hierachy;
 						for (size_t i = 0; i < params.size(); ++i) {
 							const string& name = params[i].getName();
 							if (name.empty() || name.at(0) == '_')
@@ -125,13 +126,13 @@ void setup_websocket_callbacks(patchscript::PatchScript* pscript, std::vector<in
 							if (std::find(parents.begin(), parents.end(), parent) == parents.end()) {
 								parents.push_back(parent);
 							}
-							hierachie[parent].push_back( {child, {params[i].getValue(), params[i].getMin(), params[i].getMax(), params[i].getDisplayName()}});
+							hierachy[parent].push_back( {child, {params[i].getValue(), params[i].getMin(), params[i].getMax(), params[i].getDisplayName()}});
 						}
 
 						size_t i = 0;
 						for (const auto& parent : parents) {
 							const string& module = parent;
-							const auto& children = hierachie[parent];
+							const auto& children = hierachy[parent];
 							ss << "{ \"name\": \"" << escape_json(module) << "\", \"controls\": [";
 							size_t j = 0;
 							for (const auto& child : children) {
@@ -146,7 +147,7 @@ void setup_websocket_callbacks(patchscript::PatchScript* pscript, std::vector<in
 								++j;
 							}
 							ss << "]}";
-							if (i < hierachie.size() - 1)
+							if (i < hierachy.size() - 1)
 							ss << ',';
 							++i;
 						}

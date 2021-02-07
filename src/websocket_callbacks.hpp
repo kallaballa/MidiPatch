@@ -1,5 +1,5 @@
-#ifndef SRC_CALLBACKS_HPP_
-#define SRC_CALLBACKS_HPP_
+#ifndef SRC_WEBSOCKET_CALLBACKS_HPP_
+#define SRC_WEBSOCKET_CALLBACKS_HPP_
 
 #include "PatchScript.hpp"
 #include "RtMidi.h"
@@ -12,4 +12,4 @@ void setup_websocket_callbacks(patchscript::PatchScript* pscript, std::vector<in
 
 } /* namespace midipatch */
 
-#endif /* SRC_CALLBACKS_HPP_ */
+#endif /* SRC_WEBSOCKET_CALLBACKS_HPP_ */

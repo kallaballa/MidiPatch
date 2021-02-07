@@ -20,9 +20,9 @@ class MPRack {
             for (var j = 0; j < obj.data[i].controls.length; ++j) {
                 var value;
                 if(oldControlParams)
-                value = oldControlParams[obj.data[i].name + "." + obj.data[i].controls[j].name];
+                    value = oldControlParams[obj.data[i].name + "." + obj.data[i].controls[j].name];
                 else
-                value = obj.data[i].controls[j].value;
+                    value = obj.data[i].controls[j].value;
 
                 if (obj.data[i].controls[j].name.charAt(0) != '_') {
                     var displayName = obj.data[i].controls[j].displayName;
@@ -30,7 +30,7 @@ class MPRack {
                     if(sep > -1 && displayName.length > sep) {
                         displayName = displayName.substring(sep + 1);
                     }
-                    rackDiv += "<div class=\"control-cell\"><label style=\"white-space: nowrap;\" data-name=\"" + obj.data[i].controls[j].name + "\">" + displayName + "</label><br/><input id=\"" + obj.data[i].name + "." + obj.data[i].controls[j].name + "\" class=\"knob\" data-width=\"50\" data-fgColor=\"#000000\" data-height=\"50\" value=\"" + value + "\"></div>";
+                    rackDiv += "<div class=\"control-cell\"><label style=\"white-space: nowrap;\" data-name=\"" + obj.data[i].controls[j].name + "\">" + displayName + "</label><br/><input id=\"" + obj.data[i].name + "." + obj.data[i].controls[j].name + "\" class=\"knob\" data-width=\"50\" data-fgColor=\"#000000\" data-height=\"50\" value=\"" + value + "\" data-min=\"" + obj.data[i].controls[j].min + "\" data-max=\"" + obj.data[i].controls[j].max + "\"></div>";
                 }
             }
             rackDiv += "<div style=\"width: 100%;\"></div></div><br/>";

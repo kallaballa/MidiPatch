@@ -40,7 +40,7 @@ ifdef JAVASCRIPT
 TARGET := midipatch.html
 endif
 
-SRCS  := midipatch.cpp callbacks.cpp websocket.cpp logger.cpp
+SRCS  := midipatch.cpp websocket_callbacks.cpp websocket.cpp logger.cpp pscript_singleton.cpp
 CXXFLAGS += `pkg-config --cflags webkit2gtk-4.0` -I/usr/lib64/ -I../third/webview/ -I../third/uSockets-0.3.2/src/ -I../third/uWebSockets-0.16.1/src -I../PatchScript/src/ -I../PatchScript/third/SQLiteCPP -I../PatchScript/third/kaguya/include -I../PatchScript/third/lua-5.3.5/src -I../PatchScript/third/Tonic/src -I../third/cxxopts-2.2.0/include -I../third/nlohmann-json-3.7.0/ -I../third/miby -I../third/RtMidi -I../third/RtAudio -I../third/ ${CUSTOM_DEFS}
 LIBS += `pkg-config --libs webkit2gtk-4.0` -ltonic -llua -ldl -luSockets -lsqlite3 -lz -lpatchscript 
 LDFLAGS += -L../PatchScript/third/lua-5.3.5/src -L../PatchScript/third/Tonic/src -L../third/uSockets-0.3.2/ -L../PatchScript/src/

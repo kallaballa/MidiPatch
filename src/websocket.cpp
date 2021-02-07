@@ -369,7 +369,6 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 				}).listen(8080, [=](auto *token) {
 					if (token) {
 						socket_ = token;
-						std::cout << "Listening on port " << 8080 << std::endl;
 					}
 				}).run();
 	});

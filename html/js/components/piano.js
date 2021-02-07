@@ -183,44 +183,44 @@ class MPPiano {
         }));
 
         
-        all.keydown(function(e) {
-            var num = -1;
-            if(e.code.length !== 4 || e.code.substring(0,3) !== 'Key' || (num = mappingKeys.findIndex(element => element == e.code.charAt(3))) === -1)
-                return;
-            
-            e.preventDefault();
-                      
-            if(activeKeys[num]) {
-                return;
-            } else {
-                activeKeys[num] = true;
-            }
-            
-            var target = keys[num];
-            target.classList.add('playing');
-            mp.noteOn(num + 36, 127);
-        });
-        all.keyup(function(e) {
-            var num = -1;
-
-            if(e.code.length !== 4 || e.code.substring(0,3) !== 'Key' || (num = mappingKeys.findIndex(element => element == e.code.charAt(3))) === -1)
-                return;
-            
-            e.preventDefault();
-            
-            if(activeKeys[num]) {
-                activeKeys[num] = false;
-            } else {
-                return;
-            }
-            
-            var target = keys[num];
-            console.log(target);
-            e.preventDefault();
-            target.classList.remove('playing');
-            mp.noteOff(num + 36);
-        
-        });
+//         all.keydown(function(e) {
+//             var num = -1;
+//             if(e.code.length !== 4 || e.code.substring(0,3) !== 'Key' || (num = mappingKeys.findIndex(element => element == e.code.charAt(3))) === -1)
+//                 return;
+//             
+//             e.preventDefault();
+//                       
+//             if(activeKeys[num]) {
+//                 return;
+//             } else {
+//                 activeKeys[num] = true;
+//             }
+//             
+//             var target = keys[num];
+//             target.classList.add('playing');
+//             mp.noteOn(num + 36, 127);
+//         });
+//         all.keyup(function(e) {
+//             var num = -1;
+// 
+//             if(e.code.length !== 4 || e.code.substring(0,3) !== 'Key' || (num = mappingKeys.findIndex(element => element == e.code.charAt(3))) === -1)
+//                 return;
+//             
+//             e.preventDefault();
+//             
+//             if(activeKeys[num]) {
+//                 activeKeys[num] = false;
+//             } else {
+//                 return;
+//             }
+//             
+//             var target = keys[num];
+//             console.log(target);
+//             e.preventDefault();
+//             target.classList.remove('playing');
+//             mp.noteOff(num + 36);
+//         
+//         });
      
     }
     

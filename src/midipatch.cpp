@@ -20,7 +20,8 @@
 #include "logger.hpp"
 #include "PatchScript.hpp"
 #include "websocket.hpp"
-#include "callbacks.hpp"
+#include "websocket_callbacks.hpp"
+#include "pscript_singleton.hpp"
 
 using namespace Tonic;
 using namespace midipatch;
@@ -54,16 +55,15 @@ int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFr
 	return 0;
 }
 
-
-// 
+//
 // MIDI Callbacks
 //
 // NOTE: these are brokered through the Miby parser, for which a state is
 // instantiated for all configured MIDI inputs
-// 
+//
 void MIDIPATCH_Control_Change(miby_this_t a_miby) {
-
-	std::cout << "MIDIPATCH_Control_Change C:" << int(MIBY_CHAN(a_miby)) << " CC1: " 
+	PatchScript* pscript = PScriptSingleton::getInstance();
+	std::cout << "MIDIPATCH_Control_Change C:" << int(MIBY_CHAN(a_miby)) << " CC1: "
 				<< int(MIBY_ARG0(a_miby)) << " CC2: " << int(MIBY_ARG1(a_miby)) << std::endl;
 
 	std::vector<string> commonParams;
@@ -125,7 +125,8 @@ void MIDIPATCH_Control_Change(miby_this_t a_miby) {
 }
 
 void MIDIPATCH_Note_On(miby_this_t a_miby) {
-	std::cout << "MIDIPATCH_Note_On C: " << (int)MIBY_CHAN(a_miby) 
+	PatchScript* pscript = PScriptSingleton::getInstance();
+	std::cout << "MIDIPATCH_Note_On C: " << (int)MIBY_CHAN(a_miby)
 				<< " N: " << (int)MIBY_ARG0(a_miby) << " V: " << (int)MIBY_ARG1(a_miby) << std::endl;
 
 	pscript->getPolySynth()->noteOn((uint8_t)MIBY_ARG0(a_miby), (uint8_t)MIBY_ARG1(a_miby));
@@ -135,6 +136,7 @@ void MIDIPATCH_Note_On(miby_this_t a_miby) {
 }
 
 void MIDIPATCH_Note_Off(miby_this_t a_miby) {
+	PatchScript* pscript = PScriptSingleton::getInstance();
 	std::cout << "MIDIPATCH_Note_Off C:" << (int)MIBY_CHAN(a_miby) << std::endl;
 
 	pscript->getPolySynth()->noteOff((int)MIBY_ARG0(a_miby));
@@ -152,7 +154,7 @@ void MIDIPATCH_Stop(miby_this_t a_miby) {
 }
 
 void MIDIPATCH_Program_Change(miby_this_t a_miby) {
-	std::cout << "MIDIPATCH_Program_Change C: " << (int)MIBY_CHAN(a_miby) 
+	std::cout << "MIDIPATCH_Program_Change C: " << (int)MIBY_CHAN(a_miby)
 				<< " P: " << (int)MIBY_ARG0(a_miby) << std::endl;
 
 		current_program = (int)MIBY_ARG0(a_miby);
@@ -172,7 +174,6 @@ void mainMIDICallback(double deltatime, vector<unsigned char>* msg, void* userDa
 		miby_parse((miby_t *)userData, inb);
 	}
 }
-
 
 int main(int argc, char ** argv) {
 	std::string appName = argv[0];
@@ -220,7 +221,9 @@ int main(int argc, char ** argv) {
 	}
 	midipatch::Logger::init(midipatch::L_DEBUG, logFile);
 	Logger& logger = Logger::getInstance();
-	pscript = new patchscript::PatchScript(sampleRate);
+	PScriptSingleton::init(sampleRate);
+	pscript = PScriptSingleton::getInstance();
+
 	Websocket* websocket = nullptr;
 	if (port > 0) {
 		Websocket::init(port, patchFile);

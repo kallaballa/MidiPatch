@@ -35,6 +35,7 @@ class Websocket {
 	std::function<void(size_t)> noteOffCallback_;
 	std::function<void()> clearAllNotesCallback_;
 	std::function<string()> sendControlListCallback_;
+	std::function<string()> sendChannelListCallback_;
 	std::function<string()> sendConfigCallback_;
 	std::function<string()> sendSessionListCallback_;
 	std::function<string()> sendStatusReportCallback_;
@@ -68,6 +69,10 @@ public:
 
 	void setSendControlListCallback(std::function<string()> callback) {
 		sendControlListCallback_ = callback;
+	}
+
+	void setSendChannelListCallback(std::function<string()> callback) {
+		sendChannelListCallback_ = callback;
 	}
 
 	void setSendSessionListCallback(std::function<string()> callback) {
