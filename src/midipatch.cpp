@@ -68,7 +68,7 @@ void MIDIPATCH_Control_Change(miby_this_t a_miby) {
 	std::cout << "MIDIPATCH_Control_Change C:" << int(MIBY_CHAN(a_miby)) << " CC1: "
 				<< int(MIBY_ARG0(a_miby)) << " CC2: " << int(MIBY_ARG1(a_miby)) << std::endl;
 
-	if(current_channel == -1 || MIBY_CHAN(a_miby) != current_channel)
+	if(current_channel != -1 && MIBY_CHAN(a_miby) != current_channel)
 		return;
 	std::vector<string> commonParams;
 
@@ -132,7 +132,7 @@ void MIDIPATCH_Note_On(miby_this_t a_miby) {
 	PatchScript* pscript = PScriptSingleton::getInstance();
 	std::cout << "MIDIPATCH_Note_On C: " << (int)MIBY_CHAN(a_miby)
 				<< " N: " << (int)MIBY_ARG0(a_miby) << " V: " << (int)MIBY_ARG1(a_miby) << std::endl;
-	if(current_channel == -1 || MIBY_CHAN(a_miby) != current_channel)
+	if(current_channel != -1 && MIBY_CHAN(a_miby) != current_channel)
 		return;
 
 	pscript->getPolySynth()->noteOn((uint8_t)MIBY_ARG0(a_miby), (uint8_t)MIBY_ARG1(a_miby));
@@ -144,7 +144,7 @@ void MIDIPATCH_Note_On(miby_this_t a_miby) {
 void MIDIPATCH_Note_Off(miby_this_t a_miby) {
 	PatchScript* pscript = PScriptSingleton::getInstance();
 	std::cout << "MIDIPATCH_Note_Off C:" << (int)MIBY_CHAN(a_miby) << std::endl;
-	if(current_channel == -1 || MIBY_CHAN(a_miby) != current_channel)
+	if(current_channel != -1 && MIBY_CHAN(a_miby) != current_channel)
 		return;
 
 	pscript->getPolySynth()->noteOff((int)MIBY_ARG0(a_miby));
@@ -164,7 +164,7 @@ void MIDIPATCH_Stop(miby_this_t a_miby) {
 void MIDIPATCH_Program_Change(miby_this_t a_miby) {
 	std::cout << "MIDIPATCH_Program_Change C: " << (int)MIBY_CHAN(a_miby)
 				<< " P: " << (int)MIBY_ARG0(a_miby) << std::endl;
-	if(current_channel == -1 || MIBY_CHAN(a_miby) != current_channel)
+	if(current_channel != -1 && MIBY_CHAN(a_miby) != current_channel)
 		return;
 
 	current_program = (int)MIBY_ARG0(a_miby);
