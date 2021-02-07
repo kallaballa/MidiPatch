@@ -30,7 +30,9 @@ enum ExitCodes {
 	PATCH_SCRIPT_ERROR = 1, OPTIONS_ERROR = 2, UNKNOWN_ERROR = 3
 };
 
-const unsigned int nChannels = 2;
+const unsigned int audio_channels = 2;
+
+int8_t current_channel = -1;
 uint8_t current_program = 127;
 size_t controlNumberOffset = 0;
 
@@ -42,8 +44,8 @@ int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFr
 	if (Websocket::isInitialized() && Websocket::getInstance()->isRestartRequested()) {
 		return 1;
 	} else {
-		pscript->fill((float*) outputBuffer, nBufferFrames, nChannels);
-		size_t lenBuf = nBufferFrames * nChannels;
+		pscript->fill((float*) outputBuffer, nBufferFrames, audio_channels);
+		size_t lenBuf = nBufferFrames * audio_channels;
 		std::vector<float> samples(lenBuf, 0);
 
 		for (size_t i = 0; i < lenBuf; ++i) {
@@ -66,6 +68,8 @@ void MIDIPATCH_Control_Change(miby_this_t a_miby) {
 	std::cout << "MIDIPATCH_Control_Change C:" << int(MIBY_CHAN(a_miby)) << " CC1: "
 				<< int(MIBY_ARG0(a_miby)) << " CC2: " << int(MIBY_ARG1(a_miby)) << std::endl;
 
+	if(current_channel == -1 || MIBY_CHAN(a_miby) != current_channel)
+		return;
 	std::vector<string> commonParams;
 
 	//try to set a common parameter for all synths. NOTE: only works if all synthesizers have the same public parameters
@@ -128,6 +132,8 @@ void MIDIPATCH_Note_On(miby_this_t a_miby) {
 	PatchScript* pscript = PScriptSingleton::getInstance();
 	std::cout << "MIDIPATCH_Note_On C: " << (int)MIBY_CHAN(a_miby)
 				<< " N: " << (int)MIBY_ARG0(a_miby) << " V: " << (int)MIBY_ARG1(a_miby) << std::endl;
+	if(current_channel == -1 || MIBY_CHAN(a_miby) != current_channel)
+		return;
 
 	pscript->getPolySynth()->noteOn((uint8_t)MIBY_ARG0(a_miby), (uint8_t)MIBY_ARG1(a_miby));
 
@@ -138,6 +144,8 @@ void MIDIPATCH_Note_On(miby_this_t a_miby) {
 void MIDIPATCH_Note_Off(miby_this_t a_miby) {
 	PatchScript* pscript = PScriptSingleton::getInstance();
 	std::cout << "MIDIPATCH_Note_Off C:" << (int)MIBY_CHAN(a_miby) << std::endl;
+	if(current_channel == -1 || MIBY_CHAN(a_miby) != current_channel)
+		return;
 
 	pscript->getPolySynth()->noteOff((int)MIBY_ARG0(a_miby));
 
@@ -156,8 +164,10 @@ void MIDIPATCH_Stop(miby_this_t a_miby) {
 void MIDIPATCH_Program_Change(miby_this_t a_miby) {
 	std::cout << "MIDIPATCH_Program_Change C: " << (int)MIBY_CHAN(a_miby)
 				<< " P: " << (int)MIBY_ARG0(a_miby) << std::endl;
+	if(current_channel == -1 || MIBY_CHAN(a_miby) != current_channel)
+		return;
 
-		current_program = (int)MIBY_ARG0(a_miby);
+	current_program = (int)MIBY_ARG0(a_miby);
 }
 
 
@@ -186,6 +196,7 @@ int main(int argc, char ** argv) {
 	string logFile;
 	string bankFile;
 	size_t numVoices;
+	int8_t channel;
 	const char* home = std::getenv(DEFAULT_ENV_VARIABLE);
 	if(!home) {
 		std::cerr << "Can't find environment variable: " << DEFAULT_ENV_VARIABLE << std::endl;
@@ -208,6 +219,8 @@ int main(int argc, char ** argv) {
 				cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
 			("v,voices", "The number of voices to run",
 					cxxopts::value<size_t>(numVoices)->default_value("8"))
+			("c,channel", "The midi channel to listen to or '-1' for all channels",
+					cxxopts::value<int8_t>(channel)->default_value("-1"))
 			("p,patchFile",	"The lua patchFile to use for the voices",
 					cxxopts::value<string>(patchFile)->default_value(string(home) + "/" + DEFAULT_DATA_DIR + "/midipatch.pat"))
 			("f,logFile", "The file to log to",
@@ -219,6 +232,7 @@ int main(int argc, char ** argv) {
 		std::cerr << options.help() << std::endl;
 		exit(OPTIONS_ERROR);
 	}
+	current_channel = channel;
 	midipatch::Logger::init(midipatch::L_DEBUG, logFile);
 	Logger& logger = Logger::getInstance();
 	PScriptSingleton::init(sampleRate);
@@ -281,7 +295,7 @@ int main(int argc, char ** argv) {
 		RtAudio dac;
 		RtAudio::StreamParameters rtParams;
 		rtParams.deviceId = audioIndex;
-		rtParams.nChannels = nChannels;
+		rtParams.nChannels = audio_channels;
 
 		logger.info("Waiting for clients");
 		while (websocket && !websocket->hasClients()) {
