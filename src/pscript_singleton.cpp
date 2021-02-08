@@ -2,6 +2,6 @@
 
 namespace midipatch {
 
-PatchScript* PScriptSingleton::instance_ = nullptr;
+PatchScript* PScriptsSingleton::instance_ = nullptr;
 
 } /* namespace midipatch */

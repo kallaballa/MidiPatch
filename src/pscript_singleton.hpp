@@ -8,7 +8,7 @@
 namespace midipatch {
 
 using namespace patchscript;
-class PScriptSingleton {
+class PScriptsSingleton {
 private:
 	static PatchScript* instance_;
 public:

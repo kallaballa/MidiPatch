@@ -14,7 +14,6 @@
 #include "RtMidi.h"
 #include "RtError.h"
 #include "lua.h"
-#include "webview.h"
 #include "miby.h"
 
 #include "logger.hpp"
@@ -64,7 +63,7 @@ int renderCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFr
 // instantiated for all configured MIDI inputs
 //
 void MIDIPATCH_Control_Change(miby_this_t a_miby) {
-	PatchScript* pscript = PScriptSingleton::getInstance();
+	PatchScript* pscript = PScriptsSingleton::getInstance();
 	std::cout << "MIDIPATCH_Control_Change C:" << int(MIBY_CHAN(a_miby)) << " CC1: "
 				<< int(MIBY_ARG0(a_miby)) << " CC2: " << int(MIBY_ARG1(a_miby)) << std::endl;
 
@@ -129,7 +128,7 @@ void MIDIPATCH_Control_Change(miby_this_t a_miby) {
 }
 
 void MIDIPATCH_Note_On(miby_this_t a_miby) {
-	PatchScript* pscript = PScriptSingleton::getInstance();
+	PatchScript* pscript = PScriptsSingleton::getInstance();
 	std::cout << "MIDIPATCH_Note_On C: " << (int)MIBY_CHAN(a_miby)
 				<< " N: " << (int)MIBY_ARG0(a_miby) << " V: " << (int)MIBY_ARG1(a_miby) << std::endl;
 	if(current_channel != -1 && MIBY_CHAN(a_miby) != current_channel)
@@ -142,7 +141,7 @@ void MIDIPATCH_Note_On(miby_this_t a_miby) {
 }
 
 void MIDIPATCH_Note_Off(miby_this_t a_miby) {
-	PatchScript* pscript = PScriptSingleton::getInstance();
+	PatchScript* pscript = PScriptsSingleton::getInstance();
 	std::cout << "MIDIPATCH_Note_Off C:" << (int)MIBY_CHAN(a_miby) << std::endl;
 	if(current_channel != -1 && MIBY_CHAN(a_miby) != current_channel)
 		return;
@@ -205,7 +204,7 @@ int main(int argc, char ** argv) {
 
 	cxxopts::Options options(appName, "A scriptable, modular and real-time MIDI synthesizer");
 	options.add_options()("h,help", "Print help messages")
-			("m,midi", "The indeces of the midi input ports to use.",
+			("m,midi", "The indices of the midi input ports to use.",
 				cxxopts::value<std::vector<int>>(midiIndex)->default_value("0"))
 			("a,audio",	"The index of the audio output port to use.",
 					cxxopts::value<int>(audioIndex)->default_value("0"))
@@ -235,8 +234,8 @@ int main(int argc, char ** argv) {
 	current_channel = channel;
 	midipatch::Logger::init(midipatch::L_DEBUG, logFile);
 	Logger& logger = Logger::getInstance();
-	PScriptSingleton::init(sampleRate);
-	pscript = PScriptSingleton::getInstance();
+	PScriptsSingleton::init(sampleRate);
+	pscript = PScriptsSingleton::getInstance();
 
 	Websocket* websocket = nullptr;
 	if (port > 0) {
@@ -277,19 +276,6 @@ int main(int argc, char ** argv) {
 	std::vector<RtMidiIn*> midiIn(midiIndex.size(), nullptr);
 	std::vector<miby_t*> miby_State(midiIndex.size());
 
-	std::thread webThread([](){
-#ifdef WEBVIEW_GTK
-    setenv("GTK_OVERLAY_SCROLLING", "0", 1);
-#endif
-		webview::webview w(true, nullptr);
-		w.set_title("MidiPatch");
-		w.set_size(960, 540, WEBVIEW_HINT_NONE);
-		w.navigate("http://localhost:8080");
-		w.run();
-		exit(0);
-	});
-
-	webThread.detach();
 
 	while (true) {
 		RtAudio dac;
