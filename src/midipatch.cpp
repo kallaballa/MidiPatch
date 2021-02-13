@@ -188,9 +188,9 @@ int main(int argc, char ** argv) {
 	std::string appName = argv[0];
 	std::vector<int> midiIndex;
 	int audioIndex = 0;
-	unsigned int sampleRate = 48000;
-	unsigned int bufferFrames = 512;
-	size_t port = 8080;
+	unsigned int sampleRate;
+	unsigned int bufferFrames;
+	size_t port;
 	string patchFile;
 	string logFile;
 	string bankFile;
@@ -213,7 +213,7 @@ int main(int argc, char ** argv) {
 			("b,buffer", "Number of frames per buffer.",
 					cxxopts::value<unsigned int>(bufferFrames)->default_value("512"))
 			("w,websocket", "The port number of the websocket server.",
-					cxxopts::value<size_t>(port)->default_value("0"))
+					cxxopts::value<size_t>(port)->default_value("8080"))
 			("o,offset", "The control number offset for parameter mapping",
 				cxxopts::value<size_t>(controlNumberOffset)->default_value("52"))
 			("v,voices", "The number of voices to run",

@@ -295,7 +295,7 @@ class MidiPatch {
     }
 }
 
-var midipatch = new MidiPatch(8080);
+var midipatch = new MidiPatch(location.port);
 var dialogs = new MPDialogs(midipatch);
 var toolbar = new MPToolbar(midipatch);
 var piano = new MPPiano(midipatch);

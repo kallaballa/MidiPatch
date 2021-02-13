@@ -174,7 +174,7 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 
 	};
 
-	std::thread t([&]() {
+	std::thread t([=]() {
 		uWS::App().get("/", [&](auto *res, auto *req) {
 					res->writeHeader("Content-Type", "text/html");
 					char* start = &_binary_index_min_pack_start;
@@ -366,7 +366,7 @@ Websocket::Websocket(size_t port, const string& patchFile) :
 						std::scoped_lock lock(mutex_);
 						clients_.erase(ws);
 					}
-				}).listen(8080, [=](auto *token) {
+				}).listen(port, [=](auto *token) {
 					if (token) {
 						socket_ = token;
 					}
